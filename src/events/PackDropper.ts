@@ -1,5 +1,12 @@
-import { ChannelType, Client, EmbedBuilder } from "discord.js";
-import { getDocs, query, collection, Firestore, where } from "firebase/firestore/lite"
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, Client, Colors, EmbedBuilder } from "discord.js";
+import { getDocs, query, collection, Firestore, where, doc, setDoc } from "firebase/firestore/lite"
+
+
+const COLOR_PER_PACK_RARITY: { readonly [key: string]: number } = {
+    Common: Colors.NotQuiteBlack,
+    Rare: Colors.Blue,
+    [`Super Rare`]: Colors.Orange
+}
 
 
 export const PackDropper = function (client: Client, db: Firestore) {
@@ -41,15 +48,35 @@ export const PackDropper = function (client: Client, db: Firestore) {
                     let img = `${pack.id}.png`;
 
                     const packEmbed = new EmbedBuilder()
-                        .setTitle(pack.data.Name)
-                        .setImage(`attachment://${img}`);
+                        .setTitle(`A ${pack.data.Name} HAS APPEARED!`)
+                        .setImage(`attachment://${img}`)
+                        .setColor(COLOR_PER_PACK_RARITY[pack.data.Rarity as string]);
+
+                    const row = new ActionRowBuilder<ButtonBuilder>()
+                        .addComponents(
+                            new ButtonBuilder()
+                                .setCustomId('OpenPack')
+                                .setLabel('Open!')
+                                .setStyle(ButtonStyle.Primary),
+                        );
 
                     channel.send({
+                        components: [row],
                         embeds: [packEmbed],
                         files: [`./img/packs/${img}`]
+                    }).then(message => {
+                        const messageDoc = doc(db, `serverInfo/${server.id}/messages/${message.id}`)
+
+                        setDoc(messageDoc, {
+                            Type: "RandomPack",
+                            Name: pack.data.Name,
+                            PigCount: pack.data.PigCount,
+                            Set: pack.data.Set,
+                            Tags: pack.data.Tags,
+                        })
                     })
                 }
             });
         });
-    }, 5000);
+    }, 10000);
 }

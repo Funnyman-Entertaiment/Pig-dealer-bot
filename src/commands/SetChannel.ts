@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, ChannelType, Colors } from "discord.js";
-import { doc, setDoc } from "firebase/firestore/lite";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore/lite";
 import { Command } from "../Command";
 
 export const SetBotChannel = new Command(
@@ -45,9 +45,17 @@ export const SetBotChannel = new Command(
         }
 
         const docRef = doc(db, "serverInfo", interaction.guildId)
-        await setDoc(docRef, {
-            Channel: channel.id
-        });
+        const serverInfo = await getDoc(docRef)
+
+        if(serverInfo.exists()){
+            await updateDoc(docRef, {
+                Channel: channel.id
+            });
+        }else{
+            await setDoc(docRef, {
+                Channel: channel.id
+            });
+        }
 
         const successEmbed = new EmbedBuilder()
             .setTitle(`Channel succesfully set to ${channel.name}`)
