@@ -73,6 +73,7 @@ export const PackDropper = function (client: Client, db: Firestore) {
                             PigCount: pack.data.PigCount,
                             Set: pack.data.Set,
                             Tags: pack.data.Tags,
+                            Opened: false,
                         })
                     })
                 }
