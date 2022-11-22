@@ -1,8 +1,26 @@
 import { EmbedBuilder } from "@discordjs/builders";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Interaction } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, Interaction } from "discord.js";
 import { collection, doc, DocumentData, Firestore, getDoc, getDocs, query, QueryDocumentSnapshot, QuerySnapshot, setDoc, where } from "firebase/firestore/lite";
 import { Button } from "../Button";
 import fs from 'fs';
+import { GalleryInteractions } from "./GalleryInteractions";
+
+
+const PIG_RARITY_ORDER: { readonly [key: string]: number } = {
+    Common: 0,
+    Rare: 1,
+    Epic: 2,
+    Legendary: 3,
+}
+
+
+const COLOR_PER_PIG_RARITY: { readonly [key: string]: number } = {
+    Common: Colors.LightGrey,
+    Rare: Colors.Yellow,
+    Epic: Colors.Purple,
+    Legendary: Colors.LuminousVividPink,
+    Assembly: Colors.Red
+}
 
 
 const RARITIES_PER_PIG_COUNT: { readonly [key: number]: string[][]} = {
@@ -110,6 +128,8 @@ function ChoosePigs(availablePigs: { [key: string]: QueryDocumentSnapshot[] }, p
 
 export const OpenPack = new Button("OpenPack",
     async (_, interaction, db) => {
+        await interaction.deferReply();
+
         const server = interaction.guild;
         if(server === null) { return; }
         const message = interaction.message;
@@ -126,6 +146,13 @@ export const OpenPack = new Button("OpenPack",
 
         const chosenPigs = ChoosePigs(availablePigs, pigRarities);
 
+        chosenPigs.sort((a, b) => {
+            const aOrder = PIG_RARITY_ORDER[a.data().Rarity];
+            const bOrder = PIG_RARITY_ORDER[b.data().Rarity];
+
+            return aOrder - bOrder;
+        });
+
         let img = `${chosenPigs[0].id}.png`;
         if((chosenPigs[0].data().Tags as string[]).includes("gif")){
             img = `${chosenPigs[0].id}.gif`;
@@ -140,19 +167,23 @@ export const OpenPack = new Button("OpenPack",
             .setDescription(chosenPigs.map(pig => pig.data().Name).join(", "))
             .addFields({
                 name: chosenPigs[0].data().Name,
-                value: chosenPigs[0].data().Description.length > 0? chosenPigs[0].data().Description : "..."
+                value: "[if new it goes there]\n" +
+                `_${chosenPigs[0].data().Rarity}_\n`+
+                (chosenPigs[0].data().Description.length > 0? chosenPigs[0].data().Description : "...") + "\n" +
+                `#${chosenPigs[0].id.padStart(3, chosenPigs[0].id)}`,
             })
-            .setImage(`attachment://${img}`);
+            .setImage(`attachment://${img}`)
+            .setColor(COLOR_PER_PIG_RARITY[chosenPigs[0].data().Rarity]);
 
         const row = new ActionRowBuilder<ButtonBuilder>()
         .addComponents(
             new ButtonBuilder()
-                .setCustomId('OpenedPackLeft')
-                .setLabel('Left')
+                .setCustomId('GalleryPrevious')
+                .setLabel('Previous')
                 .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
-                .setCustomId('OpenedPackRight')
-                .setLabel('Right')
+                .setCustomId('GalleryNext')
+                .setLabel('Next')
                 .setStyle(ButtonStyle.Primary)
         );
 
@@ -162,15 +193,16 @@ export const OpenPack = new Button("OpenPack",
         }
 
         await interaction.followUp({
-            ephemeral: true,
             embeds: [openedPackEmbed],
             components: [row],
             files: [`./img/pigs/${img}`]
         }).then(message => {
+            GalleryInteractions[message.id] = interaction;
+
             const messageDoc = doc(db, `serverInfo/${server.id}/messages/${message.id}`);
 
             setDoc(messageDoc, {
-                Type: "OpenedPackGallery",
+                Type: "PigGallery",
                 Pigs: chosenPigs.map(pig => pig.id),
                 CurrentPig: 0,
                 User: interaction.user.id
