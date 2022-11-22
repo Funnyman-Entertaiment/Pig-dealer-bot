@@ -23,6 +23,16 @@ const COLOR_PER_PIG_RARITY: { readonly [key: string]: number } = {
 }
 
 
+const SPECIAL_RARITIES_PER_PACK: { readonly [key: string]: string[][] } = {
+    ["🍀Super Lucky Pack🍀"]: [
+        ["Rare", "Epic"],
+        ["Rare", "Epic"],
+        ["Legendary"],
+        ["Legendary"]
+    ]
+}
+
+
 const RARITIES_PER_PIG_COUNT: { readonly [key: number]: string[][]} = {
     [3]: [
         ["Common"],
@@ -111,15 +121,40 @@ async function GetAvailablePigsFromPack(db: Firestore, msgInfoData: DocumentData
 }
 
 
-function ChoosePigs(availablePigs: { [key: string]: QueryDocumentSnapshot[] }, pigRarities: string[][]){
+function ChoosePigs(availablePigs: { [key: string]: QueryDocumentSnapshot[] }, pigRarities: string[][], msgInfoData: DocumentData){
     const chosenPigs: QueryDocumentSnapshot[] = [];
 
     pigRarities.forEach(rarities => {
-        const rarity = rarities[Math.floor(Math.random()*rarities.length)];
+        let rarity = rarities[0];
+
+        let legendaryChance = 0.01;
+        let epicChance = 0.1;
+        let rareChance = 0.35;
+
+        if(msgInfoData.Name === "🍀Lucky Pack🍀"){
+            legendaryChance = 0.1;
+            epicChance = 0.5;
+            rareChance = 1;
+        }else if(msgInfoData.Name === "🍀Super Lucky Pack🍀"){
+            epicChance = 0.35;
+        }
+
+        if(rarities.includes("Legendary") && Math.random() < legendaryChance){
+            rarity = "Legendary";
+        }else if(rarities.includes("Epic") && Math.random() < epicChance){
+            rarity = "Epic";
+        }else if(rarities.includes("Rare") && Math.random() < rareChance){
+            rarity = "Rare";
+        }
 
         const pigsOfRarity = availablePigs[rarity];
+        let chosenPig: QueryDocumentSnapshot;
 
-        chosenPigs.push(pigsOfRarity[Math.floor(Math.random()*pigsOfRarity.length)]);
+        do{
+            chosenPig = pigsOfRarity[Math.floor(Math.random()*pigsOfRarity.length)]
+        }while(chosenPigs.includes(chosenPig))
+
+        chosenPigs.push(chosenPig);
     });
 
     return chosenPigs;
@@ -144,7 +179,7 @@ export const OpenPack = new Button("OpenPack",
         const availablePigs = await GetAvailablePigsFromPack(db, msgInfoData);
         const pigRarities: string[][] = RARITIES_PER_PIG_COUNT[msgInfoData.PigCount];
 
-        const chosenPigs = ChoosePigs(availablePigs, pigRarities);
+        const chosenPigs = ChoosePigs(availablePigs, pigRarities, msgInfoData);
 
         chosenPigs.sort((a, b) => {
             const aOrder = PIG_RARITY_ORDER[a.data().Rarity];
