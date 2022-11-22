@@ -1,6 +1,6 @@
-import { Client, EmbedBuilder, GatewayIntentBits, InteractionResponseType, Partials } from "discord.js";
+import { Client, GatewayIntentBits, Partials } from "discord.js";
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, getDocs, query, collection } from "firebase/firestore/lite"
+import { getFirestore } from "firebase/firestore/lite"
 import * as DotEnv from "dotenv";
 import ready from "./listeners/Ready";
 import interactionCreate from "./listeners/InteractionCreate";

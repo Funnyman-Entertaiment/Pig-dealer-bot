@@ -1,76 +1,11 @@
 import { EmbedBuilder } from "@discordjs/builders";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, Interaction } from "discord.js";
-import { collection, doc, DocumentData, Firestore, getDoc, getDocs, query, QueryDocumentSnapshot, QuerySnapshot, setDoc, where } from "firebase/firestore/lite";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Interaction } from "discord.js";
+import { addDoc, collection, doc, DocumentData, Firestore, getDoc, getDocs, query, QueryDocumentSnapshot, QuerySnapshot, setDoc, where } from "firebase/firestore/lite";
 import { Button } from "../Button";
-import fs from 'fs';
-import { GalleryInteractions } from "./GalleryInteractions";
-
-
-const PIG_RARITY_ORDER: { readonly [key: string]: number } = {
-    Common: 0,
-    Rare: 1,
-    Epic: 2,
-    Legendary: 3,
-}
-
-
-const COLOR_PER_PIG_RARITY: { readonly [key: string]: number } = {
-    Common: Colors.LightGrey,
-    Rare: Colors.Yellow,
-    Epic: Colors.Purple,
-    Legendary: Colors.LuminousVividPink,
-    Assembly: Colors.Red
-}
-
-
-const SPECIAL_RARITIES_PER_PACK: { readonly [key: string]: string[][] } = {
-    ["🍀Super Lucky Pack🍀"]: [
-        ["Rare", "Epic"],
-        ["Rare", "Epic"],
-        ["Legendary"],
-        ["Legendary"]
-    ]
-}
-
-
-const RARITIES_PER_PIG_COUNT: { readonly [key: number]: string[][]} = {
-    [3]: [
-        ["Common"],
-        ["Rare"],
-        ["Rare", "Epic"]
-    ],
-    [4]: [
-        ["Common"],
-        ["Rare"],
-        ["Rare", "Epic"],
-        ["Rare", "Epic", "Legendary"]
-    ],
-    [5]: [
-        ["Common"],
-        ["Common", "Rare"],
-        ["Rare"],
-        ["Rare", "Epic"],
-        ["Rare", "Epic", "Legendary"]
-    ],
-    [6]: [
-        ["Common"],
-        ["Common", "Rare"],
-        ["Rare"],
-        ["Rare", "Epic"],
-        ["Rare", "Epic"],
-        ["Rare", "Epic", "Legendary"]
-    ],
-    [8]: [
-        ["Common"],
-        ["Common"],
-        ["Common", "Rare"],
-        ["Rare"],
-        ["Rare", "Epic"],
-        ["Rare", "Epic"],
-        ["Rare", "Epic"],
-        ["Rare", "Epic", "Legendary"]
-    ]
-}
+import { SPECIAL_RARITIES_PER_PACK } from "../Constants/SpecialRaritiesPerPack";
+import { PIG_RARITY_ORDER } from "../Constants/PigRarityOrder";
+import { RARITIES_PER_PIG_COUNT } from "../Constants/RaritiesPerPigCount";
+import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
 
 
 function GetAuthor(interaction: Interaction){
@@ -177,7 +112,10 @@ export const OpenPack = new Button("OpenPack",
         const msgInfoData = msgInfo.data();
 
         const availablePigs = await GetAvailablePigsFromPack(db, msgInfoData);
-        const pigRarities: string[][] = RARITIES_PER_PIG_COUNT[msgInfoData.PigCount];
+        let pigRarities: string[][] = SPECIAL_RARITIES_PER_PACK[msgInfoData.Name];
+        if(pigRarities === undefined){
+            pigRarities = RARITIES_PER_PIG_COUNT[msgInfoData.PigCount];
+        }
 
         const chosenPigs = ChoosePigs(availablePigs, pigRarities, msgInfoData);
 
@@ -188,27 +126,31 @@ export const OpenPack = new Button("OpenPack",
             return aOrder - bOrder;
         });
 
-        let img = `${chosenPigs[0].id}.png`;
-        if((chosenPigs[0].data().Tags as string[]).includes("gif")){
-            img = `${chosenPigs[0].id}.gif`;
-        }
+        const newPigs: string[] = []
 
-        if(!fs.existsSync(`./img/pigs/${img}`)){
-            img = `none.png`;
+        for (let i = 0; i < chosenPigs.length; i++) {
+            const pig = chosenPigs[i];
+
+            const pigsQuery = query(collection(db, `serverInfo/${server.id}/users/${interaction.user.id}/pigs`), where("PigId", "==", pig.id));
+            const foundPigs = await getDocs(pigsQuery);
+
+            if(foundPigs.empty){
+                newPigs.push(pig.id);
+            }
+
+            const newPigCollection = collection(db, `serverInfo/${server.id}/users/${interaction.user.id}/pigs`)
+            await addDoc(newPigCollection, {
+                PigId: pig.id
+            })
         }
 
         const openedPackEmbed = new EmbedBuilder()
             .setTitle(`You've opened a ${msgInfoData.Name}`)
-            .setDescription(chosenPigs.map(pig => pig.data().Name).join(", "))
-            .addFields({
-                name: chosenPigs[0].data().Name,
-                value: "[if new it goes there]\n" +
-                `_${chosenPigs[0].data().Rarity}_\n`+
-                (chosenPigs[0].data().Description.length > 0? chosenPigs[0].data().Description : "...") + "\n" +
-                `#${chosenPigs[0].id.padStart(3, chosenPigs[0].id)}`,
-            })
-            .setImage(`attachment://${img}`)
-            .setColor(COLOR_PER_PIG_RARITY[chosenPigs[0].data().Rarity]);
+            .setDescription(chosenPigs.map(pig => pig.data().Name).join(", "));
+
+        const imgPath = AddPigRenderToEmbed(openedPackEmbed, chosenPigs[0], newPigs.includes(chosenPigs[0].id));
+
+        if(imgPath === undefined){ return; }
 
         const row = new ActionRowBuilder<ButtonBuilder>()
         .addComponents(
@@ -230,15 +172,14 @@ export const OpenPack = new Button("OpenPack",
         await interaction.followUp({
             embeds: [openedPackEmbed],
             components: [row],
-            files: [`./img/pigs/${img}`]
+            files: [imgPath]
         }).then(message => {
-            GalleryInteractions[message.id] = interaction;
-
             const messageDoc = doc(db, `serverInfo/${server.id}/messages/${message.id}`);
 
             setDoc(messageDoc, {
                 Type: "PigGallery",
                 Pigs: chosenPigs.map(pig => pig.id),
+                NewPigs: newPigs,
                 CurrentPig: 0,
                 User: interaction.user.id
             });

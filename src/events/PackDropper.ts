@@ -1,12 +1,6 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, Client, Colors, EmbedBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, Client, EmbedBuilder } from "discord.js";
 import { getDocs, query, collection, Firestore, where, doc, setDoc } from "firebase/firestore/lite"
-
-
-const COLOR_PER_PACK_RARITY: { readonly [key: string]: number } = {
-    Common: Colors.NotQuiteBlack,
-    Rare: Colors.Blue,
-    [`Super Rare`]: Colors.Orange
-}
+import { COLOR_PER_PACK_RARITY } from "../Constants/ColorPerPackRarity";
 
 
 export const PackDropper = function (client: Client, db: Firestore) {
@@ -21,7 +15,7 @@ export const PackDropper = function (client: Client, db: Firestore) {
                 //Get Random pack
                 let chosenRarity: string = "Default";
 
-                if(Math.random() <= 0.05){
+                if(Math.random() <= 0.08){
                     const packChance = Math.random();
 
                     if(packChance <= 0.7){

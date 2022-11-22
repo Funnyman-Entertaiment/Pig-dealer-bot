@@ -1,7 +1,7 @@
+import { EmbedBuilder } from "discord.js";
 import { doc, getDoc, updateDoc } from "firebase/firestore/lite";
 import { Button } from "../Button";
-import { GalleryInteractions } from "./GalleryInteractions";
-import { RenderPig } from "./PigRenderer";
+import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
 
 
 export const PrevGallery = new Button("GalleryPrevious",
@@ -14,10 +14,6 @@ export const PrevGallery = new Button("GalleryPrevious",
 
         const msgDoc = doc(db, `serverInfo/${server.id}/messages/${message.id}`);
         const msgInfo = await getDoc(msgDoc);
-
-        const originalInteraction = GalleryInteractions[message.id];
-
-        if(originalInteraction === undefined){ return; }
 
         if(!msgInfo.exists() || msgInfo.data().Type !== "PigGallery"){ return; }
 
@@ -33,6 +29,18 @@ export const PrevGallery = new Button("GalleryPrevious",
             CurrentPig: msgInfoData.CurrentPig-1,
         });
 
-        RenderPig(message, pigToLoad, db);
+        const editedEmbed = new EmbedBuilder(message.embeds[0].data);
+
+        const pigDoc = doc(db, `pigs/${pigToLoad}`);
+        const pig = await getDoc(pigDoc);
+
+        const imgPath = AddPigRenderToEmbed(editedEmbed, pig, msgInfoData.NewPigs.includes(pig.id));
+
+        if(imgPath === undefined){ return; }
+
+        await message.edit({
+            embeds: [editedEmbed],
+            files: [imgPath]
+        })
     }
 );
