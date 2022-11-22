@@ -1,12 +1,6 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, Client, Colors, EmbedBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, Client, EmbedBuilder } from "discord.js";
 import { getDocs, query, collection, Firestore, where, doc, setDoc } from "firebase/firestore/lite"
-
-
-const COLOR_PER_PACK_RARITY: { readonly [key: string]: number } = {
-    Common: Colors.NotQuiteBlack,
-    Rare: Colors.Blue,
-    [`Super Rare`]: Colors.Orange
-}
+import { COLOR_PER_PACK_RARITY } from "../Constants/ColorPerPackRarity";
 
 
 export const PackDropper = function (client: Client, db: Firestore) {
@@ -19,15 +13,18 @@ export const PackDropper = function (client: Client, db: Firestore) {
                 if(channel === null){ return; }
 
                 //Get Random pack
-                const packChance = Math.random();
-                let chosenRarity: string;
+                let chosenRarity: string = "Default";
 
-                if(packChance <= 0.7){
-                    chosenRarity = "Common";
-                }else if(packChance <= 0.9){
-                    chosenRarity = "Rare"
-                }else{
-                    chosenRarity = "Super Rare"
+                if(Math.random() <= 0.08){
+                    const packChance = Math.random();
+
+                    if(packChance <= 0.7){
+                        chosenRarity = "Common";
+                    }else if(packChance <= 0.9){
+                        chosenRarity = "Rare"
+                    }else{
+                        chosenRarity = "Super Rare"
+                    }
                 }
 
                 const packQuery = query(collection(db, "packs"), where("Rarity", "==", chosenRarity));
@@ -79,5 +76,5 @@ export const PackDropper = function (client: Client, db: Firestore) {
                 }
             });
         });
-    }, 10000);
+    }, 120000);
 }

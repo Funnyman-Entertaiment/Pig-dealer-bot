@@ -35,7 +35,5 @@ const handleButtonCommand = async(client: Client, interaction: ButtonInteraction
         return;
     }
 
-    await interaction.deferReply();
-
     button.response(client, interaction, db);
 }

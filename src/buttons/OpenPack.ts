@@ -1,48 +1,11 @@
 import { EmbedBuilder } from "@discordjs/builders";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Interaction } from "discord.js";
-import { collection, doc, DocumentData, Firestore, getDoc, getDocs, query, QueryDocumentSnapshot, QuerySnapshot, setDoc, where } from "firebase/firestore/lite";
+import { addDoc, collection, doc, DocumentData, Firestore, getDoc, getDocs, query, QueryDocumentSnapshot, QuerySnapshot, setDoc, where } from "firebase/firestore/lite";
 import { Button } from "../Button";
-import fs from 'fs';
-
-
-const RARITIES_PER_PIG_COUNT: { readonly [key: number]: string[][]} = {
-    [3]: [
-        ["Common"],
-        ["Rare"],
-        ["Rare", "Epic"]
-    ],
-    [4]: [
-        ["Common"],
-        ["Rare"],
-        ["Rare", "Epic"],
-        ["Rare", "Epic", "Legendary"]
-    ],
-    [5]: [
-        ["Common"],
-        ["Common", "Rare"],
-        ["Rare"],
-        ["Rare", "Epic"],
-        ["Rare", "Epic", "Legendary"]
-    ],
-    [6]: [
-        ["Common"],
-        ["Common", "Rare"],
-        ["Rare"],
-        ["Rare", "Epic"],
-        ["Rare", "Epic"],
-        ["Rare", "Epic", "Legendary"]
-    ],
-    [8]: [
-        ["Common"],
-        ["Common"],
-        ["Common", "Rare"],
-        ["Rare"],
-        ["Rare", "Epic"],
-        ["Rare", "Epic"],
-        ["Rare", "Epic"],
-        ["Rare", "Epic", "Legendary"]
-    ]
-}
+import { SPECIAL_RARITIES_PER_PACK } from "../Constants/SpecialRaritiesPerPack";
+import { PIG_RARITY_ORDER } from "../Constants/PigRarityOrder";
+import { RARITIES_PER_PIG_COUNT } from "../Constants/RaritiesPerPigCount";
+import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
 
 
 function GetAuthor(interaction: Interaction){
@@ -93,15 +56,40 @@ async function GetAvailablePigsFromPack(db: Firestore, msgInfoData: DocumentData
 }
 
 
-function ChoosePigs(availablePigs: { [key: string]: QueryDocumentSnapshot[] }, pigRarities: string[][]){
+function ChoosePigs(availablePigs: { [key: string]: QueryDocumentSnapshot[] }, pigRarities: string[][], msgInfoData: DocumentData){
     const chosenPigs: QueryDocumentSnapshot[] = [];
 
     pigRarities.forEach(rarities => {
-        const rarity = rarities[Math.floor(Math.random()*rarities.length)];
+        let rarity = rarities[0];
+
+        let legendaryChance = 0.01;
+        let epicChance = 0.1;
+        let rareChance = 0.35;
+
+        if(msgInfoData.Name === "🍀Lucky Pack🍀"){
+            legendaryChance = 0.1;
+            epicChance = 0.5;
+            rareChance = 1;
+        }else if(msgInfoData.Name === "🍀Super Lucky Pack🍀"){
+            epicChance = 0.35;
+        }
+
+        if(rarities.includes("Legendary") && Math.random() < legendaryChance){
+            rarity = "Legendary";
+        }else if(rarities.includes("Epic") && Math.random() < epicChance){
+            rarity = "Epic";
+        }else if(rarities.includes("Rare") && Math.random() < rareChance){
+            rarity = "Rare";
+        }
 
         const pigsOfRarity = availablePigs[rarity];
+        let chosenPig: QueryDocumentSnapshot;
 
-        chosenPigs.push(pigsOfRarity[Math.floor(Math.random()*pigsOfRarity.length)]);
+        do{
+            chosenPig = pigsOfRarity[Math.floor(Math.random()*pigsOfRarity.length)]
+        }while(chosenPigs.includes(chosenPig))
+
+        chosenPigs.push(chosenPig);
     });
 
     return chosenPigs;
@@ -110,6 +98,8 @@ function ChoosePigs(availablePigs: { [key: string]: QueryDocumentSnapshot[] }, p
 
 export const OpenPack = new Button("OpenPack",
     async (_, interaction, db) => {
+        await interaction.deferReply();
+
         const server = interaction.guild;
         if(server === null) { return; }
         const message = interaction.message;
@@ -122,37 +112,56 @@ export const OpenPack = new Button("OpenPack",
         const msgInfoData = msgInfo.data();
 
         const availablePigs = await GetAvailablePigsFromPack(db, msgInfoData);
-        const pigRarities: string[][] = RARITIES_PER_PIG_COUNT[msgInfoData.PigCount];
-
-        const chosenPigs = ChoosePigs(availablePigs, pigRarities);
-
-        let img = `${chosenPigs[0].id}.png`;
-        if((chosenPigs[0].data().Tags as string[]).includes("gif")){
-            img = `${chosenPigs[0].id}.gif`;
+        let pigRarities: string[][] = SPECIAL_RARITIES_PER_PACK[msgInfoData.Name];
+        if(pigRarities === undefined){
+            pigRarities = RARITIES_PER_PIG_COUNT[msgInfoData.PigCount];
         }
 
-        if(!fs.existsSync(`./img/pigs/${img}`)){
-            img = `none.png`;
+        const chosenPigs = ChoosePigs(availablePigs, pigRarities, msgInfoData);
+
+        chosenPigs.sort((a, b) => {
+            const aOrder = PIG_RARITY_ORDER[a.data().Rarity];
+            const bOrder = PIG_RARITY_ORDER[b.data().Rarity];
+
+            return aOrder - bOrder;
+        });
+
+        const newPigs: string[] = []
+
+        for (let i = 0; i < chosenPigs.length; i++) {
+            const pig = chosenPigs[i];
+
+            const pigsQuery = query(collection(db, `serverInfo/${server.id}/users/${interaction.user.id}/pigs`), where("PigId", "==", pig.id));
+            const foundPigs = await getDocs(pigsQuery);
+
+            if(foundPigs.empty){
+                newPigs.push(pig.id);
+            }
+
+            const newPigCollection = collection(db, `serverInfo/${server.id}/users/${interaction.user.id}/pigs`)
+            await addDoc(newPigCollection, {
+                PigId: pig.id
+            })
         }
 
         const openedPackEmbed = new EmbedBuilder()
             .setTitle(`You've opened a ${msgInfoData.Name}`)
-            .setDescription(chosenPigs.map(pig => pig.data().Name).join(", "))
-            .addFields({
-                name: chosenPigs[0].data().Name,
-                value: chosenPigs[0].data().Description.length > 0? chosenPigs[0].data().Description : "..."
-            })
-            .setImage(`attachment://${img}`);
+            .setDescription(`1/${chosenPigs.length}`);
+
+        const imgPath = AddPigRenderToEmbed(openedPackEmbed, chosenPigs[0], newPigs.includes(chosenPigs[0].id));
+
+        if(imgPath === undefined){ return; }
 
         const row = new ActionRowBuilder<ButtonBuilder>()
         .addComponents(
             new ButtonBuilder()
-                .setCustomId('OpenedPackLeft')
-                .setLabel('Left')
-                .setStyle(ButtonStyle.Primary),
+                .setCustomId('GalleryPrevious')
+                .setLabel('Previous')
+                .setStyle(ButtonStyle.Primary)
+                .setDisabled(true),
             new ButtonBuilder()
-                .setCustomId('OpenedPackRight')
-                .setLabel('Right')
+                .setCustomId('GalleryNext')
+                .setLabel('Next')
                 .setStyle(ButtonStyle.Primary)
         );
 
@@ -162,16 +171,16 @@ export const OpenPack = new Button("OpenPack",
         }
 
         await interaction.followUp({
-            ephemeral: true,
             embeds: [openedPackEmbed],
             components: [row],
-            files: [`./img/pigs/${img}`]
+            files: [imgPath]
         }).then(message => {
             const messageDoc = doc(db, `serverInfo/${server.id}/messages/${message.id}`);
 
             setDoc(messageDoc, {
-                Type: "OpenedPackGallery",
+                Type: "PigGallery",
                 Pigs: chosenPigs.map(pig => pig.id),
+                NewPigs: newPigs,
                 CurrentPig: 0,
                 User: interaction.user.id
             });
