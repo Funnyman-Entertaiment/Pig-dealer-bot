@@ -1,4 +1,4 @@
-import { EmbedBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { doc, getDoc, updateDoc } from "firebase/firestore/lite";
 import { Button } from "../Button";
 import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
@@ -29,7 +29,8 @@ export const PrevGallery = new Button("GalleryPrevious",
             CurrentPig: msgInfoData.CurrentPig-1,
         });
 
-        const editedEmbed = new EmbedBuilder(message.embeds[0].data);
+        const editedEmbed = new EmbedBuilder(message.embeds[0].data)
+            .setDescription(`${msgInfoData.CurrentPig}/${msgInfoData.Pigs.length}`);
 
         const pigDoc = doc(db, `pigs/${pigToLoad}`);
         const pig = await getDoc(pigDoc);
@@ -38,9 +39,24 @@ export const PrevGallery = new Button("GalleryPrevious",
 
         if(imgPath === undefined){ return; }
 
+        const row = new ActionRowBuilder<ButtonBuilder>()
+        .addComponents(
+            new ButtonBuilder()
+                .setCustomId('GalleryPrevious')
+                .setLabel('Previous')
+                .setStyle(ButtonStyle.Primary)
+                .setDisabled(msgInfoData.CurrentPig-1 === 0),
+            new ButtonBuilder()
+                .setCustomId('GalleryNext')
+                .setLabel('Next')
+                .setStyle(ButtonStyle.Primary)
+                .setDisabled(false)
+        );
+
         await message.edit({
             embeds: [editedEmbed],
-            files: [imgPath]
+            files: [imgPath],
+            components: [row]
         })
     }
 );

@@ -146,7 +146,7 @@ export const OpenPack = new Button("OpenPack",
 
         const openedPackEmbed = new EmbedBuilder()
             .setTitle(`You've opened a ${msgInfoData.Name}`)
-            .setDescription(chosenPigs.map(pig => pig.data().Name).join(", "));
+            .setDescription(`1/${chosenPigs.length}`);
 
         const imgPath = AddPigRenderToEmbed(openedPackEmbed, chosenPigs[0], newPigs.includes(chosenPigs[0].id));
 
@@ -157,7 +157,8 @@ export const OpenPack = new Button("OpenPack",
             new ButtonBuilder()
                 .setCustomId('GalleryPrevious')
                 .setLabel('Previous')
-                .setStyle(ButtonStyle.Primary),
+                .setStyle(ButtonStyle.Primary)
+                .setDisabled(true),
             new ButtonBuilder()
                 .setCustomId('GalleryNext')
                 .setLabel('Next')

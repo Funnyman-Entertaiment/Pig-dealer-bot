@@ -47,11 +47,6 @@ export const ShowBinder = new Command(
             author = {name: username, iconURL: avatar === null? "" : avatar}
         }
 
-        const openedPackEmbed = new EmbedBuilder()
-            .setTitle(`${author.name}'s pig bind`)
-            .setDescription("Should I put something here")
-            .setAuthor(author);
-
         const pigsQuery = query(collection(db, `serverInfo/${server.id}/users/${interaction.user.id}/pigs`))
         const pigs = await getDocs(pigsQuery);
 
@@ -70,6 +65,11 @@ export const ShowBinder = new Command(
         const firstPigId = pigsSet[0];
         const firstPigDoc = doc(db, `pigs/${firstPigId}`);
         const firstPig = await getDoc(firstPigDoc);
+
+        const openedPackEmbed = new EmbedBuilder()
+            .setTitle(`${author.name}'s pig bind`)
+            .setDescription(`1/${pigsSet.length}`)
+            .setAuthor(author);
 
         const imgPath = AddPigRenderToEmbed(openedPackEmbed, firstPig, false);
 
