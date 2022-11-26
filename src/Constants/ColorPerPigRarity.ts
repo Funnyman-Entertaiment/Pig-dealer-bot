@@ -5,5 +5,6 @@ export const COLOR_PER_PIG_RARITY: { readonly [key: string]: number } = {
     Rare: Colors.Yellow,
     Epic: Colors.Purple,
     Legendary: Colors.LuminousVividPink,
-    Assembly: Colors.Red
+    Assembly: Colors.Red,
+    ["One of a kind"]: Colors.Gold
 }
