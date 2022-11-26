@@ -4,7 +4,7 @@ import { COLOR_PER_PACK_RARITY } from "../Constants/ColorPerPackRarity";
 
 
 export const PackDropper = function (client: Client, db: Firestore) {
-    setTimeout(async () => {
+    setInterval(async () => {
         const q = query(collection(db, "serverInfo"));
         const servers = await getDocs(q);
 
@@ -76,5 +76,5 @@ export const PackDropper = function (client: Client, db: Firestore) {
                 }
             });
         });
-    }, 1000);
+    }, 1000 * 60 * 15);
 }
