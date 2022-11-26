@@ -1,6 +1,6 @@
 import { EmbedBuilder } from "@discordjs/builders";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Interaction } from "discord.js";
-import { addDoc, collection, doc, DocumentData, Firestore, getDoc, getDocs, query, QueryDocumentSnapshot, QuerySnapshot, setDoc, updateDoc, where } from "firebase/firestore/lite";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, Interaction } from "discord.js";
+import { addDoc, collection, doc, DocumentData, Firestore, getDoc, getDocs, query, QueryDocumentSnapshot, QuerySnapshot, setDoc, Timestamp, updateDoc, where } from "firebase/firestore/lite";
 import { Button } from "../Button";
 import { SPECIAL_RARITIES_PER_PACK } from "../Constants/SpecialRaritiesPerPack";
 import { PIG_RARITY_ORDER } from "../Constants/PigRarityOrder";
@@ -331,8 +331,55 @@ export const OpenPack = new Button("OpenPack",
         await interaction.deferReply();
 
         const server = interaction.guild;
+
         if (server === null) { return; }
+
+        const userInfoData = await GetUserInfoData(db, server.id, interaction.user.id);
+
+        if(userInfoData === undefined){ return; }
+
+        const lastTimeOpened = userInfoData.LastTimeOpened as Timestamp;
+        const currentTime = Timestamp.now();
+
+        if(lastTimeOpened !== undefined && currentTime.seconds - lastTimeOpened.seconds <= 60 * 90){
+            const totalDiff = (60 * 90) - (currentTime.seconds - lastTimeOpened.seconds);
+            const minutes = Math.floor(totalDiff/60);
+            const seconds = totalDiff % 60;
+
+            const waitEmbed = new EmbedBuilder()
+                .setColor(Colors.DarkRed)
+                .setTitle(`You must wait for ${minutes}:${seconds.toString().padStart(1, "0")} to open another pack`)
+                .setAuthor(GetAuthor(interaction));
+
+            await interaction.followUp({
+                embeds: [waitEmbed],
+                ephemeral: true,
+                options: {
+                    ephemeral: true
+                }
+            });
+
+            return;
+        }
+
+        const userDoc = doc(db, `serverInfo/${server.id}/users/${interaction.user.id}`)
+        await updateDoc(userDoc, {
+            LastTimeOpened: currentTime
+        })
+
         const message = interaction.message;
+
+        const row = new ActionRowBuilder<ButtonBuilder>()
+                        .addComponents(
+                            new ButtonBuilder()
+                                .setCustomId('OpenPack')
+                                .setLabel('Open!')
+                                .setStyle(ButtonStyle.Primary)
+                                .setDisabled(true),
+                        );
+        message.edit({
+            components: [row]
+        })
 
         const msgDoc = doc(db, `serverInfo/${server.id}/messages/${message.id}`);
         const msgInfo = await getDoc(msgDoc);
@@ -354,10 +401,6 @@ export const OpenPack = new Button("OpenPack",
         const openPackFollowUp = GetOpenPackFollowUp(msgInfoData.Name, chosenPigs, newPigs, interaction)
 
         if (openPackFollowUp === undefined) { return; }
-
-        const userInfoData = await GetUserInfoData(db, server.id, interaction.user.id);
-
-        if(userInfoData === undefined){return; }
 
         const allCompletedAssemblyPigs: QueryDocumentSnapshot[] = []
     

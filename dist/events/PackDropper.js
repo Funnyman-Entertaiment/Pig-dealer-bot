@@ -5,7 +5,7 @@ const discord_js_1 = require("discord.js");
 const lite_1 = require("firebase/firestore/lite");
 const ColorPerPackRarity_1 = require("../Constants/ColorPerPackRarity");
 const PackDropper = function (client, db) {
-    setInterval(async () => {
+    setTimeout(async () => {
         const q = (0, lite_1.query)((0, lite_1.collection)(db, "serverInfo"));
         const servers = await (0, lite_1.getDocs)(q);
         servers.forEach(server => {
@@ -65,6 +65,6 @@ const PackDropper = function (client, db) {
                 }
             });
         });
-    }, 10000);
+    }, 1000);
 };
 exports.PackDropper = PackDropper;

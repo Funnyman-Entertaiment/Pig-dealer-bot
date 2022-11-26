@@ -261,7 +261,43 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
     if (server === null) {
         return;
     }
+    const userInfoData = await GetUserInfoData(db, server.id, interaction.user.id);
+    if (userInfoData === undefined) {
+        return;
+    }
+    const lastTimeOpened = userInfoData.LastTimeOpened;
+    const currentTime = lite_1.Timestamp.now();
+    if (lastTimeOpened !== undefined && currentTime.seconds - lastTimeOpened.seconds <= 60 * 90) {
+        const totalDiff = (60 * 90) - (currentTime.seconds - lastTimeOpened.seconds);
+        const minutes = Math.floor(totalDiff / 60);
+        const seconds = totalDiff % 60;
+        const waitEmbed = new builders_1.EmbedBuilder()
+            .setColor(discord_js_1.Colors.DarkRed)
+            .setTitle(`You must wait for ${minutes}:${seconds.toString().padStart(1, "0")} to open another pack`)
+            .setAuthor(GetAuthor(interaction));
+        await interaction.followUp({
+            embeds: [waitEmbed],
+            ephemeral: true,
+            options: {
+                ephemeral: true
+            }
+        });
+        return;
+    }
+    const userDoc = (0, lite_1.doc)(db, `serverInfo/${server.id}/users/${interaction.user.id}`);
+    await (0, lite_1.updateDoc)(userDoc, {
+        LastTimeOpened: currentTime
+    });
     const message = interaction.message;
+    const row = new discord_js_1.ActionRowBuilder()
+        .addComponents(new discord_js_1.ButtonBuilder()
+        .setCustomId('OpenPack')
+        .setLabel('Open!')
+        .setStyle(discord_js_1.ButtonStyle.Primary)
+        .setDisabled(true));
+    message.edit({
+        components: [row]
+    });
     const msgDoc = (0, lite_1.doc)(db, `serverInfo/${server.id}/messages/${message.id}`);
     const msgInfo = await (0, lite_1.getDoc)(msgDoc);
     if (!msgInfo.exists() || msgInfo.data().Type !== "RandomPack") {
@@ -275,10 +311,6 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
     const newPigs = GetNewPigs(chosenPigs, userPigs);
     const openPackFollowUp = GetOpenPackFollowUp(msgInfoData.Name, chosenPigs, newPigs, interaction);
     if (openPackFollowUp === undefined) {
-        return;
-    }
-    const userInfoData = await GetUserInfoData(db, server.id, interaction.user.id);
-    if (userInfoData === undefined) {
         return;
     }
     const allCompletedAssemblyPigs = [];
