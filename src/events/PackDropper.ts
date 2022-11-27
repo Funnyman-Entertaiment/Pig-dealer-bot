@@ -77,5 +77,5 @@ export const PackDropper = function (client: Client, db: Firestore) {
                 }
             });
         });
-    }, 1000 * 60 * 14);
+    }, 1000 * 60 * 10);
 }

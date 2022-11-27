@@ -68,6 +68,6 @@ const PackDropper = function (client, db) {
                 }
             });
         });
-    }, 1000 * 60 * 14);
+    }, 1000 * 60 * 10);
 };
 exports.PackDropper = PackDropper;
