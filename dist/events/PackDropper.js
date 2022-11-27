@@ -9,6 +9,9 @@ const PackDropper = function (client, db) {
         const q = (0, lite_1.query)((0, lite_1.collection)(db, "serverInfo"));
         const servers = await (0, lite_1.getDocs)(q);
         servers.forEach(server => {
+            if (server.data().Channel === undefined) {
+                return;
+            }
             client.channels.fetch(server.data().Channel).then(async (channel) => {
                 if (channel === null) {
                     return;
@@ -65,6 +68,6 @@ const PackDropper = function (client, db) {
                 }
             });
         });
-    }, 1000 * 60 * 15);
+    }, 1000 * 60 * 14);
 };
 exports.PackDropper = PackDropper;

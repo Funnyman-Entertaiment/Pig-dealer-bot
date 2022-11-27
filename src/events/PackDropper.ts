@@ -9,6 +9,7 @@ export const PackDropper = function (client: Client, db: Firestore) {
         const servers = await getDocs(q);
 
         servers.forEach(server => {
+            if(server.data().Channel === undefined) { return; }
             client.channels.fetch(server.data().Channel).then(async channel => {
                 if(channel === null){ return; }
 
