@@ -67,7 +67,7 @@ async function ChoosePigs(db, serverId, availablePigs, msgInfoData) {
     let allowGoldenPig = true;
     if (serverInfoData !== undefined) {
         if (serverInfoData.HasSpawnedGoldenPig !== undefined) {
-            allowGoldenPig = serverInfoData.HasSpawnedGoldenPig;
+            allowGoldenPig = !serverInfoData.HasSpawnedGoldenPig;
         }
     }
     let pigRarities = SpecialRaritiesPerPack_1.SPECIAL_RARITIES_PER_PACK[msgInfoData.Name];
@@ -102,14 +102,18 @@ async function ChoosePigs(db, serverId, availablePigs, msgInfoData) {
         do {
             chosenPig = pigsOfRarity[Math.floor(Math.random() * pigsOfRarity.length)];
         } while (chosenPigs.includes(chosenPig));
-        if (Math.random() <= GoldenPigChancePerRarity_1.GOLDEN_PIG_CHANCE_PER_RARITY[rarity]) {
+        if (Math.random() <= GoldenPigChancePerRarity_1.GOLDEN_PIG_CHANCE_PER_RARITY[rarity] && allowGoldenPig) {
             const goldenPigDoc = (0, lite_1.doc)(db, "pigs/500");
             const goldenPig = await (0, lite_1.getDoc)(goldenPigDoc);
             chosenPigs.push(goldenPig);
+            allowGoldenPig = false;
         }
         else {
             chosenPigs.push(chosenPig);
         }
+    });
+    await (0, lite_1.updateDoc)(serverInfoDoc, {
+        HasSpawnedGoldenPig: allowGoldenPig
     });
     chosenPigs.sort((a, b) => {
         const aOrder = PigRarityOrder_1.PIG_RARITY_ORDER[a.data().Rarity];

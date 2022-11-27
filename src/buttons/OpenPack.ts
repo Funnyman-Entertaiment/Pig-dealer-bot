@@ -82,7 +82,7 @@ async function ChoosePigs(db: Firestore, serverId: string, availablePigs: { [key
 
     if(serverInfoData !== undefined){
         if(serverInfoData.HasSpawnedGoldenPig !== undefined){
-            allowGoldenPig = serverInfoData.HasSpawnedGoldenPig;
+            allowGoldenPig = !serverInfoData.HasSpawnedGoldenPig;
         }
     }
 
@@ -123,14 +123,19 @@ async function ChoosePigs(db: Firestore, serverId: string, availablePigs: { [key
             chosenPig = pigsOfRarity[Math.floor(Math.random() * pigsOfRarity.length)]
         } while (chosenPigs.includes(chosenPig));
 
-        if(Math.random() <= GOLDEN_PIG_CHANCE_PER_RARITY[rarity]){
+        if(Math.random() <= GOLDEN_PIG_CHANCE_PER_RARITY[rarity] && allowGoldenPig){
             const goldenPigDoc = doc(db, "pigs/500");
             const goldenPig = await getDoc(goldenPigDoc);
             chosenPigs.push(goldenPig as any as QueryDocumentSnapshot);
+            allowGoldenPig = false;
         }else{
             chosenPigs.push(chosenPig);
         }
     });
+
+    await updateDoc(serverInfoDoc, {
+        HasSpawnedGoldenPig: allowGoldenPig
+    })
 
     chosenPigs.sort((a, b) => {
         const aOrder = PIG_RARITY_ORDER[a.data().Rarity];
