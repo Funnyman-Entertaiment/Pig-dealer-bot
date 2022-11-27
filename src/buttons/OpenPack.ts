@@ -346,14 +346,14 @@ export const OpenPack = new Button("OpenPack",
         const lastTimeOpened = userInfoData.LastTimeOpened as Timestamp;
         const currentTime = Timestamp.now();
 
-        if(lastTimeOpened !== undefined && currentTime.seconds - lastTimeOpened.seconds <= 60 * 90){
-            const totalDiff = (60 * 90) - (currentTime.seconds - lastTimeOpened.seconds);
+        if(lastTimeOpened !== undefined && currentTime.seconds - lastTimeOpened.seconds <= 60 * 30){
+            const totalDiff = (60 * 30) - (currentTime.seconds - lastTimeOpened.seconds);
             const minutes = Math.floor(totalDiff/60);
             const seconds = totalDiff % 60;
 
             const waitEmbed = new EmbedBuilder()
                 .setColor(Colors.DarkRed)
-                .setTitle(`You must wait for ${minutes}:${seconds.toString().padStart(1, "0")} to open another pack`)
+                .setTitle(`You must wait for ${minutes}:${seconds.toString().padStart(2, "0")} to open another pack`)
                 .setAuthor(GetAuthor(interaction));
 
             await interaction.followUp({
