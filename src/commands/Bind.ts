@@ -47,7 +47,7 @@ export const ShowBinder = new Command(
             author = {name: username, iconURL: avatar === null? "" : avatar};
         }
 
-        const pigsQuery = query(collection(db, `serverInfo/${server.id}/users/${interaction.user.id}/pigs`));
+        const pigsQuery = query(collection(db, `serverInfo/${server.id}/users/${userId}/pigs`));
         const pigs = await getDocs(pigsQuery);
 
         if(pigs.empty){

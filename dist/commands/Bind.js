@@ -39,7 +39,7 @@ exports.ShowBinder = new Command_1.Command(new discord_js_1.SlashCommandBuilder(
         const avatar = user.avatarURL();
         author = { name: username, iconURL: avatar === null ? "" : avatar };
     }
-    const pigsQuery = (0, lite_1.query)((0, lite_1.collection)(db, `serverInfo/${server.id}/users/${interaction.user.id}/pigs`));
+    const pigsQuery = (0, lite_1.query)((0, lite_1.collection)(db, `serverInfo/${server.id}/users/${userId}/pigs`));
     const pigs = await (0, lite_1.getDocs)(pigsQuery);
     if (pigs.empty) {
         const emptyEmbed = new discord_js_1.EmbedBuilder()
