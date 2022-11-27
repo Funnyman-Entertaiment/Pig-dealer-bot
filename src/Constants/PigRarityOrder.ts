@@ -3,5 +3,6 @@ export const PIG_RARITY_ORDER: { readonly [key: string]: number } = {
     Rare: 1,
     Epic: 2,
     Legendary: 3,
-    ["One of a kind"]: 4
+    Assembly: 4,
+    ["One of a kind"]: 5
 }
