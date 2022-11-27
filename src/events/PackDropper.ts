@@ -10,6 +10,7 @@ export const PackDropper = function (client: Client, db: Firestore) {
 
         servers.forEach(server => {
             if(server.data().Channel === undefined) { return; }
+
             client.channels.fetch(server.data().Channel).then(async channel => {
                 if(channel === null){ return; }
 
@@ -58,22 +59,26 @@ export const PackDropper = function (client: Client, db: Firestore) {
                                 .setStyle(ButtonStyle.Primary),
                         );
 
+                    console.log(`Sending ${pack.data.Name} to server with id: ${server.id}`)
+
                     channel.send({
                         components: [row],
                         embeds: [packEmbed],
                         files: [`./img/packs/${img}`]
-                    }).then(message => {
+                    }).then(async message => {
                         const messageDoc = doc(db, `serverInfo/${server.id}/messages/${message.id}`)
 
-                        setDoc(messageDoc, {
+                        await setDoc(messageDoc, {
                             Type: "RandomPack",
                             Name: pack.data.Name,
                             PigCount: pack.data.PigCount,
                             Set: pack.data.Set,
                             Tags: pack.data.Tags,
                             Opened: false,
-                        })
-                    })
+                        });
+
+                        console.log(`Registered of open pack msg with id: ${message.id}`);
+                    });
                 }
             });
         });

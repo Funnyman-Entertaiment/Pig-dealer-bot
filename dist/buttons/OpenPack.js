@@ -307,6 +307,18 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
     const msgInfo = await (0, lite_1.getDoc)(msgDoc);
     const msgInfoData = msgInfo.data();
     if (!msgInfo.exists() || msgInfoData === undefined || msgInfo.data().Type !== "RandomPack") {
+        if (!msgInfo.exists()) {
+            console.log(`Message with id ${message.id} doesn't exist for server ${server.id}.`);
+        }
+        else if (msgInfoData === undefined) {
+            console.log(`Message with id ${message.id} for server ${server.id} doesn't have data.`);
+        }
+        else if (msgInfoData.Type !== "RandomPack") {
+            console.log(`Trying to open a non random pack in message ${message.id} for server ${server.id}.`);
+        }
+        else {
+            console.log(`Something is very wrong with message ${message.id} for server ${server.id}.`);
+        }
         const errorEmbed = new builders_1.EmbedBuilder()
             .setTitle("⚠Error fetching message info⚠")
             .setDescription("Message anna or thicco inmediatly!!")

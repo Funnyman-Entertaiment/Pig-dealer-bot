@@ -50,13 +50,14 @@ const PackDropper = function (client, db) {
                         .setCustomId('OpenPack')
                         .setLabel('Open!')
                         .setStyle(discord_js_1.ButtonStyle.Primary));
+                    console.log(`Sending ${pack.data.Name} to server with id: ${server.id}`);
                     channel.send({
                         components: [row],
                         embeds: [packEmbed],
                         files: [`./img/packs/${img}`]
-                    }).then(message => {
+                    }).then(async (message) => {
                         const messageDoc = (0, lite_1.doc)(db, `serverInfo/${server.id}/messages/${message.id}`);
-                        (0, lite_1.setDoc)(messageDoc, {
+                        await (0, lite_1.setDoc)(messageDoc, {
                             Type: "RandomPack",
                             Name: pack.data.Name,
                             PigCount: pack.data.PigCount,
@@ -64,6 +65,7 @@ const PackDropper = function (client, db) {
                             Tags: pack.data.Tags,
                             Opened: false,
                         });
+                        console.log(`Registered of open pack msg with id: ${message.id}`);
                     });
                 }
             });
