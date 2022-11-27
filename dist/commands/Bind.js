@@ -41,6 +41,17 @@ exports.ShowBinder = new Command_1.Command(new discord_js_1.SlashCommandBuilder(
     }
     const pigsQuery = (0, lite_1.query)((0, lite_1.collection)(db, `serverInfo/${server.id}/users/${interaction.user.id}/pigs`));
     const pigs = await (0, lite_1.getDocs)(pigsQuery);
+    if (pigs.empty) {
+        const emptyEmbed = new discord_js_1.EmbedBuilder()
+            .setAuthor(author)
+            .setColor(discord_js_1.Colors.DarkRed)
+            .setTitle("This user has no pigs!")
+            .setDescription("Open some packs, loser");
+        await interaction.followUp({
+            embeds: [emptyEmbed]
+        });
+        return;
+    }
     const pigsSet = [];
     pigs.forEach(pig => {
         if (!pigsSet.includes(pig.data().PigId)) {

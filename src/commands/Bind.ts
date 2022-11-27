@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, CommandInteraction, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, CommandInteraction, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } from "discord.js";
 import { collection, doc, getDoc, getDocs, query, setDoc } from "firebase/firestore/lite";
 import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
 import { Command } from "../Command";
@@ -27,7 +27,7 @@ export const ShowBinder = new Command(
         const server = interaction.guild;
         if(server === null) { return; }
 
-        const user = (interaction.options as CommandInteractionOptionResolver).getUser('user')
+        const user = (interaction.options as CommandInteractionOptionResolver).getUser('user');
 
         let userId: string;
         let author: {name: string, iconURL: string} | null;
@@ -44,11 +44,24 @@ export const ShowBinder = new Command(
             const username = user.username;
             const avatar = user.avatarURL();
     
-            author = {name: username, iconURL: avatar === null? "" : avatar}
+            author = {name: username, iconURL: avatar === null? "" : avatar};
         }
 
-        const pigsQuery = query(collection(db, `serverInfo/${server.id}/users/${interaction.user.id}/pigs`))
+        const pigsQuery = query(collection(db, `serverInfo/${server.id}/users/${interaction.user.id}/pigs`));
         const pigs = await getDocs(pigsQuery);
+
+        if(pigs.empty){
+            const emptyEmbed = new EmbedBuilder()
+                .setAuthor(author)
+                .setColor(Colors.DarkRed)
+                .setTitle("This user has no pigs!")
+                .setDescription("Open some packs, loser");
+
+            await interaction.followUp({
+                embeds: [emptyEmbed]
+            });
+            return;
+        }
 
         const pigsSet: string[] = [];
 
