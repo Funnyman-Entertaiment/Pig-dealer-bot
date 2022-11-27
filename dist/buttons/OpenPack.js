@@ -250,10 +250,24 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
     await interaction.deferReply();
     const server = interaction.guild;
     if (server === null) {
+        const errorEmbed = new builders_1.EmbedBuilder()
+            .setTitle("⚠Error fetching server from interaction⚠")
+            .setDescription("Message anna or thicco inmediatly!!")
+            .setColor(discord_js_1.Colors.DarkRed);
+        await interaction.followUp({
+            embeds: [errorEmbed]
+        });
         return;
     }
     const userInfoData = await GetUserInfoData(db, server.id, interaction.user.id);
     if (userInfoData === undefined) {
+        const errorEmbed = new builders_1.EmbedBuilder()
+            .setTitle("⚠Error fetching server user data⚠")
+            .setDescription("Message anna or thicco inmediatly!!")
+            .setColor(discord_js_1.Colors.DarkRed);
+        await interaction.followUp({
+            embeds: [errorEmbed]
+        });
         return;
     }
     const lastTimeOpened = userInfoData.LastTimeOpened;
@@ -275,10 +289,6 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
         });
         return;
     }
-    const userDoc = (0, lite_1.doc)(db, `serverInfo/${server.id}/users/${interaction.user.id}`);
-    await (0, lite_1.updateDoc)(userDoc, {
-        LastTimeOpened: currentTime
-    });
     const message = interaction.message;
     const row = new discord_js_1.ActionRowBuilder()
         .addComponents(new discord_js_1.ButtonBuilder()
@@ -289,12 +299,23 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
     message.edit({
         components: [row]
     });
+    const userDoc = (0, lite_1.doc)(db, `serverInfo/${server.id}/users/${interaction.user.id}`);
+    await (0, lite_1.updateDoc)(userDoc, {
+        LastTimeOpened: currentTime
+    });
     const msgDoc = (0, lite_1.doc)(db, `serverInfo/${server.id}/messages/${message.id}`);
     const msgInfo = await (0, lite_1.getDoc)(msgDoc);
-    if (!msgInfo.exists() || msgInfo.data().Type !== "RandomPack") {
+    const msgInfoData = msgInfo.data();
+    if (!msgInfo.exists() || msgInfoData === undefined || msgInfo.data().Type !== "RandomPack") {
+        const errorEmbed = new builders_1.EmbedBuilder()
+            .setTitle("⚠Error fetching message info⚠")
+            .setDescription("Message anna or thicco inmediatly!!")
+            .setColor(discord_js_1.Colors.DarkRed);
+        await interaction.followUp({
+            embeds: [errorEmbed]
+        });
         return;
     }
-    const msgInfoData = msgInfo.data();
     const userPigs = await GetUserPigs(db, server.id, interaction.user.id);
     const availablePigs = await GetAvailablePigsFromPack(db, msgInfoData);
     const chosenPigs = await ChoosePigs(db, server.id, availablePigs, msgInfoData);
@@ -302,6 +323,13 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
     const newPigs = GetNewPigs(chosenPigs, userPigs);
     const openPackFollowUp = GetOpenPackFollowUp(msgInfoData.Name, chosenPigs, newPigs, interaction);
     if (openPackFollowUp === undefined) {
+        const errorEmbed = new builders_1.EmbedBuilder()
+            .setTitle("⚠Error creating open pack follow up⚠")
+            .setDescription("Message anna or thicco inmediatly!!")
+            .setColor(discord_js_1.Colors.DarkRed);
+        await interaction.followUp({
+            embeds: [errorEmbed]
+        });
         return;
     }
     const allCompletedAssemblyPigs = [];
@@ -322,6 +350,13 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
     }
     const assemblyPigsFollowUps = GetAssemblyPigsFollowUps(allCompletedAssemblyPigs, interaction);
     if (assemblyPigsFollowUps === undefined) {
+        const errorEmbed = new builders_1.EmbedBuilder()
+            .setTitle("⚠Error creating assembly pigs follow up⚠")
+            .setDescription("Message anna or thicco inmediatly!!")
+            .setColor(discord_js_1.Colors.DarkRed);
+        await interaction.followUp({
+            embeds: [errorEmbed]
+        });
         return;
     }
     await interaction.followUp(openPackFollowUp).then(message => {

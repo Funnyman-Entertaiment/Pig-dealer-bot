@@ -327,11 +327,33 @@ export const OpenPack = new Button("OpenPack",
 
         const server = interaction.guild;
 
-        if (server === null) { return; }
+        if (server === null) { 
+            const errorEmbed = new EmbedBuilder()
+            .setTitle("⚠Error fetching server from interaction⚠")
+            .setDescription("Message anna or thicco inmediatly!!")
+            .setColor(Colors.DarkRed);
+
+            await interaction.followUp({
+                embeds: [errorEmbed]
+            });
+
+            return;
+        }
 
         const userInfoData = await GetUserInfoData(db, server.id, interaction.user.id);
 
-        if(userInfoData === undefined){ return; }
+        if(userInfoData === undefined){ 
+            const errorEmbed = new EmbedBuilder()
+            .setTitle("⚠Error fetching server user data⚠")
+            .setDescription("Message anna or thicco inmediatly!!")
+            .setColor(Colors.DarkRed);
+
+            await interaction.followUp({
+                embeds: [errorEmbed]
+            });
+
+            return;
+        }
 
         const lastTimeOpened = userInfoData.LastTimeOpened as Timestamp;
         const currentTime = Timestamp.now();
@@ -357,11 +379,6 @@ export const OpenPack = new Button("OpenPack",
             return;
         }
 
-        const userDoc = doc(db, `serverInfo/${server.id}/users/${interaction.user.id}`)
-        await updateDoc(userDoc, {
-            LastTimeOpened: currentTime
-        })
-
         const message = interaction.message;
 
         const row = new ActionRowBuilder<ButtonBuilder>()
@@ -374,14 +391,30 @@ export const OpenPack = new Button("OpenPack",
                         );
         message.edit({
             components: [row]
-        })
+        });
+
+        const userDoc = doc(db, `serverInfo/${server.id}/users/${interaction.user.id}`)
+        await updateDoc(userDoc, {
+            LastTimeOpened: currentTime
+        });
 
         const msgDoc = doc(db, `serverInfo/${server.id}/messages/${message.id}`);
         const msgInfo = await getDoc(msgDoc);
 
-        if (!msgInfo.exists() || msgInfo.data().Type !== "RandomPack") { return; }
-
         const msgInfoData = msgInfo.data();
+
+        if (!msgInfo.exists() || msgInfoData === undefined || msgInfo.data().Type !== "RandomPack") {
+            const errorEmbed = new EmbedBuilder()
+                .setTitle("⚠Error fetching message info⚠")
+                .setDescription("Message anna or thicco inmediatly!!")
+                .setColor(Colors.DarkRed);
+
+            await interaction.followUp({
+                embeds: [errorEmbed]
+            });
+
+            return;
+        }
 
         const userPigs = await GetUserPigs(db, server.id, interaction.user.id);
 
@@ -395,7 +428,18 @@ export const OpenPack = new Button("OpenPack",
 
         const openPackFollowUp = GetOpenPackFollowUp(msgInfoData.Name, chosenPigs, newPigs, interaction)
 
-        if (openPackFollowUp === undefined) { return; }
+        if (openPackFollowUp === undefined) {
+            const errorEmbed = new EmbedBuilder()
+                .setTitle("⚠Error creating open pack follow up⚠")
+                .setDescription("Message anna or thicco inmediatly!!")
+                .setColor(Colors.DarkRed);
+
+            await interaction.followUp({
+                embeds: [errorEmbed]
+            });
+
+            return;
+        }
 
         const allCompletedAssemblyPigs: QueryDocumentSnapshot[] = []
     
@@ -422,7 +466,18 @@ export const OpenPack = new Button("OpenPack",
 
         const assemblyPigsFollowUps = GetAssemblyPigsFollowUps(allCompletedAssemblyPigs, interaction);
 
-        if(assemblyPigsFollowUps === undefined){ return; }
+        if(assemblyPigsFollowUps === undefined){
+            const errorEmbed = new EmbedBuilder()
+            .setTitle("⚠Error creating assembly pigs follow up⚠")
+            .setDescription("Message anna or thicco inmediatly!!")
+            .setColor(Colors.DarkRed);
+
+            await interaction.followUp({
+                embeds: [errorEmbed]
+            });
+
+            return;
+        }
 
         await interaction.followUp(openPackFollowUp).then(message => {
             const messageDoc = doc(db, `serverInfo/${server.id}/messages/${message.id}`);
