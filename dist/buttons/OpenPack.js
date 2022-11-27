@@ -76,26 +76,13 @@ async function ChoosePigs(db, serverId, availablePigs, msgInfoData) {
     }
     const chosenPigs = [];
     pigRarities.forEach(async (rarities) => {
-        let rarity = rarities[0];
-        let legendaryChance = 0.01;
-        let epicChance = 0.1;
-        let rareChance = 0.35;
-        if (msgInfoData.Name === "🍀Lucky Pack🍀") {
-            legendaryChance = 0.1;
-            epicChance = 0.5;
-            rareChance = 1;
-        }
-        else if (msgInfoData.Name === "🍀Super Lucky Pack🍀") {
-            epicChance = 0.35;
-        }
-        if (rarities.includes("Legendary") && Math.random() < legendaryChance) {
-            rarity = "Legendary";
-        }
-        else if (rarities.includes("Epic") && Math.random() < epicChance) {
-            rarity = "Epic";
-        }
-        else if (rarities.includes("Rare") && Math.random() < rareChance) {
-            rarity = "Rare";
+        let rarity = "";
+        for (const possibleRarity in rarities) {
+            const chance = rarities[possibleRarity];
+            if (Math.random() > chance) {
+                break;
+            }
+            rarity = possibleRarity;
         }
         const pigsOfRarity = availablePigs[rarity];
         let chosenPig;
@@ -113,7 +100,7 @@ async function ChoosePigs(db, serverId, availablePigs, msgInfoData) {
         }
     });
     await (0, lite_1.updateDoc)(serverInfoDoc, {
-        HasSpawnedGoldenPig: allowGoldenPig
+        HasSpawnedGoldenPig: !allowGoldenPig
     });
     chosenPigs.sort((a, b) => {
         const aOrder = PigRarityOrder_1.PIG_RARITY_ORDER[a.data().Rarity];

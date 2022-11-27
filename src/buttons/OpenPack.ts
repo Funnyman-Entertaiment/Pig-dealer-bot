@@ -86,7 +86,7 @@ async function ChoosePigs(db: Firestore, serverId: string, availablePigs: { [key
         }
     }
 
-    let pigRarities: string[][] = SPECIAL_RARITIES_PER_PACK[msgInfoData.Name];
+    let pigRarities: {readonly [key: string]: number}[] = SPECIAL_RARITIES_PER_PACK[msgInfoData.Name];
     if (pigRarities === undefined) {
         pigRarities = RARITIES_PER_PIG_COUNT[msgInfoData.PigCount];
     }
@@ -94,26 +94,16 @@ async function ChoosePigs(db: Firestore, serverId: string, availablePigs: { [key
     const chosenPigs: QueryDocumentSnapshot[] = [];
 
     pigRarities.forEach(async rarities => {
-        let rarity = rarities[0];
+        let rarity: string = "";
 
-        let legendaryChance = 0.01;
-        let epicChance = 0.1;
-        let rareChance = 0.35;
+        for (const possibleRarity in rarities) {
+            const chance = rarities[possibleRarity];
 
-        if (msgInfoData.Name === "🍀Lucky Pack🍀") {
-            legendaryChance = 0.1;
-            epicChance = 0.5;
-            rareChance = 1;
-        } else if (msgInfoData.Name === "🍀Super Lucky Pack🍀") {
-            epicChance = 0.35;
-        }
+            if(Math.random() > chance){
+                break;
+            }
 
-        if (rarities.includes("Legendary") && Math.random() < legendaryChance) {
-            rarity = "Legendary";
-        } else if (rarities.includes("Epic") && Math.random() < epicChance) {
-            rarity = "Epic";
-        } else if (rarities.includes("Rare") && Math.random() < rareChance) {
-            rarity = "Rare";
+            rarity = possibleRarity;
         }
 
         const pigsOfRarity = availablePigs[rarity];
@@ -134,7 +124,7 @@ async function ChoosePigs(db: Firestore, serverId: string, availablePigs: { [key
     });
 
     await updateDoc(serverInfoDoc, {
-        HasSpawnedGoldenPig: allowGoldenPig
+        HasSpawnedGoldenPig: !allowGoldenPig
     })
 
     chosenPigs.sort((a, b) => {
