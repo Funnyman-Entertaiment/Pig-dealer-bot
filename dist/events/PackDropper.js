@@ -50,12 +50,6 @@ async function DropPack(client, db) {
                         .setLabel('Open!')
                         .setStyle(discord_js_1.ButtonStyle.Primary));
                     console.log(`Sending ${pack.Name} to server with id: ${server.id}`);
-                    if (server.id === "333907207638876169") {
-                        console.log(channel.name);
-                    }
-                    else {
-                        return;
-                    }
                     try {
                         channel.send({
                             components: [row],
