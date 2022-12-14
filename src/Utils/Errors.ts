@@ -4,7 +4,7 @@ export function MakeErrorEmbed(title: string, ...descriptions: string[]){
     let description = "Message anna or thicco inmediatly!!";
 
     descriptions.forEach(extraDescriptionLine => {
-        description = extraDescriptionLine + "\n" + description;
+        description += "\n" + extraDescriptionLine;
     });
 
     const errorEmbed = new EmbedBuilder()

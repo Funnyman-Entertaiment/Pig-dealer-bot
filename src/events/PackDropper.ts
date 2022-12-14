@@ -17,6 +17,8 @@ async function DropPack(client: Client, db: Firestore) {
             await client.channels.fetch(server.data().Channel).then(async channel => {
                 if (channel === null) { return; }
 
+                const guild = await client.guilds.fetch(server.id);
+
                 //Get Random pack
                 let chosenRarity: string = "Default";
 
@@ -59,7 +61,7 @@ async function DropPack(client: Client, db: Firestore) {
                                 .setStyle(ButtonStyle.Primary),
                         );
 
-                    console.log(`Sending ${pack.Name} to server with id: ${server.id}`);
+                    console.log(`Sending ${pack.Name} to server with id: ${server.id} (${guild.name})`);
 
                     const permissions = channel.guild.members.me?.permissionsIn(channel);
 
@@ -84,12 +86,12 @@ async function DropPack(client: Client, db: Firestore) {
                             AddMessageInfoToCache(newMessage, db);
                         });
                     }else{
-                        console.log(`Not enough permissions to send messages in ${server.id}`);
+                        console.log(`Not enough permissions to send messages in ${server.id} (${guild.name})`);
 
                         const channelName = channel.name;
-                        const serverName = channel.guild.name;
+                        const serverName = guild.name;
 
-                        const ownerId = channel.guild.ownerId;
+                        const ownerId = guild.ownerId;
                         const owner = client.users.cache.get(ownerId);
 
                         const errorEmbed = MakeErrorEmbed(

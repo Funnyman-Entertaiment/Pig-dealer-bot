@@ -5,7 +5,7 @@ const discord_js_1 = require("discord.js");
 function MakeErrorEmbed(title, ...descriptions) {
     let description = "Message anna or thicco inmediatly!!";
     descriptions.forEach(extraDescriptionLine => {
-        description = extraDescriptionLine + "\n" + description;
+        description += "\n" + extraDescriptionLine;
     });
     const errorEmbed = new discord_js_1.EmbedBuilder()
         .setTitle(`⚠${title}⚠`)

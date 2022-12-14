@@ -19,6 +19,7 @@ async function DropPack(client, db) {
                 if (channel === null) {
                     return;
                 }
+                const guild = await client.guilds.fetch(server.id);
                 let chosenRarity = "Default";
                 if (Math.random() <= 0.08) {
                     const packChance = Math.random();
@@ -50,7 +51,7 @@ async function DropPack(client, db) {
                         .setCustomId('OpenPack')
                         .setLabel('Open!')
                         .setStyle(discord_js_1.ButtonStyle.Primary));
-                    console.log(`Sending ${pack.Name} to server with id: ${server.id}`);
+                    console.log(`Sending ${pack.Name} to server with id: ${server.id} (${guild.name})`);
                     const permissions = channel.guild.members.me?.permissionsIn(channel);
                     if (permissions === undefined) {
                         return;
@@ -66,10 +67,10 @@ async function DropPack(client, db) {
                         });
                     }
                     else {
-                        console.log(`Not enough permissions to send messages in ${server.id}`);
+                        console.log(`Not enough permissions to send messages in ${server.id} (${guild.name})`);
                         const channelName = channel.name;
-                        const serverName = channel.guild.name;
-                        const ownerId = channel.guild.ownerId;
+                        const serverName = guild.name;
+                        const ownerId = guild.ownerId;
                         const owner = client.users.cache.get(ownerId);
                         const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Pig dealer is missing permissions", "Pig dealer doesn't have enough permissions for", `the ${channelName} in the ${serverName} server.`);
                         if (owner === undefined) {
