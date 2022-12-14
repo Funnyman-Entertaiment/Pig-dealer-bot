@@ -59,7 +59,7 @@ export const SetBotChannel = new Command(
 
 
         //We need to update the db because we later get these with a direct query
-        await setDoc(doc(db, `$serverInfo/${serverInfo.ID}`), serverInfo.GetData());
+        await setDoc(doc(db, `serverInfo/${serverInfo.ID}`), serverInfo.GetData());
 
         const successEmbed = new EmbedBuilder()
             .setTitle(`Channel succesfully set to ${channel.name}`)

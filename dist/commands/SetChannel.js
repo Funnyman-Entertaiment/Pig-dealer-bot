@@ -42,7 +42,7 @@ exports.SetBotChannel = new Command_1.Command(new discord_js_1.SlashCommandBuild
     else {
         serverInfo.Channel = channel.id;
     }
-    await (0, lite_1.setDoc)((0, lite_1.doc)(db, `$serverInfo/${serverInfo.ID}`), serverInfo.GetData());
+    await (0, lite_1.setDoc)((0, lite_1.doc)(db, `serverInfo/${serverInfo.ID}`), serverInfo.GetData());
     const successEmbed = new discord_js_1.EmbedBuilder()
         .setTitle(`Channel succesfully set to ${channel.name}`)
         .setColor(discord_js_1.Colors.Green);
