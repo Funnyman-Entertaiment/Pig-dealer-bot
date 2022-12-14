@@ -1,8 +1,9 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, Client, EmbedBuilder } from "discord.js";
-import { getDocs, query, collection, Firestore, where, doc, setDoc } from "firebase/firestore/lite"
+import { getDocs, query, collection, Firestore, where } from "firebase/firestore/lite"
 import { AddMessageInfoToCache, RandomPackMessage } from "../database/MessageInfo";
 import { COLOR_PER_PACK_RARITY } from "../Constants/ColorPerPackRarity";
 import { CreatePackFromData, Pack } from "../database/Packs";
+import { MakeErrorEmbed } from "../Utils/Errors";
 
 
 async function DropPack(client: Client, db: Firestore) {
@@ -58,9 +59,13 @@ async function DropPack(client: Client, db: Firestore) {
                                 .setStyle(ButtonStyle.Primary),
                         );
 
-                    console.log(`Sending ${pack.Name} to server with id: ${server.id}`)
+                    console.log(`Sending ${pack.Name} to server with id: ${server.id}`);
 
-                    try {
+                    const permissions = channel.guild.members.me?.permissionsIn(channel);
+
+                    if(permissions === undefined){ return; }
+
+                    if(permissions.has("SendMessages") && permissions.has("ViewChannel")){
                         channel.send({
                             components: [row],
                             embeds: [packEmbed],
@@ -74,18 +79,37 @@ async function DropPack(client: Client, db: Firestore) {
                                 pack.Set,
                                 pack.Tags,
                                 false
-                            )
+                            );
 
                             AddMessageInfoToCache(newMessage, db);
                         });
-                    }
-                    catch (error) {
-                        console.log("THIS ISN'T A REAL ERROR EITHER: " + error);
+                    }else{
+                        console.log(`Not enough permissions to send messages in ${server.id}`);
+
+                        const channelName = channel.name;
+                        const serverName = channel.guild.name;
+
+                        const ownerId = channel.guild.ownerId;
+                        const owner = client.users.cache.get(ownerId);
+
+                        const errorEmbed = MakeErrorEmbed(
+                            "Pig dealer is missing permissions",
+                            "Pig dealer doesn't have enough permissions for",
+                            `the ${channelName} in the ${serverName} server.`
+                        );
+
+                        if(owner === undefined){
+                            console.log(`No owner has been found`);
+                        }else{
+                            await owner.send({
+                                embeds: [errorEmbed]
+                            });
+                        }
                     }
                 }
             });
         } catch (error) {
-            console.log("THIS ERROR ISN'T REAL " + error);
+            //console.log("THIS ERROR ISN'T REAL: " + error);
         }
     });
 }

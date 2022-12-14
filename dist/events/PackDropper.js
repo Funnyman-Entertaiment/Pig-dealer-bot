@@ -6,6 +6,7 @@ const lite_1 = require("firebase/firestore/lite");
 const MessageInfo_1 = require("../database/MessageInfo");
 const ColorPerPackRarity_1 = require("../Constants/ColorPerPackRarity");
 const Packs_1 = require("../database/Packs");
+const Errors_1 = require("../Utils/Errors");
 async function DropPack(client, db) {
     const q = (0, lite_1.query)((0, lite_1.collection)(db, "serverInfo"));
     const servers = await (0, lite_1.getDocs)(q);
@@ -50,7 +51,11 @@ async function DropPack(client, db) {
                         .setLabel('Open!')
                         .setStyle(discord_js_1.ButtonStyle.Primary));
                     console.log(`Sending ${pack.Name} to server with id: ${server.id}`);
-                    try {
+                    const permissions = channel.guild.members.me?.permissionsIn(channel);
+                    if (permissions === undefined) {
+                        return;
+                    }
+                    if (permissions.has("SendMessages") && permissions.has("ViewChannel")) {
                         channel.send({
                             components: [row],
                             embeds: [packEmbed],
@@ -60,14 +65,26 @@ async function DropPack(client, db) {
                             (0, MessageInfo_1.AddMessageInfoToCache)(newMessage, db);
                         });
                     }
-                    catch (error) {
-                        console.log("THIS ISN'T A REAL ERROR EITHER: " + error);
+                    else {
+                        console.log(`Not enough permissions to send messages in ${server.id}`);
+                        const channelName = channel.name;
+                        const serverName = channel.guild.name;
+                        const ownerId = channel.guild.ownerId;
+                        const owner = client.users.cache.get(ownerId);
+                        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Pig dealer is missing permissions", "Pig dealer doesn't have enough permissions for", `the ${channelName} in the ${serverName} server.`);
+                        if (owner === undefined) {
+                            console.log(`No owner has been found`);
+                        }
+                        else {
+                            await owner.send({
+                                embeds: [errorEmbed]
+                            });
+                        }
                     }
                 }
             });
         }
         catch (error) {
-            console.log("THIS ERROR ISN'T REAL " + error);
         }
     });
 }

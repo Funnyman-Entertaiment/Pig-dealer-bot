@@ -1,6 +1,6 @@
 import { EmbedBuilder } from "@discordjs/builders";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, Interaction } from "discord.js";
-import { addDoc, collection, doc, DocumentData, Firestore, getDoc, getDocs, query, QueryDocumentSnapshot, QuerySnapshot, setDoc, Timestamp, updateDoc, where } from "firebase/firestore/lite";
+import { addDoc, collection, doc, Firestore, getDocs, query, QuerySnapshot, setDoc, Timestamp, where } from "firebase/firestore/lite";
 import { Button } from "../Button";
 import { SPECIAL_RARITIES_PER_PACK } from "../Constants/SpecialRaritiesPerPack";
 import { PIG_RARITY_ORDER } from "../Constants/PigRarityOrder";
