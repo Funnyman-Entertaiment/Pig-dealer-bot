@@ -5,28 +5,28 @@ import { COLOR_PER_PACK_RARITY } from "../Constants/ColorPerPackRarity";
 import { CreatePackFromData, Pack } from "../database/Packs";
 
 
-async function DropPack(client: Client, db: Firestore){
+async function DropPack(client: Client, db: Firestore) {
     const q = query(collection(db, "serverInfo"));
     const servers = await getDocs(q);
 
     servers.forEach(async server => {
-        if(server.data().Channel === undefined) { return; }
+        if (server.data().Channel === undefined) { return; }
 
         try {
             await client.channels.fetch(server.data().Channel).then(async channel => {
-                if(channel === null){ return; }
+                if (channel === null) { return; }
 
                 //Get Random pack
                 let chosenRarity: string = "Default";
 
-                if(Math.random() <= 0.08){
+                if (Math.random() <= 0.08) {
                     const packChance = Math.random();
 
-                    if(packChance <= 0.7){
+                    if (packChance <= 0.7) {
                         chosenRarity = "Common";
-                    }else if(packChance <= 0.9){
+                    } else if (packChance <= 0.9) {
                         chosenRarity = "Rare"
-                    }else{
+                    } else {
                         chosenRarity = "Super Rare"
                     }
                 }
@@ -40,9 +40,9 @@ async function DropPack(client: Client, db: Firestore){
                     possiblePacks.push(CreatePackFromData(pack.id, pack.data()))
                 });
 
-                var pack = possiblePacks[Math.floor(Math.random()*possiblePacks.length)];
+                var pack = possiblePacks[Math.floor(Math.random() * possiblePacks.length)];
 
-                if(channel.type === ChannelType.GuildText){
+                if (channel.type === ChannelType.GuildText) {
                     let img = `${pack.ID}.png`;
 
                     const packEmbed = new EmbedBuilder()
@@ -59,32 +59,37 @@ async function DropPack(client: Client, db: Firestore){
                         );
 
                     console.log(`Sending ${pack.Name} to server with id: ${server.id}`)
-                    if(server.id === "333907207638876169"){
+                    if (server.id === "333907207638876169") {
                         console.log(channel.name);
-                    }else{
+                    } else {
                         return;
                     }
 
-                    channel.send({
-                        components: [row],
-                        embeds: [packEmbed],
-                        files: [`./img/packs/${img}`]
-                    }).then(async message => {
-                        const newMessage = new RandomPackMessage(
-                            message.id,
-                            server.id,
-                            pack.Name,
-                            pack.PigCount,
-                            pack.Set,
-                            pack.Tags,
-                            false
-                        )
-            
-                        AddMessageInfoToCache(newMessage, db);
-                    });
+                    try {
+                        channel.send({
+                            components: [row],
+                            embeds: [packEmbed],
+                            files: [`./img/packs/${img}`]
+                        }).then(async message => {
+                            const newMessage = new RandomPackMessage(
+                                message.id,
+                                server.id,
+                                pack.Name,
+                                pack.PigCount,
+                                pack.Set,
+                                pack.Tags,
+                                false
+                            )
+
+                            AddMessageInfoToCache(newMessage, db);
+                        });
+                    }
+                    catch (error) {
+                        console.log("THIS ISN'T A REAL ERROR EITHER: " + error);
+                    }
                 }
             });
-        }catch(error){
+        } catch (error) {
             console.log("THIS ERROR ISN'T REAL " + error);
         }
     });
