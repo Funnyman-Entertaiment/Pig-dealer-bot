@@ -35,9 +35,7 @@ const client = new Client({
     partials: [Partials.Channel, Partials.Reaction, Partials.Message],
 });
 
-ready(client);
+ready(client, db);
 interactionCreate(client, db);
 
 client.login(token);
-
-PackDropper(client, db)

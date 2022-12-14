@@ -7,7 +7,6 @@ const lite_1 = require("firebase/firestore/lite");
 const DotEnv = tslib_1.__importStar(require("dotenv"));
 const Ready_1 = tslib_1.__importDefault(require("./listeners/Ready"));
 const InteractionCreate_1 = tslib_1.__importDefault(require("./listeners/InteractionCreate"));
-const PackDropper_1 = require("./events/PackDropper");
 DotEnv.config();
 const firebaseConfig = {
     apiKey: process.env.FIREBASE_KEY,
@@ -29,7 +28,6 @@ const client = new discord_js_1.Client({
     ],
     partials: [discord_js_1.Partials.Channel, discord_js_1.Partials.Reaction, discord_js_1.Partials.Message],
 });
-(0, Ready_1.default)(client);
+(0, Ready_1.default)(client, db);
 (0, InteractionCreate_1.default)(client, db);
 client.login(token);
-(0, PackDropper_1.PackDropper)(client, db);
