@@ -430,9 +430,7 @@ export const OpenPack = new Button("OpenPack",
 
             allCompletedAssemblyPigs.concat(completedAssemblyPigs);
 
-            await updateDoc(doc(db, `serverInfo/${server.id}/users/${interaction.user.id}`), {
-                AssembledPigs: userAssembledPigs
-            })
+            userInfo.AssembledPigs = userAssembledPigs;
 
             if(completedAssemblyPigs.length === 0){
                 break;

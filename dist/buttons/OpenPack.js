@@ -307,9 +307,7 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
             userAssembledPigs.push(assemblyPig.ID);
         });
         allCompletedAssemblyPigs.concat(completedAssemblyPigs);
-        await (0, lite_1.updateDoc)((0, lite_1.doc)(db, `serverInfo/${server.id}/users/${interaction.user.id}`), {
-            AssembledPigs: userAssembledPigs
-        });
+        userInfo.AssembledPigs = userAssembledPigs;
         if (completedAssemblyPigs.length === 0) {
             break;
         }
