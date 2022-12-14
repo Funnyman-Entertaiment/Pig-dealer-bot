@@ -56,14 +56,19 @@ async function DropPack(client, db) {
                     else {
                         return;
                     }
-                    channel.send({
-                        components: [row],
-                        embeds: [packEmbed],
-                        files: [`./img/packs/${img}`]
-                    }).then(async (message) => {
-                        const newMessage = new MessageInfo_1.RandomPackMessage(message.id, server.id, pack.Name, pack.PigCount, pack.Set, pack.Tags, false);
-                        (0, MessageInfo_1.AddMessageInfoToCache)(newMessage, db);
-                    });
+                    try {
+                        channel.send({
+                            components: [row],
+                            embeds: [packEmbed],
+                            files: [`./img/packs/${img}`]
+                        }).then(async (message) => {
+                            const newMessage = new MessageInfo_1.RandomPackMessage(message.id, server.id, pack.Name, pack.PigCount, pack.Set, pack.Tags, false);
+                            (0, MessageInfo_1.AddMessageInfoToCache)(newMessage, db);
+                        });
+                    }
+                    catch (error) {
+                        console.log("THIS ISN'T A REAL ERROR EITHER: " + error);
+                    }
                 }
             });
         }
