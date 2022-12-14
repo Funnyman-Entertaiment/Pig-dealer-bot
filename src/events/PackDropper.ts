@@ -1,5 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, Client, EmbedBuilder } from "discord.js";
-import { getDocs, query, collection, Firestore, where } from "firebase/firestore/lite"
+import { getDocs, query, collection, Firestore, where, doc, setDoc } from "firebase/firestore/lite"
 import { AddMessageInfoToCache, RandomPackMessage } from "../database/MessageInfo";
 import { COLOR_PER_PACK_RARITY } from "../Constants/ColorPerPackRarity";
 import { CreatePackFromData, Pack } from "../database/Packs";
@@ -11,7 +11,6 @@ export const PackDropper = function (client: Client, db: Firestore) {
         const servers = await getDocs(q);
 
         servers.forEach(async server => {
-            return;
             if(server.data().Channel === undefined) { return; }
 
             try {
@@ -85,5 +84,5 @@ export const PackDropper = function (client: Client, db: Firestore) {
                 //console.log(error);
             }
         });
-    }, 10000);
+    }, 1000 * 60 * 10);
 }
