@@ -1,5 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
-import { doc, getDoc, updateDoc } from "firebase/firestore/lite";
+import { GetMessageInfo, PigGalleryMessage } from "../database/MessageInfo";
+import { GetPig } from "../database/Pigs";
+import { MakeErrorEmbed } from "../Utils/Errors";
 import { Button } from "../Button";
 import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
 
@@ -9,35 +11,67 @@ export const PrevGallery = new Button("GalleryPrevious",
         await interaction.deferUpdate();
 
         const server = interaction.guild;
-        if(server === null) { return; }
+        if(server === null) {
+            const errorEmbed = MakeErrorEmbed(
+                "Error fetching server from interaction",
+                "Where did you find this message?"
+            );
+
+            await interaction.followUp({
+                embeds: [errorEmbed]
+            });
+
+            return;
+        }
+
         const message = interaction.message;
+        const msgInfo = await GetMessageInfo(server.id, message.id, db) as PigGalleryMessage;
 
-        const msgDoc = doc(db, `serverInfo/${server.id}/messages/${message.id}`);
-        const msgInfo = await getDoc(msgDoc);
+        if(msgInfo === undefined || msgInfo.Type !== "PigGallery"){ return; }
 
-        if(!msgInfo.exists() || msgInfo.data().Type !== "PigGallery"){ return; }
+        if(msgInfo.User === undefined){
+            const errorEmbed = MakeErrorEmbed(
+                "This message doesn't have an associated user",
+                `Server: ${server.id}`,
+                `Message: ${message.id}`
+            );
 
-        const msgInfoData = msgInfo.data();
+            await interaction.followUp({
+                embeds: [errorEmbed]
+            });
 
-        if(interaction.user.id !== msgInfoData.User){ return; }
+            return;
+        }
 
-        if(msgInfoData.CurrentPig === 0){ return; }
+        if(interaction.user.id !== msgInfo.User){ return; }
 
-        const pigToLoad = msgInfoData.Pigs[msgInfoData.CurrentPig-1];
+        if(msgInfo.CurrentPig === 0){ return; }
 
-        await updateDoc(msgDoc, {
-            CurrentPig: msgInfoData.CurrentPig-1,
-        });
+        const pigToLoad = msgInfo.Pigs[msgInfo.CurrentPig-1];
+
+        msgInfo.CurrentPig--;
 
         const editedEmbed = new EmbedBuilder(message.embeds[0].data)
-            .setDescription(`${msgInfoData.CurrentPig}/${msgInfoData.Pigs.length}`);
+            .setDescription(`${msgInfo.CurrentPig+1}/${msgInfo.Pigs.length}`);
 
-        const pigDoc = doc(db, `pigs/${pigToLoad}`);
-        const pig = await getDoc(pigDoc);
+        const pig = await GetPig(pigToLoad, db);
 
-        const imgPath = AddPigRenderToEmbed(editedEmbed, pig, msgInfoData.NewPigs.includes(pig.id));
+        if(pig === undefined){
+            const errorEmbed = MakeErrorEmbed(
+                "Couldn't fetch pig",
+                `Server: ${server.id}`,
+                `Message: ${message.id}`,
+                `Pig to Load: ${pigToLoad}`
+            )
 
-        if(imgPath === undefined){ return; }
+            await interaction.followUp({
+                embeds: [errorEmbed]
+            });
+
+            return;
+        }
+
+        const imgPath = AddPigRenderToEmbed(editedEmbed, pig, msgInfo.NewPigs.includes(pig.ID));
 
         const row = new ActionRowBuilder<ButtonBuilder>()
         .addComponents(
@@ -45,7 +79,7 @@ export const PrevGallery = new Button("GalleryPrevious",
                 .setCustomId('GalleryPrevious')
                 .setLabel('Previous')
                 .setStyle(ButtonStyle.Primary)
-                .setDisabled(msgInfoData.CurrentPig-1 === 0),
+                .setDisabled(msgInfo.CurrentPig === 0),
             new ButtonBuilder()
                 .setCustomId('GalleryNext')
                 .setLabel('Next')

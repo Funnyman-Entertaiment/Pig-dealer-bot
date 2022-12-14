@@ -10,6 +10,11 @@ const PigRarityOrder_1 = require("../Constants/PigRarityOrder");
 const RaritiesPerPigCount_1 = require("../Constants/RaritiesPerPigCount");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const GoldenPigChancePerRarity_1 = require("../Constants/GoldenPigChancePerRarity");
+const Errors_1 = require("../Utils/Errors");
+const UserInfo_1 = require("../database/UserInfo");
+const MessageInfo_1 = require("../database/MessageInfo");
+const Pigs_1 = require("../database/Pigs");
+const ServerInfo_1 = require("../database/ServerInfo");
 async function GetUserPigs(db, severId, userId) {
     const pigsCollection = (0, lite_1.collection)(db, `serverInfo/${severId}/users/${userId}/pigs`);
     const userPigs = await (0, lite_1.getDocs)(pigsCollection);
@@ -30,14 +35,14 @@ function GetAuthor(interaction) {
     const avatar = user.avatarURL();
     return { name: username, iconURL: avatar === null ? "" : avatar };
 }
-async function GetAvailablePigsFromPack(db, msgInfoData) {
+async function GetAvailablePigsFromPack(db, msgInfo) {
     let pigs;
-    if (msgInfoData.Set.length !== 0) {
-        const packQuery = (0, lite_1.query)((0, lite_1.collection)(db, "pigs"), (0, lite_1.where)("Set", "==", msgInfoData.Set));
+    if (msgInfo.Set.length !== 0) {
+        const packQuery = (0, lite_1.query)((0, lite_1.collection)(db, "pigs"), (0, lite_1.where)("Set", "==", msgInfo.Set));
         pigs = await (0, lite_1.getDocs)(packQuery);
     }
-    else if (msgInfoData.Tags.length !== 0) {
-        const packQuery = (0, lite_1.query)((0, lite_1.collection)(db, "pigs"), (0, lite_1.where)("Tags", "array-contains-any", msgInfoData.Tags));
+    else if (msgInfo.Tags.length !== 0) {
+        const packQuery = (0, lite_1.query)((0, lite_1.collection)(db, "pigs"), (0, lite_1.where)("Tags", "array-contains-any", msgInfo.Tags));
         pigs = await (0, lite_1.getDocs)(packQuery);
     }
     else {
@@ -54,25 +59,20 @@ async function GetAvailablePigsFromPack(db, msgInfoData) {
         const list = pigsPerRarity[key];
         pigs.forEach(pig => {
             if (pig.data().Rarity === key) {
-                list.push(pig);
+                const pigObject = (0, Pigs_1.CreatePigFromData)(pig.id, pig.data());
+                list.push(pigObject);
             }
         });
     }
     return pigsPerRarity;
 }
-async function ChoosePigs(db, serverId, availablePigs, msgInfoData) {
-    const serverInfoDoc = (0, lite_1.doc)(db, `serverInfo/${serverId}`);
-    const serverInfo = await (0, lite_1.getDoc)(serverInfoDoc);
-    const serverInfoData = serverInfo.data();
+async function ChoosePigs(db, serverId, availablePigs, msgInfo) {
+    const serverInfo = await (0, ServerInfo_1.GetServerInfo)(serverId, db);
     let allowGoldenPig = true;
-    if (serverInfoData !== undefined) {
-        if (serverInfoData.HasSpawnedGoldenPig !== undefined) {
-            allowGoldenPig = !serverInfoData.HasSpawnedGoldenPig;
-        }
-    }
-    let pigRarities = SpecialRaritiesPerPack_1.SPECIAL_RARITIES_PER_PACK[msgInfoData.Name];
+    allowGoldenPig = !serverInfo.HasSpawnedGoldenPig;
+    let pigRarities = SpecialRaritiesPerPack_1.SPECIAL_RARITIES_PER_PACK[msgInfo.Name];
     if (pigRarities === undefined) {
-        pigRarities = RaritiesPerPigCount_1.RARITIES_PER_PIG_COUNT[msgInfoData.PigCount];
+        pigRarities = RaritiesPerPigCount_1.RARITIES_PER_PIG_COUNT[msgInfo.PigCount];
     }
     const chosenPigs = [];
     pigRarities.forEach(async (rarities) => {
@@ -90,21 +90,20 @@ async function ChoosePigs(db, serverId, availablePigs, msgInfoData) {
             chosenPig = pigsOfRarity[Math.floor(Math.random() * pigsOfRarity.length)];
         } while (chosenPigs.includes(chosenPig));
         if (Math.random() <= GoldenPigChancePerRarity_1.GOLDEN_PIG_CHANCE_PER_RARITY[rarity] && allowGoldenPig) {
-            const goldenPigDoc = (0, lite_1.doc)(db, "pigs/500");
-            const goldenPig = await (0, lite_1.getDoc)(goldenPigDoc);
-            chosenPigs.push(goldenPig);
-            allowGoldenPig = false;
+            const goldenPig = await (0, Pigs_1.GetPig)("500", db);
+            if (goldenPig !== undefined) {
+                chosenPigs.push(goldenPig);
+                allowGoldenPig = false;
+            }
         }
         else {
             chosenPigs.push(chosenPig);
         }
     });
-    await (0, lite_1.updateDoc)(serverInfoDoc, {
-        HasSpawnedGoldenPig: !allowGoldenPig
-    });
+    serverInfo.HasSpawnedGoldenPig = !allowGoldenPig;
     chosenPigs.sort((a, b) => {
-        const aOrder = PigRarityOrder_1.PIG_RARITY_ORDER[a.data().Rarity];
-        const bOrder = PigRarityOrder_1.PIG_RARITY_ORDER[b.data().Rarity];
+        const aOrder = PigRarityOrder_1.PIG_RARITY_ORDER[a.Rarity];
+        const bOrder = PigRarityOrder_1.PIG_RARITY_ORDER[b.Rarity];
         return aOrder - bOrder;
     });
     return chosenPigs;
@@ -114,7 +113,7 @@ async function AddPigsToDB(db, chosenPigs, serverId, userId) {
         const pig = chosenPigs[i];
         const newPigCollection = (0, lite_1.collection)(db, `serverInfo/${serverId}/users/${userId}/pigs`);
         await (0, lite_1.addDoc)(newPigCollection, {
-            PigId: pig.id
+            PigId: pig.ID
         });
     }
 }
@@ -122,9 +121,9 @@ function GetNewPigs(chosenPigs, playerPigs) {
     const newPigs = [];
     for (let i = 0; i < chosenPigs.length; i++) {
         const pig = chosenPigs[i];
-        if (!playerPigs.includes(pig.id)) {
-            newPigs.push(pig.id);
-            playerPigs.push(pig.id);
+        if (!playerPigs.includes(pig.ID)) {
+            newPigs.push(pig.ID);
+            playerPigs.push(pig.ID);
         }
     }
     return newPigs;
@@ -133,7 +132,7 @@ function GetOpenPackFollowUp(packName, chosenPigs, newPigs, interaction) {
     const openedPackEmbed = new builders_1.EmbedBuilder()
         .setTitle(`You've opened a ${packName}`)
         .setDescription(`1/${chosenPigs.length}`);
-    const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(openedPackEmbed, chosenPigs[0], newPigs.includes(chosenPigs[0].id));
+    const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(openedPackEmbed, chosenPigs[0], newPigs.includes(chosenPigs[0].ID));
     if (imgPath === undefined) {
         return;
     }
@@ -157,37 +156,27 @@ function GetOpenPackFollowUp(packName, chosenPigs, newPigs, interaction) {
     };
 }
 async function GetUserInfoData(db, serverId, userId) {
-    const userInfoDoc = (0, lite_1.doc)(db, `serverInfo/${serverId}/users/${userId}`);
-    let userInfo = await (0, lite_1.getDoc)(userInfoDoc);
-    let userInfoData = userInfo.data();
-    if (userInfoData === undefined) {
-        await (0, lite_1.setDoc)(userInfoDoc, {
-            AssembledPigs: []
-        });
-        userInfo = await (0, lite_1.getDoc)(userInfoDoc);
-        userInfoData = userInfo.data();
-        if (userInfoData === undefined) {
-            return;
-        }
+    const userInfo = await (0, UserInfo_1.GetUserInfo)(serverId, userId, db);
+    if (userInfo === undefined) {
+        const newUserInfo = new UserInfo_1.UserInfo(userId, serverId, []);
+        await (0, UserInfo_1.AddUserInfoToCache)(newUserInfo, db);
+        return newUserInfo;
     }
-    return userInfoData;
+    return userInfo;
 }
-function GetUserAssembledPigs(userInfoData) {
-    let userAssembledPigs = userInfoData.AssembledPigs;
-    if (userAssembledPigs === undefined) {
-        userAssembledPigs = [];
-    }
+function GetUserAssembledPigs(userInfo) {
+    let userAssembledPigs = userInfo.AssembledPigs;
     return userAssembledPigs;
 }
 async function GetPossibleAssemblyPigs(db, chosenPigs, userAssembledPigs) {
     const possibleAssemblyPigs = [];
     for (let i = 0; i < chosenPigs.length; i++) {
         const pig = chosenPigs[i];
-        const assemblyPigQuery = (0, lite_1.query)((0, lite_1.collection)(db, "pigs"), (0, lite_1.where)("RequiredPigs", "array-contains", pig.id));
+        const assemblyPigQuery = (0, lite_1.query)((0, lite_1.collection)(db, "pigs"), (0, lite_1.where)("RequiredPigs", "array-contains", pig.ID));
         const assemblyPigs = await (0, lite_1.getDocs)(assemblyPigQuery);
         assemblyPigs.forEach(assemblyPig => {
-            if (!userAssembledPigs.includes(assemblyPig.id) && !possibleAssemblyPigs.some(x => x.id == assemblyPig.id)) {
-                possibleAssemblyPigs.push(assemblyPig);
+            if (!userAssembledPigs.includes(assemblyPig.id) && !possibleAssemblyPigs.some(x => x.ID == assemblyPig.id)) {
+                possibleAssemblyPigs.push((0, Pigs_1.CreatePigFromData)(assemblyPig.id, assemblyPig.data()));
             }
         });
     }
@@ -197,13 +186,9 @@ function GetCompletedAssemblyPigs(possibleAssemblyPigs, userPigs) {
     const completedAssemblyPigs = [];
     for (let i = 0; i < possibleAssemblyPigs.length; i++) {
         const assemblyPig = possibleAssemblyPigs[i];
-        const assemblyPigData = assemblyPig.data();
-        if (assemblyPigData === undefined) {
-            continue;
-        }
         let hasAllPigs = true;
-        for (let o = 0; o < assemblyPigData.RequiredPigs.length; o++) {
-            const requiredPigId = assemblyPigData.RequiredPigs[o];
+        for (let o = 0; o < assemblyPig.RequiredPigs.length; o++) {
+            const requiredPigId = assemblyPig.RequiredPigs[o];
             if (!userPigs.includes(requiredPigId)) {
                 hasAllPigs = false;
                 break;
@@ -250,27 +235,26 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
     await interaction.deferReply();
     const server = interaction.guild;
     if (server === null) {
-        const errorEmbed = new builders_1.EmbedBuilder()
-            .setTitle("⚠Error fetching server from interaction⚠")
-            .setDescription("Message anna or thicco inmediatly!!")
-            .setColor(discord_js_1.Colors.DarkRed);
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Error fetching server from interaction", "Where did you find this message?");
         await interaction.followUp({
             embeds: [errorEmbed]
         });
         return;
     }
-    const userInfoData = await GetUserInfoData(db, server.id, interaction.user.id);
-    if (userInfoData === undefined) {
-        const errorEmbed = new builders_1.EmbedBuilder()
-            .setTitle("⚠Error fetching server user data⚠")
-            .setDescription("Message anna or thicco inmediatly!!")
-            .setColor(discord_js_1.Colors.DarkRed);
+    const message = interaction.message;
+    const msgInfo = await (0, MessageInfo_1.GetMessageInfo)(server.id, message.id, db);
+    if (msgInfo === undefined || msgInfo.Type !== "RandomPack") {
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Error fetching message information", `Server: ${server.id}`, `Message: ${message.id}`);
         await interaction.followUp({
             embeds: [errorEmbed]
         });
         return;
     }
-    const lastTimeOpened = userInfoData.LastTimeOpened;
+    if (msgInfo.Opened) {
+        return;
+    }
+    const userInfo = await GetUserInfoData(db, server.id, interaction.user.id);
+    const lastTimeOpened = userInfo.LastTimeOpened;
     const currentTime = lite_1.Timestamp.now();
     if (lastTimeOpened !== undefined && currentTime.seconds - lastTimeOpened.seconds <= 60 * 30) {
         const totalDiff = (60 * 30) - (currentTime.seconds - lastTimeOpened.seconds);
@@ -289,7 +273,8 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
         });
         return;
     }
-    const message = interaction.message;
+    msgInfo.Opened = true;
+    userInfo.LastTimeOpened = currentTime;
     const row = new discord_js_1.ActionRowBuilder()
         .addComponents(new discord_js_1.ButtonBuilder()
         .setCustomId('OpenPack')
@@ -299,46 +284,15 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
     message.edit({
         components: [row]
     });
-    const userDoc = (0, lite_1.doc)(db, `serverInfo/${server.id}/users/${interaction.user.id}`);
-    await (0, lite_1.updateDoc)(userDoc, {
-        LastTimeOpened: currentTime
-    });
-    const msgDoc = (0, lite_1.doc)(db, `serverInfo/${server.id}/messages/${message.id}`);
-    const msgInfo = await (0, lite_1.getDoc)(msgDoc);
-    const msgInfoData = msgInfo.data();
-    if (!msgInfo.exists() || msgInfoData === undefined || msgInfo.data().Type !== "RandomPack") {
-        if (!msgInfo.exists()) {
-            console.log(`Message with id ${message.id} doesn't exist for server ${server.id}.`);
-        }
-        else if (msgInfoData === undefined) {
-            console.log(`Message with id ${message.id} for server ${server.id} doesn't have data.`);
-        }
-        else if (msgInfoData.Type !== "RandomPack") {
-            console.log(`Trying to open a non random pack in message ${message.id} for server ${server.id}.`);
-        }
-        else {
-            console.log(`Something is very wrong with message ${message.id} for server ${server.id}.`);
-        }
-        const errorEmbed = new builders_1.EmbedBuilder()
-            .setTitle("⚠Error fetching message info⚠")
-            .setDescription("Message anna or thicco inmediatly!!")
-            .setColor(discord_js_1.Colors.DarkRed);
-        await interaction.followUp({
-            embeds: [errorEmbed]
-        });
-        return;
-    }
     const userPigs = await GetUserPigs(db, server.id, interaction.user.id);
-    const availablePigs = await GetAvailablePigsFromPack(db, msgInfoData);
-    const chosenPigs = await ChoosePigs(db, server.id, availablePigs, msgInfoData);
+    const availablePigs = await GetAvailablePigsFromPack(db, msgInfo);
+    const chosenPigs = await ChoosePigs(db, server.id, availablePigs, msgInfo);
+    (0, Pigs_1.AddPigsToCache)(chosenPigs, db);
     await AddPigsToDB(db, chosenPigs, server.id, interaction.user.id);
     const newPigs = GetNewPigs(chosenPigs, userPigs);
-    const openPackFollowUp = GetOpenPackFollowUp(msgInfoData.Name, chosenPigs, newPigs, interaction);
+    const openPackFollowUp = GetOpenPackFollowUp(msgInfo.Name, chosenPigs, newPigs, interaction);
     if (openPackFollowUp === undefined) {
-        const errorEmbed = new builders_1.EmbedBuilder()
-            .setTitle("⚠Error creating open pack follow up⚠")
-            .setDescription("Message anna or thicco inmediatly!!")
-            .setColor(discord_js_1.Colors.DarkRed);
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Error creating open pack follow up");
         await interaction.followUp({
             embeds: [errorEmbed]
         });
@@ -346,11 +300,11 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
     }
     const allCompletedAssemblyPigs = [];
     while (true) {
-        const userAssembledPigs = GetUserAssembledPigs(userInfoData);
+        const userAssembledPigs = GetUserAssembledPigs(userInfo);
         const possibleAssemblyPigs = await GetPossibleAssemblyPigs(db, chosenPigs, userAssembledPigs);
         const completedAssemblyPigs = GetCompletedAssemblyPigs(possibleAssemblyPigs, userPigs);
         completedAssemblyPigs.forEach(assemblyPig => {
-            userAssembledPigs.push(assemblyPig.id);
+            userAssembledPigs.push(assemblyPig.ID);
         });
         allCompletedAssemblyPigs.concat(completedAssemblyPigs);
         await (0, lite_1.updateDoc)((0, lite_1.doc)(db, `serverInfo/${server.id}/users/${interaction.user.id}`), {
@@ -360,6 +314,7 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
             break;
         }
     }
+    (0, Pigs_1.AddPigsToCache)(allCompletedAssemblyPigs, db);
     const assemblyPigsFollowUps = GetAssemblyPigsFollowUps(allCompletedAssemblyPigs, interaction);
     if (assemblyPigsFollowUps === undefined) {
         const errorEmbed = new builders_1.EmbedBuilder()
@@ -375,7 +330,7 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
         const messageDoc = (0, lite_1.doc)(db, `serverInfo/${server.id}/messages/${message.id}`);
         (0, lite_1.setDoc)(messageDoc, {
             Type: "PigGallery",
-            Pigs: chosenPigs.map(pig => pig.id),
+            Pigs: chosenPigs.map(pig => pig.ID),
             NewPigs: newPigs,
             CurrentPig: 0,
             User: interaction.user.id

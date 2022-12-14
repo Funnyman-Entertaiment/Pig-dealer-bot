@@ -1,86 +1,89 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, Client, EmbedBuilder } from "discord.js";
-import { getDocs, query, collection, Firestore, where, doc, setDoc } from "firebase/firestore/lite"
+import { getDocs, query, collection, Firestore, where } from "firebase/firestore/lite"
+import { AddMessageInfoToCache, RandomPackMessage } from "../database/MessageInfo";
 import { COLOR_PER_PACK_RARITY } from "../Constants/ColorPerPackRarity";
+import { CreatePackFromData, Pack } from "../database/Packs";
 
 
 export const PackDropper = function (client: Client, db: Firestore) {
-    setInterval(async () => {
+    setTimeout(async () => {
         const q = query(collection(db, "serverInfo"));
         const servers = await getDocs(q);
 
-        servers.forEach(server => {
+        servers.forEach(async server => {
+            return;
             if(server.data().Channel === undefined) { return; }
 
-            client.channels.fetch(server.data().Channel).then(async channel => {
-                if(channel === null){ return; }
+            try {
+                await client.channels.fetch(server.data().Channel).then(async channel => {
+                    if(channel === null){ return; }
 
-                //Get Random pack
-                let chosenRarity: string = "Default";
+                    //Get Random pack
+                    let chosenRarity: string = "Default";
 
-                if(Math.random() <= 0.08){
-                    const packChance = Math.random();
+                    if(Math.random() <= 0.08){
+                        const packChance = Math.random();
 
-                    if(packChance <= 0.7){
-                        chosenRarity = "Common";
-                    }else if(packChance <= 0.9){
-                        chosenRarity = "Rare"
-                    }else{
-                        chosenRarity = "Super Rare"
+                        if(packChance <= 0.7){
+                            chosenRarity = "Common";
+                        }else if(packChance <= 0.9){
+                            chosenRarity = "Rare"
+                        }else{
+                            chosenRarity = "Super Rare"
+                        }
                     }
-                }
 
-                const packQuery = query(collection(db, "packs"), where("Rarity", "==", chosenRarity));
-                const packs = await getDocs(packQuery);
+                    const packQuery = query(collection(db, "packs"), where("Rarity", "==", chosenRarity));
+                    const packs = await getDocs(packQuery);
 
-                const possiblePacks: any[] = [];
+                    const possiblePacks: Pack[] = [];
 
-                packs.forEach(pack => {
-                    possiblePacks.push({
-                        id: pack.id,
-                        data: pack.data()
+                    packs.forEach(pack => {
+                        possiblePacks.push(CreatePackFromData(pack.id, pack.data()))
                     });
-                });
 
-                var pack = possiblePacks[Math.floor(Math.random()*possiblePacks.length)];
+                    var pack = possiblePacks[Math.floor(Math.random()*possiblePacks.length)];
 
-                if(channel.type === ChannelType.GuildText){
-                    let img = `${pack.id}.png`;
+                    if(channel.type === ChannelType.GuildText){
+                        let img = `${pack.ID}.png`;
 
-                    const packEmbed = new EmbedBuilder()
-                        .setTitle(`A ${pack.data.Name} HAS APPEARED!`)
-                        .setImage(`attachment://${img}`)
-                        .setColor(COLOR_PER_PACK_RARITY[pack.data.Rarity as string]);
+                        const packEmbed = new EmbedBuilder()
+                            .setTitle(`A ${pack.Name} HAS APPEARED!`)
+                            .setImage(`attachment://${img}`)
+                            .setColor(COLOR_PER_PACK_RARITY[pack.Rarity]);
 
-                    const row = new ActionRowBuilder<ButtonBuilder>()
-                        .addComponents(
-                            new ButtonBuilder()
-                                .setCustomId('OpenPack')
-                                .setLabel('Open!')
-                                .setStyle(ButtonStyle.Primary),
-                        );
+                        const row = new ActionRowBuilder<ButtonBuilder>()
+                            .addComponents(
+                                new ButtonBuilder()
+                                    .setCustomId('OpenPack')
+                                    .setLabel('Open!')
+                                    .setStyle(ButtonStyle.Primary),
+                            );
 
-                    console.log(`Sending ${pack.data.Name} to server with id: ${server.id}`)
+                        console.log(`Sending ${pack.Name} to server with id: ${server.id}`)
 
-                    channel.send({
-                        components: [row],
-                        embeds: [packEmbed],
-                        files: [`./img/packs/${img}`]
-                    }).then(async message => {
-                        const messageDoc = doc(db, `serverInfo/${server.id}/messages/${message.id}`)
-
-                        await setDoc(messageDoc, {
-                            Type: "RandomPack",
-                            Name: pack.data.Name,
-                            PigCount: pack.data.PigCount,
-                            Set: pack.data.Set,
-                            Tags: pack.data.Tags,
-                            Opened: false,
+                        channel.send({
+                            components: [row],
+                            embeds: [packEmbed],
+                            files: [`./img/packs/${img}`]
+                        }).then(async message => {
+                            const newMessage = new RandomPackMessage(
+                                message.id,
+                                server.id,
+                                pack.Name,
+                                pack.PigCount,
+                                pack.Set,
+                                pack.Tags,
+                                false
+                            )
+                
+                            AddMessageInfoToCache(newMessage, db);
                         });
-
-                        console.log(`Registered of open pack msg with id: ${message.id}`);
-                    });
-                }
-            });
+                    }
+                });
+            }catch(error){
+                //console.log(error);
+            }
         });
-    }, 1000 * 60 * 10);
+    }, 10000);
 }

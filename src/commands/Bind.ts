@@ -1,7 +1,9 @@
 import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, CommandInteraction, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } from "discord.js";
-import { collection, doc, getDoc, getDocs, query, setDoc } from "firebase/firestore/lite";
+import { collection, doc, DocumentData, getDoc, getDocs, query } from "firebase/firestore/lite";
 import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
 import { Command } from "../Command";
+import { CreatePigFromData } from "../database/Pigs";
+import { AddMessageInfoToCache, PigGalleryMessage } from "../database/MessageInfo";
 
 function GetAuthor(interaction: CommandInteraction){
     if(interaction.user === null){
@@ -84,7 +86,7 @@ export const ShowBinder = new Command(
             .setDescription(`1/${pigsSet.length}`)
             .setAuthor(author);
 
-        const imgPath = AddPigRenderToEmbed(openedPackEmbed, firstPig, false);
+        const imgPath = AddPigRenderToEmbed(openedPackEmbed, CreatePigFromData(firstPig.id, firstPig.data() as any as DocumentData), false);
 
         if(imgPath === undefined){ return; }
 
@@ -105,15 +107,16 @@ export const ShowBinder = new Command(
             components: [row],
             files: [imgPath]
         }).then(message => {
-            const messageDoc = doc(db, `serverInfo/${server.id}/messages/${message.id}`);
+            const newMessage = new PigGalleryMessage(
+                message.id,
+                server.id,
+                0,
+                pigsSet,
+                [],
+                interaction.user.id
+            );
 
-            setDoc(messageDoc, {
-                Type: "PigGallery",
-                Pigs: pigsSet,
-                NewPigs: [],
-                CurrentPig: 0,
-                User: interaction.user.id
-            });
+            AddMessageInfoToCache(newMessage, db);
         });
     }
 );
