@@ -4,17 +4,20 @@ import { DatabaseElement } from "./DatabaseElement";
 
 export class ServerInfo extends DatabaseElement {
     Channel: string | undefined;
+    Role: string | undefined
     HasSpawnedGoldenPig: boolean;
 
-    constructor(id: string, channel: string | undefined, hasSpawnedGoldenPig: boolean) {
+    constructor(id: string, channel: string | undefined, role: string | undefined, hasSpawnedGoldenPig: boolean) {
         super(id);
         this.Channel = channel;
+        this.Role = role;
         this.HasSpawnedGoldenPig = hasSpawnedGoldenPig;
     }
 
     GetData(): object {
         return {
             Channel: this.Channel,
+            Role: this.Role,
             HasSpawnedGoldenPig: this.HasSpawnedGoldenPig,
         }
     }
@@ -33,10 +36,11 @@ function GetCachedServerInfos(){
 }
 
 
-function CreateServerInfoFromData(id: string, serverInfoData: DocumentData): ServerInfo{
+export function CreateServerInfoFromData(id: string, serverInfoData: DocumentData): ServerInfo{
     const newPack = new ServerInfo(
         id,
         serverInfoData.Channel,
+        serverInfoData.Role,
         serverInfoData.HasSpawnedGoldenPig ?? false
     )
 
