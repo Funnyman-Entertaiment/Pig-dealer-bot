@@ -7,5 +7,6 @@ const TestPack_1 = require("./commands/TestPack");
 const SetChannel_1 = require("./commands/SetChannel");
 const Bind_1 = require("./commands/Bind");
 const SetRole_1 = require("./commands/SetRole");
+const Announcement_1 = require("./commands/Announcement");
 exports.Commands = [Sex_1.Sex, SetChannel_1.SetBotChannel, SetRole_1.SetBotRole, Bind_1.ShowBinder];
-exports.DebugCommands = [TestPack_1.TestPack, TestPig_1.TestPig];
+exports.DebugCommands = [TestPack_1.TestPack, TestPig_1.TestPig, Announcement_1.Announcement];
