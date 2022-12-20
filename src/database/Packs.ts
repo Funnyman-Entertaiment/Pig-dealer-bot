@@ -34,7 +34,13 @@ export class Pack extends DatabaseElement {
 }
 
 
+let Packs: Pack[] = [];
 let CachedPacks: DatabaseElementList<Pack> | undefined;
+
+
+export function AddPack(pack: Pack){
+    Packs.push(pack);
+}
 
 
 function GetCachedPacks(){
@@ -73,38 +79,15 @@ export async function AddPacksToCache(packs: Pack[], db: Firestore){
 }
 
 
-export async function GetPack(id: string, db: Firestore): Promise<Pack | undefined>{
-    const cachedPack = GetCachedPacks().Get(id);
-
-    if(cachedPack === undefined){
-        const packDocument = doc(db, `packs/${id}`);
-        const foundPack = await getDoc(packDocument);
-
-        if(foundPack.exists()){
-            const packData = foundPack.data();
-            const newPack = CreatePackFromData(id, packData);
-            GetCachedPacks().Add(newPack, db);
-
-            return newPack;
-        }else{
-            return undefined;
-        }
-    }else{
-        return cachedPack;
-    }
+export function GetPack(id: string): Pack | undefined{
+    return Packs.find(pack => {
+        return pack.ID === id;
+    });
 }
 
 
-export async function GetPacksByRarity(rarity: PackRarity, db:Firestore): Promise<Pack[]>{
-    const packsQuery = query(collection(db, "packs"), where("Rarity", "==", rarity));
-    const packDocs = await getDocs(packsQuery);
-    const packs: Pack[] = [];
-
-    packDocs.forEach(packDoc => {
-        const packData = packDoc.data();
-        const newPack = CreatePackFromData(packDoc.id, packData);      
-        packs.push(newPack);
-    });
-
-    return packs;
+export function GetPacksByRarity(rarity: PackRarity): Pack[]{
+    return Packs.filter(pack => {
+        return pack.Rarity === rarity;
+    })
 }

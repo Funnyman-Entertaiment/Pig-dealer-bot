@@ -1,8 +1,7 @@
-import { collection, doc, DocumentData, Firestore, getDoc, getDocs, query, where } from "firebase/firestore/lite";
-import { DatabaseElementList } from "./DatabaseCacheList";
+import { DocumentData } from "firebase/firestore/lite";
 import { DatabaseElement } from "./DatabaseElement";
 
-type PigRarity = "Common" | "Rare" | "Epic" | "Legendary" | "Assembly" | "One of a kind"
+type PigRarity = "Common" | "Rare" | "Epic" | "Legendary" | "Assembly" | "One of a kind" | "Christmas" | "Postcard"
 
 
 export class Pig extends DatabaseElement {
@@ -37,15 +36,11 @@ export class Pig extends DatabaseElement {
 }
 
 
-let CachedPigs: DatabaseElementList<Pig> | undefined;
+let Pigs: Pig[] = [];
 
 
-function GetCachedPigs(){
-    if(CachedPigs === undefined){
-        CachedPigs = new DatabaseElementList<Pig>();
-    }
-
-    return CachedPigs;
+export function AddPig(pig: Pig){
+    Pigs.push(pig);
 }
 
 
@@ -64,81 +59,41 @@ export function CreatePigFromData(id: string, pigData: DocumentData): Pig{
 }
 
 
-export async function AddPigToCache(pig: Pig, db: Firestore){
-    await GetCachedPigs().Add(pig, db);
+export function GetPig(id: string): Pig | undefined{
+    return Pigs.find(pig => {
+        return pig.ID == id;
+    });
 }
 
 
-export async function AddPigsToCache(pigs: Pig[], db: Firestore){
-    for (let i = 0; i < pigs.length; i++) {
-        const pig = pigs[i];
-        await AddPigToCache(pig, db);
-    }
+export function GetAllPigs(): Pig[]{
+    return [...Pigs];
 }
 
 
-export async function GetPig(id: string, db: Firestore): Promise<Pig | undefined>{
-    const cachedPig = GetCachedPigs().Get(id);
+export function GetPigsBySet(set: string): Pig[]{
+    return Pigs.filter(pig => {
+        return pig.Set === set;
+    });
+}
 
-    if(cachedPig === undefined){
-        const pigDocument = doc(db, `pigs/${id}`);
-        const foundPig = await getDoc(pigDocument);
 
-        if(foundPig.exists()){
-            const pigData = foundPig.data();
-            const newPig = CreatePigFromData(id, pigData);
-            GetCachedPigs().Add(newPig, db);
-
-            return newPig;
-        }else{
-            return undefined;
+export function GetPigsWithTag(tags: string[]): Pig[]{
+    return Pigs.filter(pig => {
+        let hasAllTags = true;
+        for (let i = 0; i < tags.length; i++) {
+            const tag = tags[i];
+            if(!pig.Tags.includes(tag)){
+                hasAllTags = false;
+            }
         }
-    }else{
-        return cachedPig;
-    }
+        return hasAllTags;
+    });
 }
 
 
-export async function GetPigsBySet(set: string, db:Firestore): Promise<Pig[]>{
-    const pigsQuery = query(collection(db, "pigs"), where("Set", "==", set));
-    const pigDocs = await getDocs(pigsQuery);
-    const pigs: Pig[] = [];
-
-    pigDocs.forEach(pigDoc => {
-        const pigData = pigDoc.data();
-        const newPig = CreatePigFromData(pigDoc.id, pigData);
-        pigs.push(newPig);
+export function GetPigsByRarity(rarity: string): Pig[]{
+    return Pigs.filter(pig =>{
+        return pig.Rarity === rarity;
     });
-
-    return pigs;
-}
-
-
-export async function GetPigsWithTag(tag: string, db:Firestore): Promise<Pig[]>{
-    const pigsQuery = query(collection(db, "pigs"), where("Tags", "array-contains-any", tag));
-    const pigDocs = await getDocs(pigsQuery);
-    const pigs: Pig[] = [];
-
-    pigDocs.forEach(pigDoc => {
-        const pigData = pigDoc.data();
-        const newPig = CreatePigFromData(pigDoc.id, pigData);      
-        pigs.push(newPig);
-    });
-
-    return pigs;
-}
-
-
-export async function GetAllPigs(db: Firestore): Promise<Pig[]>{
-    const pigsQuery = query(collection(db, "pigs"));
-    const pigDocs = await getDocs(pigsQuery);
-    const pigs: Pig[] = [];
-
-    pigDocs.forEach(pigDoc => {
-        const pigData = pigDoc.data();
-        const newPig = CreatePigFromData(pigDoc.id, pigData);  
-        pigs.push(newPig);
-    });
-
-    return pigs;
 }

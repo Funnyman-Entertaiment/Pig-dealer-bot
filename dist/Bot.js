@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.GetClient = exports.client = exports.db = void 0;
 const tslib_1 = require("tslib");
 const discord_js_1 = require("discord.js");
 const app_1 = require("firebase/app");
@@ -18,9 +19,9 @@ const firebaseConfig = {
     measurementId: "G-SLSDV1DJR9"
 };
 const app = (0, app_1.initializeApp)(firebaseConfig);
-const db = (0, lite_1.getFirestore)(app);
+exports.db = (0, lite_1.getFirestore)(app);
 const token = process.env.BOT_TOKEN;
-const client = new discord_js_1.Client({
+exports.client = new discord_js_1.Client({
     intents: [
         discord_js_1.GatewayIntentBits.GuildMessages,
         discord_js_1.GatewayIntentBits.Guilds,
@@ -28,6 +29,10 @@ const client = new discord_js_1.Client({
     ],
     partials: [discord_js_1.Partials.Channel, discord_js_1.Partials.Reaction, discord_js_1.Partials.Message],
 });
-(0, Ready_1.default)(client, db);
-(0, InteractionCreate_1.default)(client, db);
-client.login(token);
+(0, Ready_1.default)(exports.client, exports.db);
+(0, InteractionCreate_1.default)(exports.client, exports.db);
+exports.client.login(token);
+function GetClient() {
+    return exports.client;
+}
+exports.GetClient = GetClient;

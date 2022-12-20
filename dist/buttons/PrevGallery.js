@@ -39,7 +39,7 @@ exports.PrevGallery = new Button_1.Button("GalleryPrevious", async (_, interacti
     msgInfo.CurrentPig--;
     const editedEmbed = new discord_js_1.EmbedBuilder(message.embeds[0].data)
         .setDescription(`${msgInfo.CurrentPig + 1}/${msgInfo.Pigs.length}`);
-    const pig = await (0, Pigs_1.GetPig)(pigToLoad, db);
+    const pig = (0, Pigs_1.GetPig)(pigToLoad);
     if (pig === undefined) {
         const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Couldn't fetch pig", `Server: ${server.id}`, `Message: ${message.id}`, `Pig to Load: ${pigToLoad}`);
         await interaction.followUp({

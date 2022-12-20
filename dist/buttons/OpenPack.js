@@ -15,6 +15,10 @@ const UserInfo_1 = require("../database/UserInfo");
 const MessageInfo_1 = require("../database/MessageInfo");
 const Pigs_1 = require("../database/Pigs");
 const ServerInfo_1 = require("../database/ServerInfo");
+const SeasonalEvents_1 = require("src/Utils/SeasonalEvents");
+const v = {
+    SpawnStocking: false
+};
 async function GetUserPigs(db, severId, userId) {
     const pigsCollection = (0, lite_1.collection)(db, `serverInfo/${severId}/users/${userId}/pigs`);
     const userPigs = await (0, lite_1.getDocs)(pigsCollection);
@@ -35,35 +39,25 @@ function GetAuthor(interaction) {
     const avatar = user.avatarURL();
     return { name: username, iconURL: avatar === null ? "" : avatar };
 }
-async function GetAvailablePigsFromPack(db, msgInfo) {
+async function GetAvailablePigsFromPack(msgInfo) {
     let pigs;
     if (msgInfo.Set.length !== 0) {
-        const packQuery = (0, lite_1.query)((0, lite_1.collection)(db, "pigs"), (0, lite_1.where)("Set", "==", msgInfo.Set));
-        pigs = await (0, lite_1.getDocs)(packQuery);
+        pigs = (0, Pigs_1.GetPigsBySet)(msgInfo.Set);
     }
     else if (msgInfo.Tags.length !== 0) {
-        const packQuery = (0, lite_1.query)((0, lite_1.collection)(db, "pigs"), (0, lite_1.where)("Tags", "array-contains-any", msgInfo.Tags));
-        pigs = await (0, lite_1.getDocs)(packQuery);
+        pigs = (0, Pigs_1.GetPigsWithTag)(msgInfo.Tags);
     }
     else {
-        const packQuery = (0, lite_1.query)((0, lite_1.collection)(db, "pigs"));
-        pigs = await (0, lite_1.getDocs)(packQuery);
+        pigs = (0, Pigs_1.GetAllPigs)();
     }
-    const pigsPerRarity = {
-        Common: [],
-        Rare: [],
-        Epic: [],
-        Legendary: [],
-    };
-    for (const key in pigsPerRarity) {
-        const list = pigsPerRarity[key];
-        pigs.forEach(pig => {
-            if (pig.data().Rarity === key) {
-                const pigObject = (0, Pigs_1.CreatePigFromData)(pig.id, pig.data());
-                list.push(pigObject);
-            }
-        });
-    }
+    const pigsPerRarity = {};
+    pigs.forEach(pig => {
+        if (pigsPerRarity[pig.Rarity] === undefined) {
+            pigsPerRarity[pig.Rarity] = [];
+        }
+        const pigsOfRarity = pigsPerRarity[pig.Rarity];
+        pigsOfRarity.push(pig);
+    });
     return pigsPerRarity;
 }
 async function ChoosePigs(db, serverId, availablePigs, msgInfo) {
@@ -89,8 +83,9 @@ async function ChoosePigs(db, serverId, availablePigs, msgInfo) {
         do {
             chosenPig = pigsOfRarity[Math.floor(Math.random() * pigsOfRarity.length)];
         } while (chosenPigs.includes(chosenPig));
-        if (Math.random() <= GoldenPigChancePerRarity_1.GOLDEN_PIG_CHANCE_PER_RARITY[rarity] && allowGoldenPig) {
-            const goldenPig = await (0, Pigs_1.GetPig)("500", db);
+        const goldenPigChance = GoldenPigChancePerRarity_1.GOLDEN_PIG_CHANCE_PER_RARITY[rarity] ?? 0;
+        if (Math.random() <= goldenPigChance && allowGoldenPig) {
+            const goldenPig = (0, Pigs_1.GetPig)("500");
             if (goldenPig !== undefined) {
                 chosenPigs.push(goldenPig);
                 allowGoldenPig = false;
@@ -100,6 +95,16 @@ async function ChoosePigs(db, serverId, availablePigs, msgInfo) {
             chosenPigs.push(chosenPig);
         }
     });
+    if ((0, SeasonalEvents_1.IsChristmas)() && Math.random() < 0.4) {
+        if (Math.random() < 0.2) {
+            v.SpawnStocking = true;
+        }
+        else {
+            const christmasPigs = (0, Pigs_1.GetPigsByRarity)("Christmas");
+            const chosenChristmasPig = christmasPigs[Math.floor(Math.random() * christmasPigs.length)];
+            chosenPigs.push(chosenChristmasPig);
+        }
+    }
     serverInfo.HasSpawnedGoldenPig = !allowGoldenPig;
     chosenPigs.sort((a, b) => {
         const aOrder = PigRarityOrder_1.PIG_RARITY_ORDER[a.Rarity];
@@ -168,18 +173,19 @@ function GetUserAssembledPigs(userInfo) {
     let userAssembledPigs = userInfo.AssembledPigs;
     return userAssembledPigs;
 }
-async function GetPossibleAssemblyPigs(db, chosenPigs, userAssembledPigs) {
+async function GetPossibleAssemblyPigs(chosenPigs, userAssembledPigs) {
+    const assemblyPigs = (0, Pigs_1.GetPigsByRarity)("Assembly");
     const possibleAssemblyPigs = [];
-    for (let i = 0; i < chosenPigs.length; i++) {
-        const pig = chosenPigs[i];
-        const assemblyPigQuery = (0, lite_1.query)((0, lite_1.collection)(db, "pigs"), (0, lite_1.where)("RequiredPigs", "array-contains", pig.ID));
-        const assemblyPigs = await (0, lite_1.getDocs)(assemblyPigQuery);
-        assemblyPigs.forEach(assemblyPig => {
-            if (!userAssembledPigs.includes(assemblyPig.id) && !possibleAssemblyPigs.some(x => x.ID == assemblyPig.id)) {
-                possibleAssemblyPigs.push((0, Pigs_1.CreatePigFromData)(assemblyPig.id, assemblyPig.data()));
+    assemblyPigs.forEach(assemblyPig => {
+        for (let i = 0; i < chosenPigs.length; i++) {
+            const pig = chosenPigs[i];
+            if (assemblyPig.RequiredPigs.includes(pig.ID) &&
+                !userAssembledPigs.includes(pig.ID) &&
+                !possibleAssemblyPigs.some(x => x.ID === assemblyPig.ID)) {
+                possibleAssemblyPigs.push(assemblyPig);
             }
-        });
-    }
+        }
+    });
     return possibleAssemblyPigs;
 }
 function GetCompletedAssemblyPigs(possibleAssemblyPigs, userPigs) {
@@ -285,9 +291,8 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
         components: [row]
     });
     const userPigs = await GetUserPigs(db, server.id, interaction.user.id);
-    const availablePigs = await GetAvailablePigsFromPack(db, msgInfo);
+    const availablePigs = await GetAvailablePigsFromPack(msgInfo);
     const chosenPigs = await ChoosePigs(db, server.id, availablePigs, msgInfo);
-    (0, Pigs_1.AddPigsToCache)(chosenPigs, db);
     await AddPigsToDB(db, chosenPigs, server.id, interaction.user.id);
     const newPigs = GetNewPigs(chosenPigs, userPigs);
     const openPackFollowUp = GetOpenPackFollowUp(msgInfo.Name, chosenPigs, newPigs, interaction);
@@ -301,7 +306,7 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
     const allCompletedAssemblyPigs = [];
     while (true) {
         const userAssembledPigs = GetUserAssembledPigs(userInfo);
-        const possibleAssemblyPigs = await GetPossibleAssemblyPigs(db, chosenPigs, userAssembledPigs);
+        const possibleAssemblyPigs = await GetPossibleAssemblyPigs(chosenPigs, userAssembledPigs);
         const completedAssemblyPigs = GetCompletedAssemblyPigs(possibleAssemblyPigs, userPigs);
         completedAssemblyPigs.forEach(assemblyPig => {
             userAssembledPigs.push(assemblyPig.ID);
@@ -312,7 +317,6 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
             break;
         }
     }
-    (0, Pigs_1.AddPigsToCache)(allCompletedAssemblyPigs, db);
     const assemblyPigsFollowUps = GetAssemblyPigsFollowUps(allCompletedAssemblyPigs, interaction);
     if (assemblyPigsFollowUps === undefined) {
         const errorEmbed = new builders_1.EmbedBuilder()
@@ -337,4 +341,8 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
     assemblyPigsFollowUps.forEach(async (assemblyPigsFollowUp) => {
         await interaction.followUp(assemblyPigsFollowUp);
     });
+    if (v.SpawnStocking) {
+        const channel = interaction.channel;
+    }
+    v.SpawnStocking = false;
 });

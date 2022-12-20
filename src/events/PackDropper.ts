@@ -46,10 +46,10 @@ async function SpawnRandomPack(client: Client, db: Firestore) {
 
                 const serverInfo = CreateServerInfoFromData(server.id, server.data())
 
-                DropPack(pack, channel as GuildTextBasedChannel, guild, serverInfo, undefined, true)
+                DropPack(`A ${pack.Name} HAS APPEARED!`, pack, channel as GuildTextBasedChannel, guild, serverInfo, undefined, true)
             });
         } catch (error) {
-            //console.log("THIS ERROR ISN'T REAL: " + error);
+            console.log("THIS ERROR ISN'T REAL: " + error);
         }
     });
 }

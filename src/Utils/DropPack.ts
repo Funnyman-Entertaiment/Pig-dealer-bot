@@ -35,13 +35,13 @@ function SendGhostPing(channel: GuildTextBasedChannel, roleId: string){
 }
 
 
-export async function DropPack(pack: Pack, channel: GuildTextBasedChannel, server: Guild, serverInfo: ServerInfo, userId?: string, ping = false) {
+export async function DropPack(title: string, pack: Pack, channel: GuildTextBasedChannel, server: Guild, serverInfo: ServerInfo, userId?: string, ping = false) {
     if (channel.type !== ChannelType.GuildText) { return; }
 
     let img = `${pack.ID}.png`;
 
     const packEmbed = new EmbedBuilder()
-        .setTitle(`A ${pack.Name} HAS APPEARED!`)
+        .setTitle(title)
         .setImage(`attachment://${img}`)
         .setColor(COLOR_PER_PACK_RARITY[pack.Rarity]);
 

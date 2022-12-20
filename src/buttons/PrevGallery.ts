@@ -54,7 +54,7 @@ export const PrevGallery = new Button("GalleryPrevious",
         const editedEmbed = new EmbedBuilder(message.embeds[0].data)
             .setDescription(`${msgInfo.CurrentPig+1}/${msgInfo.Pigs.length}`);
 
-        const pig = await GetPig(pigToLoad, db);
+        const pig = GetPig(pigToLoad);
 
         if(pig === undefined){
             const errorEmbed = MakeErrorEmbed(

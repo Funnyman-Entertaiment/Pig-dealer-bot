@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetPacksByRarity = exports.GetPack = exports.AddPacksToCache = exports.AddPackToCache = exports.CreatePackFromData = exports.Pack = void 0;
-const lite_1 = require("firebase/firestore/lite");
+exports.GetPacksByRarity = exports.GetPack = exports.AddPacksToCache = exports.AddPackToCache = exports.CreatePackFromData = exports.AddPack = exports.Pack = void 0;
 const DatabaseCacheList_1 = require("./DatabaseCacheList");
 const DatabaseElement_1 = require("./DatabaseElement");
 class Pack extends DatabaseElement_1.DatabaseElement {
@@ -29,7 +28,12 @@ class Pack extends DatabaseElement_1.DatabaseElement {
     }
 }
 exports.Pack = Pack;
+let Packs = [];
 let CachedPacks;
+function AddPack(pack) {
+    Packs.push(pack);
+}
+exports.AddPack = AddPack;
 function GetCachedPacks() {
     if (CachedPacks === undefined) {
         CachedPacks = new DatabaseCacheList_1.DatabaseElementList();
@@ -52,35 +56,15 @@ async function AddPacksToCache(packs, db) {
     }
 }
 exports.AddPacksToCache = AddPacksToCache;
-async function GetPack(id, db) {
-    const cachedPack = GetCachedPacks().Get(id);
-    if (cachedPack === undefined) {
-        const packDocument = (0, lite_1.doc)(db, `packs/${id}`);
-        const foundPack = await (0, lite_1.getDoc)(packDocument);
-        if (foundPack.exists()) {
-            const packData = foundPack.data();
-            const newPack = CreatePackFromData(id, packData);
-            GetCachedPacks().Add(newPack, db);
-            return newPack;
-        }
-        else {
-            return undefined;
-        }
-    }
-    else {
-        return cachedPack;
-    }
+function GetPack(id) {
+    return Packs.find(pack => {
+        return pack.ID === id;
+    });
 }
 exports.GetPack = GetPack;
-async function GetPacksByRarity(rarity, db) {
-    const packsQuery = (0, lite_1.query)((0, lite_1.collection)(db, "packs"), (0, lite_1.where)("Rarity", "==", rarity));
-    const packDocs = await (0, lite_1.getDocs)(packsQuery);
-    const packs = [];
-    packDocs.forEach(packDoc => {
-        const packData = packDoc.data();
-        const newPack = CreatePackFromData(packDoc.id, packData);
-        packs.push(newPack);
+function GetPacksByRarity(rarity) {
+    return Packs.filter(pack => {
+        return pack.Rarity === rarity;
     });
-    return packs;
 }
 exports.GetPacksByRarity = GetPacksByRarity;

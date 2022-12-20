@@ -1,20 +1,23 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetServerInfo = exports.AddServerInfosToCache = exports.AddServerInfoToCache = exports.ServerInfo = void 0;
+exports.GetServerInfo = exports.AddServerInfosToCache = exports.AddServerInfoToCache = exports.CreateServerInfoFromData = exports.ServerInfo = void 0;
 const lite_1 = require("firebase/firestore/lite");
 const DatabaseCacheList_1 = require("./DatabaseCacheList");
 const DatabaseElement_1 = require("./DatabaseElement");
 class ServerInfo extends DatabaseElement_1.DatabaseElement {
     Channel;
+    Role;
     HasSpawnedGoldenPig;
-    constructor(id, channel, hasSpawnedGoldenPig) {
+    constructor(id, channel, role, hasSpawnedGoldenPig) {
         super(id);
         this.Channel = channel;
+        this.Role = role;
         this.HasSpawnedGoldenPig = hasSpawnedGoldenPig;
     }
     GetData() {
         return {
             Channel: this.Channel,
+            Role: this.Role,
             HasSpawnedGoldenPig: this.HasSpawnedGoldenPig,
         };
     }
@@ -28,9 +31,10 @@ function GetCachedServerInfos() {
     return CachedServerInfos;
 }
 function CreateServerInfoFromData(id, serverInfoData) {
-    const newPack = new ServerInfo(id, serverInfoData.Channel, serverInfoData.HasSpawnedGoldenPig ?? false);
+    const newPack = new ServerInfo(id, serverInfoData.Channel, serverInfoData.Role, serverInfoData.HasSpawnedGoldenPig ?? false);
     return newPack;
 }
+exports.CreateServerInfoFromData = CreateServerInfoFromData;
 async function AddServerInfoToCache(serverInfo, db) {
     await GetCachedServerInfos().Add(serverInfo, db);
 }

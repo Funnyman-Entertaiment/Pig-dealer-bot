@@ -7,6 +7,10 @@ exports.default = (client, db) => {
         if (!client.user || !client.application) {
             return;
         }
+        const guild = await client.guilds.fetch("1040735505127579718");
+        if (guild !== undefined) {
+            guild.commands.set(Commands_1.DebugCommands.map(c => c.slashCommand));
+        }
         await client.application.commands.set(Commands_1.Commands.map(c => c.slashCommand));
         console.log(`${client.user.username} is online`);
     });

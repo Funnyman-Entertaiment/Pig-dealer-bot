@@ -1,29 +1,19 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SetBotChannel = void 0;
+exports.SetBotRole = void 0;
 const discord_js_1 = require("discord.js");
 const lite_1 = require("firebase/firestore/lite");
 const ServerInfo_1 = require("../database/ServerInfo");
 const Command_1 = require("../Command");
-exports.SetBotChannel = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
-    .setName("setchannel")
-    .addChannelOption(option => option.setName('channel')
-    .setDescription('channel to send packs')
+exports.SetBotRole = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+    .setName("setrole")
+    .addRoleOption(option => option.setName('role')
+    .setDescription('role that will get pinged when the bot drops a pack')
     .setRequired(true))
-    .setDescription("Let's you choose what channel the bot sends packs to")
+    .setDescription("Let's you choose what role the bot pings")
     .setDefaultMemberPermissions(discord_js_1.PermissionFlagsBits.Administrator), async (_, interaction, db) => {
-    const channel = interaction.options.getChannel('channel');
-    if (channel === null) {
-        return;
-    }
-    if (channel.type !== discord_js_1.ChannelType.GuildText) {
-        const errorEmbed = new discord_js_1.EmbedBuilder()
-            .setTitle("Channel must be a text channel.")
-            .setColor(discord_js_1.Colors.Red);
-        await interaction.followUp({
-            ephemeral: true,
-            embeds: [errorEmbed]
-        });
+    const role = interaction.options.getRole('role');
+    if (role === null) {
         return;
     }
     if (interaction.guildId === null) {
@@ -38,14 +28,14 @@ exports.SetBotChannel = new Command_1.Command(new discord_js_1.SlashCommandBuild
     }
     let serverInfo = await (0, ServerInfo_1.GetServerInfo)(interaction.guildId, db);
     if (serverInfo === undefined) {
-        serverInfo = new ServerInfo_1.ServerInfo(interaction.guildId, channel.id, undefined, false);
+        serverInfo = new ServerInfo_1.ServerInfo(interaction.guildId, undefined, role.id, false);
     }
     else {
-        serverInfo.Channel = channel.id;
+        serverInfo.Role = role.id;
     }
     await (0, lite_1.setDoc)((0, lite_1.doc)(db, `serverInfo/${serverInfo.ID}`), serverInfo.GetData());
     const successEmbed = new discord_js_1.EmbedBuilder()
-        .setTitle(`Channel succesfully set to ${channel.name}`)
+        .setTitle(`Role succesfully set to @${role.name}`)
         .setColor(discord_js_1.Colors.Green);
     await interaction.followUp({
         ephemeral: true,
