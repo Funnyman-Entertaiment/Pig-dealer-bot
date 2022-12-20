@@ -46,7 +46,6 @@ export const SetBotRole = new Command(
             serverInfo.Role = role.id;
         }
 
-
         //We need to update the db because we later get these with a direct query
         await setDoc(doc(db, `serverInfo/${serverInfo.ID}`), serverInfo.GetData());
 

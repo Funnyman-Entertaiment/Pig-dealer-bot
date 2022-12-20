@@ -1,5 +1,5 @@
 import { query, collection, getDocs } from "firebase/firestore/lite";
-import { db } from "src/Bot";
+import { db } from "../Bot";
 import { AddPig, CreatePigFromData } from "./Pigs";
 import { AddPack, CreatePackFromData } from "./Packs";
 

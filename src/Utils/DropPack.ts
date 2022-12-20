@@ -5,6 +5,7 @@ import { Pack } from "../database/Packs";
 import { MakeErrorEmbed } from "./Errors";
 import { ServerInfo } from "../database/ServerInfo";
 import { RandomPackMessage, AddMessageInfoToCache } from "../database/MessageInfo";
+import { LogInfo, PrintServer } from "./Log";
 
 
 function SendNotEnoughPermissionsMsg(channel: GuildTextBasedChannel, server: Guild){
@@ -53,14 +54,14 @@ export async function DropPack(title: string, pack: Pack, channel: GuildTextBase
                 .setStyle(ButtonStyle.Primary),
         );
 
-    console.log(`Sending ${pack.Name} to server with id: ${server.id} (${server.name})`);
+    LogInfo(`Sending ${pack.Name} to server with id: ${PrintServer(server)}`);
 
     const permissions = server.members.me?.permissionsIn(channel);
 
     if(permissions === undefined){ return; }
 
     if(!permissions.has("SendMessages") || !permissions.has("ViewChannel")){
-        console.log(`Not enough permissions to send messages in ${server.id} (${server.name})`);
+        console.log(`[WARN] Not enough permissions to send messages in ${PrintServer(server)}`);
         SendNotEnoughPermissionsMsg(channel, server);
         return;
     }

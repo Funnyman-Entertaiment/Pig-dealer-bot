@@ -1,8 +1,7 @@
-import { collection, doc, DocumentData, Firestore, getDoc, getDocs, query, where } from "firebase/firestore/lite";
-import { DatabaseElementList } from "./DatabaseCacheList";
+import { DocumentData } from "firebase/firestore/lite";
 import { DatabaseElement } from "./DatabaseElement";
 
-type PackRarity = "Default" | "Common" | "Rare" | "Super Rare"
+export type PackRarity = "Default" | "Common" | "Rare" | "Super Rare"
 
 
 export class Pack extends DatabaseElement {
@@ -35,20 +34,10 @@ export class Pack extends DatabaseElement {
 
 
 let Packs: Pack[] = [];
-let CachedPacks: DatabaseElementList<Pack> | undefined;
 
 
 export function AddPack(pack: Pack){
     Packs.push(pack);
-}
-
-
-function GetCachedPacks(){
-    if(CachedPacks === undefined){
-        CachedPacks = new DatabaseElementList<Pack>();
-    }
-
-    return CachedPacks;
 }
 
 
@@ -63,19 +52,6 @@ export function CreatePackFromData(id: string, packData: DocumentData): Pack{
     )
 
     return newPack;
-}
-
-
-export async function AddPackToCache(pack: Pack, db: Firestore){
-    await GetCachedPacks().Add(pack, db);
-}
-
-
-export async function AddPacksToCache(packs: Pack[], db: Firestore){
-    for (let i = 0; i < packs.length; i++) {
-        const pack = packs[i];
-        await AddPackToCache(pack, db);
-    }
 }
 
 

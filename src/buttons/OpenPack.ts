@@ -1,6 +1,6 @@
 import { EmbedBuilder } from "@discordjs/builders";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, Interaction } from "discord.js";
-import { addDoc, collection, doc, Firestore, getDocs, query, QuerySnapshot, setDoc, Timestamp, where } from "firebase/firestore/lite";
+import { addDoc, collection, doc, Firestore, getDocs, setDoc, Timestamp } from "firebase/firestore/lite";
 import { Button } from "../Button";
 import { SPECIAL_RARITIES_PER_PACK } from "../Constants/SpecialRaritiesPerPack";
 import { PIG_RARITY_ORDER } from "../Constants/PigRarityOrder";
@@ -10,11 +10,10 @@ import { GOLDEN_PIG_CHANCE_PER_RARITY } from "../Constants/GoldenPigChancePerRar
 import { MakeErrorEmbed } from "../Utils/Errors";
 import { AddUserInfoToCache, GetUserInfo, UserInfo } from "../database/UserInfo";
 import { GetMessageInfo, RandomPackMessage } from "../database/MessageInfo";
-import { CreatePigFromData, GetAllPigs, GetPig, GetPigsByRarity, GetPigsBySet, GetPigsWithTag, Pig } from "../database/Pigs";
+import { GetAllPigs, GetPig, GetPigsByRarity, GetPigsBySet, GetPigsWithTag, Pig } from "../database/Pigs";
 import { GetServerInfo, ServerInfo } from "../database/ServerInfo";
-import { IsChristmas } from "src/Utils/SeasonalEvents";
-import { DropPack } from "src/Utils/DropPack";
-import { GetPack } from "src/database/Packs";
+import { IsChristmas } from "../Utils/SeasonalEvents";
+import { LogError, LogInfo, PrintServer, PrintUser } from "../Utils/Log";
 
 
 const v = {
@@ -371,7 +370,7 @@ export const OpenPack = new Button("OpenPack",
 
             const waitEmbed = new EmbedBuilder()
                 .setColor(Colors.DarkRed)
-                .setTitle(`You must wait for ${minutes}:${seconds.toString().padStart(2, "0")} to open another pack`)
+                .setTitle(`You must wait for ${minutes}:${seconds.toString().padStart(2, "0")} minutes to open another pack`)
                 .setAuthor(GetAuthor(interaction));
 
             await interaction.followUp({
@@ -400,6 +399,8 @@ export const OpenPack = new Button("OpenPack",
             components: [row]
         });
 
+        LogInfo(`User ${PrintUser(interaction.user)} opened ${msgInfo.Name} pack in server ${PrintServer(server)}`);
+
         const userPigs = await GetUserPigs(db, server.id, interaction.user.id);
 
         const availablePigs = await GetAvailablePigsFromPack(msgInfo);
@@ -413,6 +414,7 @@ export const OpenPack = new Button("OpenPack",
         const openPackFollowUp = GetOpenPackFollowUp(msgInfo.Name, chosenPigs, newPigs, interaction)
 
         if (openPackFollowUp === undefined) {
+            LogError(`Couldn't create a follow up for this pack opening`);
             const errorEmbed = MakeErrorEmbed(
                 "Error creating open pack follow up"
             );
@@ -448,6 +450,8 @@ export const OpenPack = new Button("OpenPack",
         const assemblyPigsFollowUps = GetAssemblyPigsFollowUps(allCompletedAssemblyPigs, interaction);
 
         if (assemblyPigsFollowUps === undefined) {
+            LogError(`Couldn't create a follow up for this pack's assembly pigs`);
+
             const errorEmbed = new EmbedBuilder()
                 .setTitle("⚠Error creating assembly pigs follow up⚠")
                 .setDescription("Message anna or thicco inmediatly!!")
@@ -485,5 +489,7 @@ export const OpenPack = new Button("OpenPack",
         }
 
         v.SpawnStocking = false;
+
+        console.log("\n");
     }
 );

@@ -1,13 +1,16 @@
 import { Client, GuildTextBasedChannel } from "discord.js";
 import { getDocs, query, collection, Firestore, where } from "firebase/firestore/lite"
-import { CreatePackFromData, Pack } from "../database/Packs";
+import { GetPacksByRarity, Pack, PackRarity } from "../database/Packs";
 import { DropPack } from "../Utils/DropPack";
 import { CreateServerInfoFromData } from "../database/ServerInfo";
+import { LogError, LogInfo, PrintServer } from "../Utils/Log";
 
 
 async function SpawnRandomPack(client: Client, db: Firestore) {
     const q = query(collection(db, "serverInfo"));
     const servers = await getDocs(q);
+
+    LogInfo("Sending random packs.");
 
     servers.forEach(async server => {
         if (server.data().Channel === undefined) { return; }
@@ -19,7 +22,7 @@ async function SpawnRandomPack(client: Client, db: Firestore) {
                 const guild = await client.guilds.fetch(server.id);
 
                 //Get Random pack
-                let chosenRarity: string = "Default";
+                let chosenRarity: PackRarity = "Default";
 
                 if (Math.random() <= 0.08) {
                     const packChance = Math.random();
@@ -30,17 +33,10 @@ async function SpawnRandomPack(client: Client, db: Firestore) {
                         chosenRarity = "Rare"
                     } else {
                         chosenRarity = "Super Rare"
-                    }
+                    }   
                 }
 
-                const packQuery = query(collection(db, "packs"), where("Rarity", "==", chosenRarity));
-                const packs = await getDocs(packQuery);
-
-                const possiblePacks: Pack[] = [];
-
-                packs.forEach(pack => {
-                    possiblePacks.push(CreatePackFromData(pack.id, pack.data()))
-                });
+                const possiblePacks: Pack[] = GetPacksByRarity(chosenRarity);
 
                 var pack = possiblePacks[Math.floor(Math.random() * possiblePacks.length)];
 
@@ -49,9 +45,11 @@ async function SpawnRandomPack(client: Client, db: Firestore) {
                 DropPack(`A ${pack.Name} HAS APPEARED!`, pack, channel as GuildTextBasedChannel, guild, serverInfo, undefined, true)
             });
         } catch (error) {
-            console.log("THIS ERROR ISN'T REAL: " + error);
+            LogError(`Bot doesn't have access to server ${server.id}`);
         }
     });
+    
+    console.log("\n");
 }
 
 
