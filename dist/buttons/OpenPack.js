@@ -15,7 +15,8 @@ const UserInfo_1 = require("../database/UserInfo");
 const MessageInfo_1 = require("../database/MessageInfo");
 const Pigs_1 = require("../database/Pigs");
 const ServerInfo_1 = require("../database/ServerInfo");
-const SeasonalEvents_1 = require("src/Utils/SeasonalEvents");
+const SeasonalEvents_1 = require("../Utils/SeasonalEvents");
+const Log_1 = require("../Utils/Log");
 const v = {
     SpawnStocking: false
 };
@@ -268,7 +269,7 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
         const seconds = totalDiff % 60;
         const waitEmbed = new builders_1.EmbedBuilder()
             .setColor(discord_js_1.Colors.DarkRed)
-            .setTitle(`You must wait for ${minutes}:${seconds.toString().padStart(2, "0")} to open another pack`)
+            .setTitle(`You must wait for ${minutes}:${seconds.toString().padStart(2, "0")} minutes to open another pack`)
             .setAuthor(GetAuthor(interaction));
         await interaction.followUp({
             embeds: [waitEmbed],
@@ -290,6 +291,7 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
     message.edit({
         components: [row]
     });
+    (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} opened ${msgInfo.Name} pack in server ${(0, Log_1.PrintServer)(server)}`);
     const userPigs = await GetUserPigs(db, server.id, interaction.user.id);
     const availablePigs = await GetAvailablePigsFromPack(msgInfo);
     const chosenPigs = await ChoosePigs(db, server.id, availablePigs, msgInfo);
@@ -297,6 +299,7 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
     const newPigs = GetNewPigs(chosenPigs, userPigs);
     const openPackFollowUp = GetOpenPackFollowUp(msgInfo.Name, chosenPigs, newPigs, interaction);
     if (openPackFollowUp === undefined) {
+        (0, Log_1.LogError)(`Couldn't create a follow up for this pack opening`);
         const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Error creating open pack follow up");
         await interaction.followUp({
             embeds: [errorEmbed]
@@ -319,6 +322,7 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
     }
     const assemblyPigsFollowUps = GetAssemblyPigsFollowUps(allCompletedAssemblyPigs, interaction);
     if (assemblyPigsFollowUps === undefined) {
+        (0, Log_1.LogError)(`Couldn't create a follow up for this pack's assembly pigs`);
         const errorEmbed = new builders_1.EmbedBuilder()
             .setTitle("⚠Error creating assembly pigs follow up⚠")
             .setDescription("Message anna or thicco inmediatly!!")
@@ -345,4 +349,5 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
         const channel = interaction.channel;
     }
     v.SpawnStocking = false;
+    console.log("\n");
 });

@@ -5,9 +5,11 @@ const lite_1 = require("firebase/firestore/lite");
 const Packs_1 = require("../database/Packs");
 const DropPack_1 = require("../Utils/DropPack");
 const ServerInfo_1 = require("../database/ServerInfo");
+const Log_1 = require("../Utils/Log");
 async function SpawnRandomPack(client, db) {
     const q = (0, lite_1.query)((0, lite_1.collection)(db, "serverInfo"));
     const servers = await (0, lite_1.getDocs)(q);
+    (0, Log_1.LogInfo)("Sending random packs.");
     servers.forEach(async (server) => {
         if (server.data().Channel === undefined) {
             return;
@@ -31,21 +33,17 @@ async function SpawnRandomPack(client, db) {
                         chosenRarity = "Super Rare";
                     }
                 }
-                const packQuery = (0, lite_1.query)((0, lite_1.collection)(db, "packs"), (0, lite_1.where)("Rarity", "==", chosenRarity));
-                const packs = await (0, lite_1.getDocs)(packQuery);
-                const possiblePacks = [];
-                packs.forEach(pack => {
-                    possiblePacks.push((0, Packs_1.CreatePackFromData)(pack.id, pack.data()));
-                });
+                const possiblePacks = (0, Packs_1.GetPacksByRarity)(chosenRarity);
                 var pack = possiblePacks[Math.floor(Math.random() * possiblePacks.length)];
                 const serverInfo = (0, ServerInfo_1.CreateServerInfoFromData)(server.id, server.data());
                 (0, DropPack_1.DropPack)(`A ${pack.Name} HAS APPEARED!`, pack, channel, guild, serverInfo, undefined, true);
             });
         }
         catch (error) {
-            console.log("THIS ERROR ISN'T REAL: " + error);
+            (0, Log_1.LogError)(`Bot doesn't have access to server ${server.id}`);
         }
     });
+    console.log("\n");
 }
 const PackDropper = function (client, db) {
     setTimeout(async () => {

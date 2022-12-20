@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReadPigsAndPacks = void 0;
 const lite_1 = require("firebase/firestore/lite");
-const Bot_1 = require("src/Bot");
+const Bot_1 = require("../Bot");
 const Pigs_1 = require("./Pigs");
 const Packs_1 = require("./Packs");
 async function ReadPigs() {

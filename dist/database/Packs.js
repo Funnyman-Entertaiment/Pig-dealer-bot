@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetPacksByRarity = exports.GetPack = exports.AddPacksToCache = exports.AddPackToCache = exports.CreatePackFromData = exports.AddPack = exports.Pack = void 0;
-const DatabaseCacheList_1 = require("./DatabaseCacheList");
+exports.GetPacksByRarity = exports.GetPack = exports.CreatePackFromData = exports.AddPack = exports.Pack = void 0;
 const DatabaseElement_1 = require("./DatabaseElement");
 class Pack extends DatabaseElement_1.DatabaseElement {
     Name;
@@ -29,33 +28,15 @@ class Pack extends DatabaseElement_1.DatabaseElement {
 }
 exports.Pack = Pack;
 let Packs = [];
-let CachedPacks;
 function AddPack(pack) {
     Packs.push(pack);
 }
 exports.AddPack = AddPack;
-function GetCachedPacks() {
-    if (CachedPacks === undefined) {
-        CachedPacks = new DatabaseCacheList_1.DatabaseElementList();
-    }
-    return CachedPacks;
-}
 function CreatePackFromData(id, packData) {
     const newPack = new Pack(id, packData.Name, packData.Rarity, packData.PigCount, packData.Set, packData.Tags);
     return newPack;
 }
 exports.CreatePackFromData = CreatePackFromData;
-async function AddPackToCache(pack, db) {
-    await GetCachedPacks().Add(pack, db);
-}
-exports.AddPackToCache = AddPackToCache;
-async function AddPacksToCache(packs, db) {
-    for (let i = 0; i < packs.length; i++) {
-        const pack = packs[i];
-        await AddPackToCache(pack, db);
-    }
-}
-exports.AddPacksToCache = AddPacksToCache;
 function GetPack(id) {
     return Packs.find(pack => {
         return pack.ID === id;

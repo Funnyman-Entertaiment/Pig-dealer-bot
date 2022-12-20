@@ -7,6 +7,7 @@ const PigRenderer_1 = require("../Utils/PigRenderer");
 const Command_1 = require("../Command");
 const Pigs_1 = require("../database/Pigs");
 const MessageInfo_1 = require("../database/MessageInfo");
+const Log_1 = require("../Utils/Log");
 function GetAuthor(interaction) {
     if (interaction.user === null) {
         return null;
@@ -29,6 +30,7 @@ exports.ShowBinder = new Command_1.Command(new discord_js_1.SlashCommandBuilder(
     let userId;
     let author;
     if (user === null) {
+        (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} is checking its own binder`);
         author = GetAuthor(interaction);
         if (author === null) {
             return;
@@ -36,6 +38,7 @@ exports.ShowBinder = new Command_1.Command(new discord_js_1.SlashCommandBuilder(
         userId = interaction.user.id;
     }
     else {
+        (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} is checking the binder of ${(0, Log_1.PrintUser)(interaction.user)}`);
         userId = user.id;
         const username = user.username;
         const avatar = user.avatarURL();
@@ -64,16 +67,16 @@ exports.ShowBinder = new Command_1.Command(new discord_js_1.SlashCommandBuilder(
         return parseInt(a) - parseInt(b);
     });
     const firstPigId = pigsSet[0];
-    const firstPigDoc = (0, lite_1.doc)(db, `pigs/${firstPigId}`);
-    const firstPig = await (0, lite_1.getDoc)(firstPigDoc);
+    const firstPig = (0, Pigs_1.GetPig)(firstPigId);
+    if (firstPig === undefined) {
+        (0, Log_1.LogError)(`Couldn't find the first pig in the binder (${firstPigId})`);
+        return;
+    }
     const openedPackEmbed = new discord_js_1.EmbedBuilder()
         .setTitle(`${author.name}'s pig bind`)
         .setDescription(`1/${pigsSet.length}`)
         .setAuthor(author);
-    const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(openedPackEmbed, (0, Pigs_1.CreatePigFromData)(firstPig.id, firstPig.data()), false);
-    if (imgPath === undefined) {
-        return;
-    }
+    const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(openedPackEmbed, firstPig, false);
     const row = new discord_js_1.ActionRowBuilder()
         .addComponents(new discord_js_1.ButtonBuilder()
         .setCustomId('GalleryPrevious')
@@ -90,4 +93,5 @@ exports.ShowBinder = new Command_1.Command(new discord_js_1.SlashCommandBuilder(
         const newMessage = new MessageInfo_1.PigGalleryMessage(message.id, server.id, 0, pigsSet, [], interaction.user.id);
         (0, MessageInfo_1.AddMessageInfoToCache)(newMessage, db);
     });
+    console.log("\n");
 });

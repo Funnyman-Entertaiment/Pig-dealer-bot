@@ -6,6 +6,7 @@ const Bot_1 = require("../Bot");
 const ColorPerPackRarity_1 = require("../Constants/ColorPerPackRarity");
 const Errors_1 = require("./Errors");
 const MessageInfo_1 = require("../database/MessageInfo");
+const Log_1 = require("./Log");
 function SendNotEnoughPermissionsMsg(channel, server) {
     const channelName = channel.name;
     const serverName = server.name;
@@ -38,13 +39,13 @@ async function DropPack(title, pack, channel, server, serverInfo, userId, ping =
         .setCustomId('OpenPack')
         .setLabel('Open!')
         .setStyle(discord_js_1.ButtonStyle.Primary));
-    console.log(`Sending ${pack.Name} to server with id: ${server.id} (${server.name})`);
+    (0, Log_1.LogInfo)(`Sending ${pack.Name} to server with id: ${(0, Log_1.PrintServer)(server)}`);
     const permissions = server.members.me?.permissionsIn(channel);
     if (permissions === undefined) {
         return;
     }
     if (!permissions.has("SendMessages") || !permissions.has("ViewChannel")) {
-        console.log(`Not enough permissions to send messages in ${server.id} (${server.name})`);
+        console.log(`[WARN] Not enough permissions to send messages in ${(0, Log_1.PrintServer)(server)}`);
         SendNotEnoughPermissionsMsg(channel, server);
         return;
     }
