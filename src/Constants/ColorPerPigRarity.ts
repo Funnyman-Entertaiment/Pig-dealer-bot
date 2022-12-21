@@ -7,6 +7,6 @@ export const COLOR_PER_PIG_RARITY: { readonly [key: string]: number } = {
     Legendary: Colors.LuminousVividPink,
     Assembly: Colors.Red,
     ["One of a kind"]: Colors.Gold,
-    Christmas: Colors.Green,
+    Christmas: Colors.DarkGreen,
     Postcard: Colors.DarkRed
 }
