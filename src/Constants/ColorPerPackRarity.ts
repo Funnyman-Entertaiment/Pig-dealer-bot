@@ -6,5 +6,5 @@ export const COLOR_PER_PACK_RARITY: { readonly [key: string]: number } = {
     Rare: Colors.Blue,
     [`Super Rare`]: Colors.Orange,
 
-    [`Christmas Bundle`]: Colors.DarkGreen
+    [`Special`]: Colors.DarkGreen
 }

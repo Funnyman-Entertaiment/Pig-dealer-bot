@@ -1,5 +1,5 @@
 import { EmbedBuilder } from "@discordjs/builders";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, Interaction } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, GuildTextBasedChannel, Interaction, TextBasedChannel } from "discord.js";
 import { addDoc, collection, doc, Firestore, getDocs, setDoc, Timestamp } from "firebase/firestore/lite";
 import { Button } from "../Button";
 import { SPECIAL_RARITIES_PER_PACK } from "../Constants/SpecialRaritiesPerPack";
@@ -14,6 +14,8 @@ import { GetAllPigs, GetPig, GetPigsByRarity, GetPigsBySet, GetPigsWithTag, Pig 
 import { GetServerInfo, ServerInfo } from "../database/ServerInfo";
 import { IsChristmas } from "../Utils/SeasonalEvents";
 import { LogError, LogInfo, PrintServer, PrintUser } from "../Utils/Log";
+import { GetPack } from "../database/Packs";
+import { DropPack } from "../Utils/DropPack";
 
 
 const v = {
@@ -123,8 +125,8 @@ async function ChoosePigs(db: Firestore, serverId: string, availablePigs: { [key
         }
     });
 
-    if(IsChristmas() && Math.random() < 0.4){
-        if(Math.random() < 0.2){
+    if(IsChristmas() && Math.random() < 0.1 && msgInfo.Name !== "Stocking"){
+        if(Math.random() < 0.05){
             v.SpawnStocking = true;
         }else{
             const christmasPigs: Pig[] = GetPigsByRarity("Christmas");
@@ -483,9 +485,12 @@ export const OpenPack = new Button("OpenPack",
         if(v.SpawnStocking){
             const channel = interaction.channel;
 
-            // GetPack(16);
+            const pack = GetPack("16");
 
-            // DropPack(``);
+            if(pack !== undefined && channel !== null && server !== null){
+                const serverInfo = await GetServerInfo(server.id, db) as any as ServerInfo;
+                DropPack(`${interaction.user.username} found a stocking!`, pack, channel as GuildTextBasedChannel, server, serverInfo, interaction.user.id, false);
+            }
         }
 
         v.SpawnStocking = false;

@@ -3,6 +3,6 @@ import { Timestamp } from "firebase/firestore/lite";
 export function IsChristmas(){
     const currentDate = Timestamp.now().toDate();
 
-    return currentDate.getMonth() === 12 &&
-        currentDate.getDay() >= 21 && currentDate.getDay() <= 25;
+    return currentDate.getUTCMonth() === 11 &&
+        currentDate.getUTCDate() >= 21 && currentDate.getUTCDate() <= 25;
 }
