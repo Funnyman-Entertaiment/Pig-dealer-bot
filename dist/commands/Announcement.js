@@ -112,6 +112,7 @@ async function SendAnnouncement(interaction) {
         });
         return;
     }
+    const embed = new discord_js_1.EmbedBuilder(announcementEmbed?.data);
     const q = (0, lite_1.query)((0, lite_1.collection)(Bot_1.db, "serverInfo"));
     const servers = await (0, lite_1.getDocs)(q);
     servers.forEach(async (server) => {
@@ -131,9 +132,17 @@ async function SendAnnouncement(interaction) {
                 if (!permissions.has("SendMessages") || !permissions.has("ViewChannel")) {
                     return;
                 }
-                channel.send({
-                    embeds: [announcementEmbed]
-                });
+                if (server.data().Role !== undefined) {
+                    channel.send({
+                        content: (0, discord_js_1.roleMention)(server.data().Role),
+                        embeds: [embed]
+                    });
+                }
+                else {
+                    channel.send({
+                        embeds: [embed]
+                    });
+                }
             });
         }
         catch (error) {

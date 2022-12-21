@@ -1,4 +1,4 @@
-import { APIEmbedField, Client, Colors, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder, GuildTextBasedChannel, SlashCommandBuilder } from "discord.js";
+import { APIEmbedField, Client, Colors, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder, GuildTextBasedChannel, SlashCommandBuilder, roleMention } from "discord.js";
 import { Command } from "../Command";
 import { query, collection, getDocs } from "firebase/firestore/lite";
 import { client, db } from "../Bot";
@@ -152,6 +152,8 @@ async function SendAnnouncement(interaction: CommandInteraction){
         return;
     }
 
+    const embed = new EmbedBuilder(announcementEmbed?.data);
+
     const q = query(collection(db, "serverInfo"));
     const servers = await getDocs(q);
 
@@ -172,9 +174,18 @@ async function SendAnnouncement(interaction: CommandInteraction){
                     return;
                 }
 
-                (channel as GuildTextBasedChannel).send({
-                    embeds: [announcementEmbed as any as EmbedBuilder]
-                })
+                if(server.data().Role !== undefined){
+                    (channel as GuildTextBasedChannel).send({
+                        content: roleMention(server.data().Role),
+                        embeds: [embed]
+                    });
+                }else{
+                    (channel as GuildTextBasedChannel).send({
+                        embeds: [embed]
+                    });
+                }
+
+                
             });
         } catch (error) {
             
