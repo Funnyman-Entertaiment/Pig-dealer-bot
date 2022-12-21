@@ -17,6 +17,8 @@ const Pigs_1 = require("../database/Pigs");
 const ServerInfo_1 = require("../database/ServerInfo");
 const SeasonalEvents_1 = require("../Utils/SeasonalEvents");
 const Log_1 = require("../Utils/Log");
+const Packs_1 = require("../database/Packs");
+const DropPack_1 = require("../Utils/DropPack");
 const v = {
     SpawnStocking: false
 };
@@ -96,8 +98,8 @@ async function ChoosePigs(db, serverId, availablePigs, msgInfo) {
             chosenPigs.push(chosenPig);
         }
     });
-    if ((0, SeasonalEvents_1.IsChristmas)() && Math.random() < 0.4) {
-        if (Math.random() < 0.2) {
+    if ((0, SeasonalEvents_1.IsChristmas)() && Math.random() < 0.1 && msgInfo.Name !== "Stocking") {
+        if (Math.random() < 0.05) {
             v.SpawnStocking = true;
         }
         else {
@@ -347,6 +349,11 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
     });
     if (v.SpawnStocking) {
         const channel = interaction.channel;
+        const pack = (0, Packs_1.GetPack)("16");
+        if (pack !== undefined && channel !== null && server !== null) {
+            const serverInfo = await (0, ServerInfo_1.GetServerInfo)(server.id, db);
+            (0, DropPack_1.DropPack)(`${interaction.user.username} found a stocking!`, pack, channel, server, serverInfo, interaction.user.id, false);
+        }
     }
     v.SpawnStocking = false;
     console.log("\n");

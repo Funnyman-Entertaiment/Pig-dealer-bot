@@ -9,5 +9,6 @@ exports.PIG_RARITY_ORDER = {
     Assembly: 4,
     ["One of a kind"]: 5,
     Christmas: 6,
-    Postcard: 7
+    Postcard: 7,
+    ["Postcard (Animated)"]: 8
 };
