@@ -8,7 +8,14 @@ export const SPECIAL_RARITIES_PER_PACK: { readonly [key: string]: {readonly [key
     ["🍀Super Lucky Pack🍀"]: [
         {"Rare": 1, "Epic": 0.25},
         {"Rare": 1, "Epic": 0.5},
-        {"Legendary": 1},
+        {"Epic": 1},
         {"Legendary": 1}
-    ]
+    ],
+	["Generic Pack"]: [
+        {"Common": 1},
+        {"Common": 1},
+        {"Common": 1},
+        {"Common": 1, "Rare": 0.25},
+        {"Rare": 1, "Epic": 0.1},
+        {"Rare": 1, "Epic": 0.1, "Legendary": 0.1}
 }
