@@ -7,5 +7,7 @@ exports.PIG_RARITY_ORDER = {
     Epic: 2,
     Legendary: 3,
     Assembly: 4,
-    ["One of a kind"]: 5
+    ["One of a kind"]: 5,
+    Christmas: 6,
+    Postcard: 7
 };

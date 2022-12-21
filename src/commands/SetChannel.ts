@@ -1,5 +1,6 @@
-import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, ChannelType, Colors } from "discord.js";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore/lite";
+import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, ChannelType, Colors, PermissionFlagsBits } from "discord.js";
+import { doc, setDoc } from "firebase/firestore/lite";
+import { GetServerInfo, ServerInfo } from "../database/ServerInfo";
 import { Command } from "../Command";
 
 export const SetBotChannel = new Command(
@@ -9,7 +10,8 @@ export const SetBotChannel = new Command(
             option.setName('channel')
                 .setDescription('channel to send packs')
                 .setRequired(true))
-        .setDescription("Let's you choose what channel the bot sends packs to"),
+        .setDescription("Let's you choose what channel the bot sends packs to")
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
     async (_, interaction, db) => {
         const channel = (interaction.options as CommandInteractionOptionResolver).getChannel('channel')
@@ -28,7 +30,7 @@ export const SetBotChannel = new Command(
                 embeds: [errorEmbed]
             });
 
-            return
+            return;
         }
 
         if (interaction.guildId === null) {
@@ -44,18 +46,22 @@ export const SetBotChannel = new Command(
             return;
         }
 
-        const docRef = doc(db, "serverInfo", interaction.guildId)
-        const serverInfo = await getDoc(docRef)
+        let serverInfo = await GetServerInfo(interaction.guildId, db);
 
-        if(serverInfo.exists()){
-            await updateDoc(docRef, {
-                Channel: channel.id
-            });
+        if(serverInfo === undefined){
+            serverInfo = new ServerInfo(
+                interaction.guildId,
+                channel.id,
+                undefined,
+                false
+            );
         }else{
-            await setDoc(docRef, {
-                Channel: channel.id
-            });
+            serverInfo.Channel = channel.id;
         }
+
+
+        //We need to update the db because we later get these with a direct query
+        await setDoc(doc(db, `serverInfo/${serverInfo.ID}`), serverInfo.GetData());
 
         const successEmbed = new EmbedBuilder()
             .setTitle(`Channel succesfully set to ${channel.name}`)

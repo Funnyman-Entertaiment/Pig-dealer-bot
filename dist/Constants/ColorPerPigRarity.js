@@ -8,5 +8,7 @@ exports.COLOR_PER_PIG_RARITY = {
     Epic: discord_js_1.Colors.Purple,
     Legendary: discord_js_1.Colors.LuminousVividPink,
     Assembly: discord_js_1.Colors.Red,
-    ["One of a kind"]: discord_js_1.Colors.Gold
+    ["One of a kind"]: discord_js_1.Colors.Gold,
+    Christmas: discord_js_1.Colors.Green,
+    Postcard: discord_js_1.Colors.DarkRed
 };

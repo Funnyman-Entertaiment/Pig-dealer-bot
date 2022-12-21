@@ -3,40 +3,52 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.NextGallery = void 0;
 const builders_1 = require("@discordjs/builders");
 const discord_js_1 = require("discord.js");
-const lite_1 = require("firebase/firestore/lite");
+const MessageInfo_1 = require("../database/MessageInfo");
+const Pigs_1 = require("../database/Pigs");
+const Errors_1 = require("../Utils/Errors");
 const Button_1 = require("../Button");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 exports.NextGallery = new Button_1.Button("GalleryNext", async (_, interaction, db) => {
     await interaction.deferUpdate();
     const server = interaction.guild;
     if (server === null) {
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Error fetching server from interaction", "Where did you find this message?");
+        await interaction.followUp({
+            embeds: [errorEmbed]
+        });
         return;
     }
     const message = interaction.message;
-    const msgDoc = (0, lite_1.doc)(db, `serverInfo/${server.id}/messages/${message.id}`);
-    const msgInfo = await (0, lite_1.getDoc)(msgDoc);
-    if (!msgInfo.exists() || msgInfo.data().Type !== "PigGallery") {
+    const msgInfo = await (0, MessageInfo_1.GetMessageInfo)(server.id, message.id, db);
+    if (msgInfo === undefined || msgInfo.Type !== "PigGallery") {
         return;
     }
-    const msgInfoData = msgInfo.data();
-    if (interaction.user.id !== msgInfoData.User) {
+    if (msgInfo.User === undefined) {
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("This message doesn't have an associated user", `Server: ${server.id}`, `Message: ${message.id}`);
+        await interaction.followUp({
+            embeds: [errorEmbed]
+        });
         return;
     }
-    if (msgInfoData.CurrentPig == msgInfoData.Pigs.length - 1) {
+    if (interaction.user.id !== msgInfo.User) {
         return;
     }
-    const pigToLoad = msgInfoData.Pigs[msgInfoData.CurrentPig + 1];
-    await (0, lite_1.updateDoc)(msgDoc, {
-        CurrentPig: msgInfoData.CurrentPig + 1,
-    });
+    if (msgInfo.CurrentPig == msgInfo.Pigs.length - 1) {
+        return;
+    }
+    const pigToLoad = msgInfo.Pigs[msgInfo.CurrentPig + 1];
+    msgInfo.CurrentPig++;
     const editedEmbed = new builders_1.EmbedBuilder(message.embeds[0].data)
-        .setDescription(`${msgInfoData.CurrentPig + 2}/${msgInfoData.Pigs.length}`);
-    const pigDoc = (0, lite_1.doc)(db, `pigs/${pigToLoad}`);
-    const pig = await (0, lite_1.getDoc)(pigDoc);
-    const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(editedEmbed, pig, msgInfoData.NewPigs.includes(pig.id));
-    if (imgPath === undefined) {
+        .setDescription(`${msgInfo.CurrentPig + 1}/${msgInfo.Pigs.length}`);
+    const pig = (0, Pigs_1.GetPig)(pigToLoad);
+    if (pig === undefined) {
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Couldn't fetch pig", `Server: ${server.id}`, `Message: ${message.id}`, `Pig to Load: ${pigToLoad}`);
+        await interaction.followUp({
+            embeds: [errorEmbed]
+        });
         return;
     }
+    const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(editedEmbed, pig, msgInfo.NewPigs.includes(pig.ID));
     const row = new discord_js_1.ActionRowBuilder()
         .addComponents(new discord_js_1.ButtonBuilder()
         .setCustomId('GalleryPrevious')
@@ -46,7 +58,7 @@ exports.NextGallery = new Button_1.Button("GalleryNext", async (_, interaction, 
         .setCustomId('GalleryNext')
         .setLabel('Next')
         .setStyle(discord_js_1.ButtonStyle.Primary)
-        .setDisabled(msgInfoData.CurrentPig + 1 == msgInfoData.Pigs.length - 1));
+        .setDisabled(msgInfo.CurrentPig == msgInfo.Pigs.length - 1));
     await message.edit({
         embeds: [editedEmbed],
         files: [imgPath],

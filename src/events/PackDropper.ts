@@ -1,81 +1,64 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, Client, EmbedBuilder } from "discord.js";
-import { getDocs, query, collection, Firestore, where, doc, setDoc } from "firebase/firestore/lite"
-import { COLOR_PER_PACK_RARITY } from "../Constants/ColorPerPackRarity";
+import { Client, GuildTextBasedChannel } from "discord.js";
+import { getDocs, query, collection, Firestore, where } from "firebase/firestore/lite"
+import { GetPacksByRarity, Pack, PackRarity } from "../database/Packs";
+import { DropPack } from "../Utils/DropPack";
+import { CreateServerInfoFromData } from "../database/ServerInfo";
+import { LogError, LogInfo, PrintServer } from "../Utils/Log";
+
+
+async function SpawnRandomPack(client: Client, db: Firestore) {
+    const q = query(collection(db, "serverInfo"));
+    const servers = await getDocs(q);
+
+    LogInfo("Sending random packs.");
+
+    servers.forEach(async server => {
+        if (server.data().Channel === undefined) { return; }
+
+        try {
+            await client.channels.fetch(server.data().Channel).then(async channel => {
+                if (channel === null) { return; }
+
+                const guild = await client.guilds.fetch(server.id);
+
+                //Get Random pack
+                let chosenRarity: PackRarity = "Default";
+
+                if (Math.random() <= 0.08) {
+                    const packChance = Math.random();
+
+                    if (packChance <= 0.7) {
+                        chosenRarity = "Common";
+                    } else if (packChance <= 0.9) {
+                        chosenRarity = "Rare"
+                    } else {
+                        chosenRarity = "Super Rare"
+                    }   
+                }
+
+                const possiblePacks: Pack[] = GetPacksByRarity(chosenRarity);
+
+                var pack = possiblePacks[Math.floor(Math.random() * possiblePacks.length)];
+
+                const serverInfo = CreateServerInfoFromData(server.id, server.data())
+
+                DropPack(`A ${pack.Name} HAS APPEARED!`, pack, channel as GuildTextBasedChannel, guild, serverInfo, undefined, true)
+            });
+        } catch (error) {
+            LogError(`Bot doesn't have access to server ${server.id}`);
+        }
+    });
+    
+    console.log("\n");
+}
 
 
 export const PackDropper = function (client: Client, db: Firestore) {
+    setTimeout(async () => {
+        SpawnRandomPack(client, db);
+    }, 1000 * 5);
+
     setInterval(async () => {
-        const q = query(collection(db, "serverInfo"));
-        const servers = await getDocs(q);
-
-        servers.forEach(server => {
-            if(server.data().Channel === undefined) { return; }
-            client.channels.fetch(server.data().Channel).then(async channel => {
-                if(channel === null){ return; }
-
-                //Get Random pack
-                let chosenRarity: string = "Default";
-
-                if(Math.random() <= 0.08){
-                    const packChance = Math.random();
-
-                    if(packChance <= 0.7){
-                        chosenRarity = "Common";
-                    }else if(packChance <= 0.9){
-                        chosenRarity = "Rare"
-                    }else{
-                        chosenRarity = "Super Rare"
-                    }
-                }
-
-                const packQuery = query(collection(db, "packs"), where("Rarity", "==", chosenRarity));
-                const packs = await getDocs(packQuery);
-
-                const possiblePacks: any[] = [];
-
-                packs.forEach(pack => {
-                    possiblePacks.push({
-                        id: pack.id,
-                        data: pack.data()
-                    });
-                });
-
-                var pack = possiblePacks[Math.floor(Math.random()*possiblePacks.length)];
-
-                if(channel.type === ChannelType.GuildText){
-                    let img = `${pack.id}.png`;
-
-                    const packEmbed = new EmbedBuilder()
-                        .setTitle(`A ${pack.data.Name} HAS APPEARED!`)
-                        .setImage(`attachment://${img}`)
-                        .setColor(COLOR_PER_PACK_RARITY[pack.data.Rarity as string]);
-
-                    const row = new ActionRowBuilder<ButtonBuilder>()
-                        .addComponents(
-                            new ButtonBuilder()
-                                .setCustomId('OpenPack')
-                                .setLabel('Open!')
-                                .setStyle(ButtonStyle.Primary),
-                        );
-
-                    channel.send({
-                        components: [row],
-                        embeds: [packEmbed],
-                        files: [`./img/packs/${img}`]
-                    }).then(message => {
-                        const messageDoc = doc(db, `serverInfo/${server.id}/messages/${message.id}`)
-
-                        setDoc(messageDoc, {
-                            Type: "RandomPack",
-                            Name: pack.data.Name,
-                            PigCount: pack.data.PigCount,
-                            Set: pack.data.Set,
-                            Tags: pack.data.Tags,
-                            Opened: false,
-                        })
-                    })
-                }
-            });
-        });
-    }, 1000 * 60 * 10);
+        await SpawnRandomPack(client, db);
+    }, 1000 * 60 * 20);
 }

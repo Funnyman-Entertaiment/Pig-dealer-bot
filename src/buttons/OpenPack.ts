@@ -1,12 +1,24 @@
 import { EmbedBuilder } from "@discordjs/builders";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, Interaction } from "discord.js";
-import { addDoc, collection, doc, DocumentData, Firestore, getDoc, getDocs, query, QueryDocumentSnapshot, QuerySnapshot, setDoc, Timestamp, updateDoc, where } from "firebase/firestore/lite";
+import { addDoc, collection, doc, Firestore, getDocs, setDoc, Timestamp } from "firebase/firestore/lite";
 import { Button } from "../Button";
 import { SPECIAL_RARITIES_PER_PACK } from "../Constants/SpecialRaritiesPerPack";
 import { PIG_RARITY_ORDER } from "../Constants/PigRarityOrder";
 import { RARITIES_PER_PIG_COUNT } from "../Constants/RaritiesPerPigCount";
 import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
 import { GOLDEN_PIG_CHANCE_PER_RARITY } from "../Constants/GoldenPigChancePerRarity";
+import { MakeErrorEmbed } from "../Utils/Errors";
+import { AddUserInfoToCache, GetUserInfo, UserInfo } from "../database/UserInfo";
+import { GetMessageInfo, RandomPackMessage } from "../database/MessageInfo";
+import { GetAllPigs, GetPig, GetPigsByRarity, GetPigsBySet, GetPigsWithTag, Pig } from "../database/Pigs";
+import { GetServerInfo, ServerInfo } from "../database/ServerInfo";
+import { IsChristmas } from "../Utils/SeasonalEvents";
+import { LogError, LogInfo, PrintServer, PrintUser } from "../Utils/Log";
+
+
+const v = {
+    SpawnStocking: false
+};
 
 
 async function GetUserPigs(db: Firestore, severId: string, userId: string) {
@@ -38,60 +50,45 @@ function GetAuthor(interaction: Interaction) {
 }
 
 
-async function GetAvailablePigsFromPack(db: Firestore, msgInfoData: DocumentData) {
-    let pigs: QuerySnapshot;
+async function GetAvailablePigsFromPack(msgInfo: RandomPackMessage) {
+    let pigs: Pig[];
 
-    if ((msgInfoData.Set as string).length !== 0) {
-        const packQuery = query(collection(db, "pigs"), where("Set", "==", msgInfoData.Set));
-        pigs = await getDocs(packQuery);
-    } else if ((msgInfoData.Tags as string[]).length !== 0) {
-        const packQuery = query(collection(db, "pigs"), where("Tags", "array-contains-any", msgInfoData.Tags));
-        pigs = await getDocs(packQuery);
+    if (msgInfo.Set.length !== 0) {
+        pigs = GetPigsBySet(msgInfo.Set);
+    } else if ((msgInfo.Tags as string[]).length !== 0) {
+        pigs = GetPigsWithTag(msgInfo.Tags);
     } else {
-        const packQuery = query(collection(db, "pigs"));
-        pigs = await getDocs(packQuery);
+        pigs = GetAllPigs();
     }
 
-    const pigsPerRarity: { [key: string]: QueryDocumentSnapshot[] } = {
-        Common: [],
-        Rare: [],
-        Epic: [],
-        Legendary: [],
-    }
+    const pigsPerRarity: { [key: string]: Pig[] } = {}
 
-    for (const key in pigsPerRarity) {
-        const list: QueryDocumentSnapshot[] = pigsPerRarity[key];
+    pigs.forEach(pig =>{
+        if(pigsPerRarity[pig.Rarity] === undefined){
+            pigsPerRarity[pig.Rarity] = [];
+        }
 
-        pigs.forEach(pig => {
-            if (pig.data().Rarity === key) {
-                list.push(pig);
-            }
-        });
-    }
+        const pigsOfRarity = pigsPerRarity[pig.Rarity];
+        pigsOfRarity.push(pig);
+    });
 
     return pigsPerRarity;
 }
 
 
-async function ChoosePigs(db: Firestore, serverId: string, availablePigs: { [key: string]: QueryDocumentSnapshot[] }, msgInfoData: DocumentData) {
-    const serverInfoDoc = doc(db, `serverInfo/${serverId}`);
-    const serverInfo = await getDoc(serverInfoDoc);
-    const serverInfoData = serverInfo.data();
+async function ChoosePigs(db: Firestore, serverId: string, availablePigs: { [key: string]: Pig[] }, msgInfo: RandomPackMessage) {
+    const serverInfo = await GetServerInfo(serverId, db) as any as ServerInfo;
 
     let allowGoldenPig: boolean = true;
 
-    if(serverInfoData !== undefined){
-        if(serverInfoData.HasSpawnedGoldenPig !== undefined){
-            allowGoldenPig = !serverInfoData.HasSpawnedGoldenPig;
-        }
-    }
+    allowGoldenPig = !serverInfo.HasSpawnedGoldenPig;
 
-    let pigRarities: {readonly [key: string]: number}[] = SPECIAL_RARITIES_PER_PACK[msgInfoData.Name];
+    let pigRarities: { readonly [key: string]: number }[] = SPECIAL_RARITIES_PER_PACK[msgInfo.Name];
     if (pigRarities === undefined) {
-        pigRarities = RARITIES_PER_PIG_COUNT[msgInfoData.PigCount];
+        pigRarities = RARITIES_PER_PIG_COUNT[msgInfo.PigCount];
     }
 
-    const chosenPigs: QueryDocumentSnapshot[] = [];
+    const chosenPigs: Pig[] = [];
 
     pigRarities.forEach(async rarities => {
         let rarity: string = "";
@@ -99,7 +96,7 @@ async function ChoosePigs(db: Firestore, serverId: string, availablePigs: { [key
         for (const possibleRarity in rarities) {
             const chance = rarities[possibleRarity];
 
-            if(Math.random() > chance){
+            if (Math.random() > chance) {
                 break;
             }
 
@@ -107,29 +104,40 @@ async function ChoosePigs(db: Firestore, serverId: string, availablePigs: { [key
         }
 
         const pigsOfRarity = availablePigs[rarity];
-        let chosenPig: QueryDocumentSnapshot;
+        let chosenPig: Pig;
 
         do {
             chosenPig = pigsOfRarity[Math.floor(Math.random() * pigsOfRarity.length)]
         } while (chosenPigs.includes(chosenPig));
 
-        if(Math.random() <= GOLDEN_PIG_CHANCE_PER_RARITY[rarity] && allowGoldenPig){
-            const goldenPigDoc = doc(db, "pigs/500");
-            const goldenPig = await getDoc(goldenPigDoc);
-            chosenPigs.push(goldenPig as any as QueryDocumentSnapshot);
-            allowGoldenPig = false;
-        }else{
+        const goldenPigChance = GOLDEN_PIG_CHANCE_PER_RARITY[rarity]?? 0
+
+        if (Math.random() <= goldenPigChance && allowGoldenPig) {
+            const goldenPig = GetPig("500");
+            if (goldenPig !== undefined) {
+                chosenPigs.push(goldenPig);
+                allowGoldenPig = false;
+            }
+        } else {
             chosenPigs.push(chosenPig);
         }
     });
 
-    await updateDoc(serverInfoDoc, {
-        HasSpawnedGoldenPig: !allowGoldenPig
-    })
+    if(IsChristmas() && Math.random() < 0.4){
+        if(Math.random() < 0.2){
+            v.SpawnStocking = true;
+        }else{
+            const christmasPigs: Pig[] = GetPigsByRarity("Christmas");
+            const chosenChristmasPig = christmasPigs[Math.floor(Math.random() * christmasPigs.length)];
+            chosenPigs.push(chosenChristmasPig);
+        }
+    }
+
+    serverInfo.HasSpawnedGoldenPig = !allowGoldenPig;
 
     chosenPigs.sort((a, b) => {
-        const aOrder = PIG_RARITY_ORDER[a.data().Rarity];
-        const bOrder = PIG_RARITY_ORDER[b.data().Rarity];
+        const aOrder = PIG_RARITY_ORDER[a.Rarity];
+        const bOrder = PIG_RARITY_ORDER[b.Rarity];
 
         return aOrder - bOrder;
     });
@@ -138,26 +146,26 @@ async function ChoosePigs(db: Firestore, serverId: string, availablePigs: { [key
 }
 
 
-async function AddPigsToDB(db: Firestore, chosenPigs: QueryDocumentSnapshot[], serverId: string, userId: string){
+async function AddPigsToDB(db: Firestore, chosenPigs: Pig[], serverId: string, userId: string) {
     for (let i = 0; i < chosenPigs.length; i++) {
         const pig = chosenPigs[i];
         const newPigCollection = collection(db, `serverInfo/${serverId}/users/${userId}/pigs`);
         await addDoc(newPigCollection, {
-            PigId: pig.id
+            PigId: pig.ID
         });
     }
 }
 
 
-function GetNewPigs(chosenPigs: QueryDocumentSnapshot[], playerPigs: string[]){
+function GetNewPigs(chosenPigs: Pig[], playerPigs: string[]) {
     const newPigs: string[] = [];
 
     for (let i = 0; i < chosenPigs.length; i++) {
         const pig = chosenPigs[i];
 
-        if (!playerPigs.includes(pig.id)) {
-            newPigs.push(pig.id);
-            playerPigs.push(pig.id);
+        if (!playerPigs.includes(pig.ID)) {
+            newPigs.push(pig.ID);
+            playerPigs.push(pig.ID);
         }
     }
 
@@ -165,12 +173,12 @@ function GetNewPigs(chosenPigs: QueryDocumentSnapshot[], playerPigs: string[]){
 }
 
 
-function GetOpenPackFollowUp(packName: string, chosenPigs: QueryDocumentSnapshot[], newPigs: string[], interaction: Interaction) {
+function GetOpenPackFollowUp(packName: string, chosenPigs: Pig[], newPigs: string[], interaction: Interaction) {
     const openedPackEmbed = new EmbedBuilder()
         .setTitle(`You've opened a ${packName}`)
         .setDescription(`1/${chosenPigs.length}`);
 
-    const imgPath = AddPigRenderToEmbed(openedPackEmbed, chosenPigs[0], newPigs.includes(chosenPigs[0].id));
+    const imgPath = AddPigRenderToEmbed(openedPackEmbed, chosenPigs[0], newPigs.includes(chosenPigs[0].ID));
 
     if (imgPath === undefined) { return; }
 
@@ -200,77 +208,69 @@ function GetOpenPackFollowUp(packName: string, chosenPigs: QueryDocumentSnapshot
 }
 
 
-async function GetUserInfoData(db: Firestore, serverId: string, userId: string){
-    const userInfoDoc = doc(db, `serverInfo/${serverId}/users/${userId}`);
-    let userInfo = await getDoc(userInfoDoc);
-    let userInfoData = userInfo.data();
+async function GetUserInfoData(db: Firestore, serverId: string, userId: string) {
+    const userInfo = await GetUserInfo(serverId, userId, db);
 
-    if (userInfoData === undefined) {
-        await setDoc(userInfoDoc, {
-            AssembledPigs: []
-        })
+    if (userInfo === undefined) {
+        const newUserInfo = new UserInfo(
+            userId,
+            serverId,
+            []
+        );
+        await AddUserInfoToCache(newUserInfo, db);
 
-        userInfo = await getDoc(userInfoDoc);
-        userInfoData = userInfo.data();
-
-        if (userInfoData === undefined) { return; }
+        return newUserInfo
     }
 
-    return userInfoData;
+    return userInfo;
 }
 
 
-function GetUserAssembledPigs(userInfoData: DocumentData){
-    let userAssembledPigs: string[] = userInfoData.AssembledPigs
-    if (userAssembledPigs === undefined) {
-        userAssembledPigs = [];
-    }
+function GetUserAssembledPigs(userInfo: UserInfo) {
+    let userAssembledPigs = userInfo.AssembledPigs;
 
     return userAssembledPigs;
 }
 
 
-async function GetPossibleAssemblyPigs(db: Firestore, chosenPigs: QueryDocumentSnapshot[], userAssembledPigs: String[]){
-    const possibleAssemblyPigs: QueryDocumentSnapshot[] = []
+async function GetPossibleAssemblyPigs(chosenPigs: Pig[], userAssembledPigs: String[]) {
+    const assemblyPigs = GetPigsByRarity("Assembly");
+    const possibleAssemblyPigs: Pig[] = []
 
-    for (let i = 0; i < chosenPigs.length; i++) {
-        const pig = chosenPigs[i];
+    assemblyPigs.forEach(assemblyPig => {
+        for (let i = 0; i < chosenPigs.length; i++) {
+            const pig = chosenPigs[i];
 
-        const assemblyPigQuery = query(collection(db, "pigs"), where("RequiredPigs", "array-contains", pig.id));
-        const assemblyPigs = await getDocs(assemblyPigQuery);
-
-        assemblyPigs.forEach(assemblyPig => {
-            if (!userAssembledPigs.includes(assemblyPig.id) && !possibleAssemblyPigs.some(x => x.id == assemblyPig.id)) {
+            if(assemblyPig.RequiredPigs.includes(pig.ID) &&
+            !userAssembledPigs.includes(pig.ID) &&
+            !possibleAssemblyPigs.some(x => x.ID === assemblyPig.ID)){
                 possibleAssemblyPigs.push(assemblyPig);
             }
-        });
-    }
+        }
+    });
 
     return possibleAssemblyPigs;
 }
 
 
-function GetCompletedAssemblyPigs(possibleAssemblyPigs: QueryDocumentSnapshot[], userPigs: string[]){
-    const completedAssemblyPigs: QueryDocumentSnapshot[] = [];
+function GetCompletedAssemblyPigs(possibleAssemblyPigs: Pig[], userPigs: string[]) {
+    const completedAssemblyPigs: Pig[] = [];
 
     for (let i = 0; i < possibleAssemblyPigs.length; i++) {
         const assemblyPig = possibleAssemblyPigs[i];
-        const assemblyPigData = assemblyPig.data();
-
-        if (assemblyPigData === undefined) { continue; }
 
         let hasAllPigs = true;
 
-        for (let o = 0; o < assemblyPigData.RequiredPigs.length; o++) {
-            const requiredPigId = assemblyPigData.RequiredPigs[o];
+        for (let o = 0; o < assemblyPig.RequiredPigs.length; o++) {
+            const requiredPigId = assemblyPig.RequiredPigs[o];
 
-            if(!userPigs.includes(requiredPigId)){
+            if (!userPigs.includes(requiredPigId)) {
                 hasAllPigs = false;
                 break;
             }
         }
 
-        if (hasAllPigs) { 
+        if (hasAllPigs) {
             completedAssemblyPigs.push(assemblyPig);
         }
     }
@@ -279,7 +279,7 @@ function GetCompletedAssemblyPigs(possibleAssemblyPigs: QueryDocumentSnapshot[],
 }
 
 
-function GetAssemblyPigsFollowUps(completedAssemblyPigs: QueryDocumentSnapshot[], interaction: Interaction){
+function GetAssemblyPigsFollowUps(completedAssemblyPigs: Pig[], interaction: Interaction) {
     const assemblyPigsFollowUps = [];
 
     for (let i = 0; i < completedAssemblyPigs.length; i++) {
@@ -327,23 +327,50 @@ export const OpenPack = new Button("OpenPack",
 
         const server = interaction.guild;
 
-        if (server === null) { return; }
+        if (server === null) {
+            const errorEmbed = MakeErrorEmbed(
+                "Error fetching server from interaction",
+                "Where did you find this message?"
+            );
 
-        const userInfoData = await GetUserInfoData(db, server.id, interaction.user.id);
+            await interaction.followUp({
+                embeds: [errorEmbed]
+            });
 
-        if(userInfoData === undefined){ return; }
+            return;
+        }
+        const message = interaction.message;
+        const msgInfo = await GetMessageInfo(server.id, message.id, db) as RandomPackMessage;
 
-        const lastTimeOpened = userInfoData.LastTimeOpened as Timestamp;
+        if (msgInfo === undefined || msgInfo.Type !== "RandomPack") {
+            const errorEmbed = MakeErrorEmbed(
+                "Error fetching message information",
+                `Server: ${server.id}`,
+                `Message: ${message.id}`
+            );
+
+            await interaction.followUp({
+                embeds: [errorEmbed]
+            });
+
+            return;
+        }
+
+        if (msgInfo.Opened) { return; }
+
+        const userInfo = await GetUserInfoData(db, server.id, interaction.user.id);
+
+        const lastTimeOpened = userInfo.LastTimeOpened;
         const currentTime = Timestamp.now();
 
-        if(lastTimeOpened !== undefined && currentTime.seconds - lastTimeOpened.seconds <= 60 * 30){
+        if (lastTimeOpened !== undefined && currentTime.seconds - lastTimeOpened.seconds <= 60 * 30) {
             const totalDiff = (60 * 30) - (currentTime.seconds - lastTimeOpened.seconds);
-            const minutes = Math.floor(totalDiff/60);
+            const minutes = Math.floor(totalDiff / 60);
             const seconds = totalDiff % 60;
 
             const waitEmbed = new EmbedBuilder()
                 .setColor(Colors.DarkRed)
-                .setTitle(`You must wait for ${minutes}:${seconds.toString().padStart(2, "0")} to open another pack`)
+                .setTitle(`You must wait for ${minutes}:${seconds.toString().padStart(2, "0")} minutes to open another pack`)
                 .setAuthor(GetAuthor(interaction));
 
             await interaction.followUp({
@@ -357,79 +384,92 @@ export const OpenPack = new Button("OpenPack",
             return;
         }
 
-        const userDoc = doc(db, `serverInfo/${server.id}/users/${interaction.user.id}`)
-        await updateDoc(userDoc, {
-            LastTimeOpened: currentTime
-        })
-
-        const message = interaction.message;
+        msgInfo.Opened = true;
+        userInfo.LastTimeOpened = currentTime;
 
         const row = new ActionRowBuilder<ButtonBuilder>()
-                        .addComponents(
-                            new ButtonBuilder()
-                                .setCustomId('OpenPack')
-                                .setLabel('Open!')
-                                .setStyle(ButtonStyle.Primary)
-                                .setDisabled(true),
-                        );
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId('OpenPack')
+                    .setLabel('Open!')
+                    .setStyle(ButtonStyle.Primary)
+                    .setDisabled(true),
+            );
         message.edit({
             components: [row]
-        })
+        });
 
-        const msgDoc = doc(db, `serverInfo/${server.id}/messages/${message.id}`);
-        const msgInfo = await getDoc(msgDoc);
-
-        if (!msgInfo.exists() || msgInfo.data().Type !== "RandomPack") { return; }
-
-        const msgInfoData = msgInfo.data();
+        LogInfo(`User ${PrintUser(interaction.user)} opened ${msgInfo.Name} pack in server ${PrintServer(server)}`);
 
         const userPigs = await GetUserPigs(db, server.id, interaction.user.id);
 
-        const availablePigs = await GetAvailablePigsFromPack(db, msgInfoData);
+        const availablePigs = await GetAvailablePigsFromPack(msgInfo);
 
-        const chosenPigs = await ChoosePigs(db, server.id, availablePigs, msgInfoData);
+        const chosenPigs = await ChoosePigs(db, server.id, availablePigs, msgInfo);
 
         await AddPigsToDB(db, chosenPigs, server.id, interaction.user.id);
 
         const newPigs: string[] = GetNewPigs(chosenPigs, userPigs);
 
-        const openPackFollowUp = GetOpenPackFollowUp(msgInfoData.Name, chosenPigs, newPigs, interaction)
+        const openPackFollowUp = GetOpenPackFollowUp(msgInfo.Name, chosenPigs, newPigs, interaction)
 
-        if (openPackFollowUp === undefined) { return; }
+        if (openPackFollowUp === undefined) {
+            LogError(`Couldn't create a follow up for this pack opening`);
+            const errorEmbed = MakeErrorEmbed(
+                "Error creating open pack follow up"
+            );
 
-        const allCompletedAssemblyPigs: QueryDocumentSnapshot[] = []
-    
-        while(true){
-            const userAssembledPigs = GetUserAssembledPigs(userInfoData);
+            await interaction.followUp({
+                embeds: [errorEmbed]
+            });
 
-            const possibleAssemblyPigs = await GetPossibleAssemblyPigs(db, chosenPigs, userAssembledPigs);
+            return;
+        }
+
+        const allCompletedAssemblyPigs: Pig[] = []
+
+        while (true) {
+            const userAssembledPigs = GetUserAssembledPigs(userInfo);
+
+            const possibleAssemblyPigs = await GetPossibleAssemblyPigs(chosenPigs, userAssembledPigs);
 
             const completedAssemblyPigs = GetCompletedAssemblyPigs(possibleAssemblyPigs, userPigs);
             completedAssemblyPigs.forEach(assemblyPig => {
-                userAssembledPigs.push(assemblyPig.id);
+                userAssembledPigs.push(assemblyPig.ID);
             });
 
             allCompletedAssemblyPigs.concat(completedAssemblyPigs);
 
-            await updateDoc(doc(db, `serverInfo/${server.id}/users/${interaction.user.id}`), {
-                AssembledPigs: userAssembledPigs
-            })
+            userInfo.AssembledPigs = userAssembledPigs;
 
-            if(completedAssemblyPigs.length === 0){
+            if (completedAssemblyPigs.length === 0) {
                 break;
             }
         }
 
         const assemblyPigsFollowUps = GetAssemblyPigsFollowUps(allCompletedAssemblyPigs, interaction);
 
-        if(assemblyPigsFollowUps === undefined){ return; }
+        if (assemblyPigsFollowUps === undefined) {
+            LogError(`Couldn't create a follow up for this pack's assembly pigs`);
+
+            const errorEmbed = new EmbedBuilder()
+                .setTitle("⚠Error creating assembly pigs follow up⚠")
+                .setDescription("Message anna or thicco inmediatly!!")
+                .setColor(Colors.DarkRed);
+
+            await interaction.followUp({
+                embeds: [errorEmbed]
+            });
+
+            return;
+        }
 
         await interaction.followUp(openPackFollowUp).then(message => {
             const messageDoc = doc(db, `serverInfo/${server.id}/messages/${message.id}`);
 
             setDoc(messageDoc, {
                 Type: "PigGallery",
-                Pigs: chosenPigs.map(pig => pig.id),
+                Pigs: chosenPigs.map(pig => pig.ID),
                 NewPigs: newPigs,
                 CurrentPig: 0,
                 User: interaction.user.id
@@ -439,5 +479,17 @@ export const OpenPack = new Button("OpenPack",
         assemblyPigsFollowUps.forEach(async assemblyPigsFollowUp => {
             await interaction.followUp(assemblyPigsFollowUp);
         });
+
+        if(v.SpawnStocking){
+            const channel = interaction.channel;
+
+            // GetPack(16);
+
+            // DropPack(``);
+        }
+
+        v.SpawnStocking = false;
+
+        console.log("\n");
     }
 );

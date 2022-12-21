@@ -3,13 +3,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SetBotChannel = void 0;
 const discord_js_1 = require("discord.js");
 const lite_1 = require("firebase/firestore/lite");
+const ServerInfo_1 = require("../database/ServerInfo");
 const Command_1 = require("../Command");
 exports.SetBotChannel = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     .setName("setchannel")
     .addChannelOption(option => option.setName('channel')
     .setDescription('channel to send packs')
     .setRequired(true))
-    .setDescription("Let's you choose what channel the bot sends packs to"), async (_, interaction, db) => {
+    .setDescription("Let's you choose what channel the bot sends packs to")
+    .setDefaultMemberPermissions(discord_js_1.PermissionFlagsBits.Administrator), async (_, interaction, db) => {
     const channel = interaction.options.getChannel('channel');
     if (channel === null) {
         return;
@@ -34,18 +36,14 @@ exports.SetBotChannel = new Command_1.Command(new discord_js_1.SlashCommandBuild
         });
         return;
     }
-    const docRef = (0, lite_1.doc)(db, "serverInfo", interaction.guildId);
-    const serverInfo = await (0, lite_1.getDoc)(docRef);
-    if (serverInfo.exists()) {
-        await (0, lite_1.updateDoc)(docRef, {
-            Channel: channel.id
-        });
+    let serverInfo = await (0, ServerInfo_1.GetServerInfo)(interaction.guildId, db);
+    if (serverInfo === undefined) {
+        serverInfo = new ServerInfo_1.ServerInfo(interaction.guildId, channel.id, undefined, false);
     }
     else {
-        await (0, lite_1.setDoc)(docRef, {
-            Channel: channel.id
-        });
+        serverInfo.Channel = channel.id;
     }
+    await (0, lite_1.setDoc)((0, lite_1.doc)(db, `serverInfo/${serverInfo.ID}`), serverInfo.GetData());
     const successEmbed = new discord_js_1.EmbedBuilder()
         .setTitle(`Channel succesfully set to ${channel.name}`)
         .setColor(discord_js_1.Colors.Green);

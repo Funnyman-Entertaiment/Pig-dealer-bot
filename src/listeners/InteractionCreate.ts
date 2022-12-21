@@ -1,7 +1,7 @@
 import { Client, Interaction, CommandInteraction, ButtonInteraction } from "discord.js";
 import { Firestore } from "firebase/firestore/lite";
 import { Buttons } from "../Buttons";
-import { Commands } from "../Commands";
+import { Commands, DebugCommands } from "../Commands";
 
 export default (client: Client, db: Firestore) => {
     client.on("interactionCreate", async (interaction: Interaction) => {
@@ -14,9 +14,13 @@ export default (client: Client, db: Firestore) => {
 };
 
 const handleSlashCommand = async (client: Client, interaction: CommandInteraction, db: Firestore) => {
-    const slashCommand = Commands.find(c => c.slashCommand.name === interaction.commandName);
+    let slashCommand = Commands.find(c => c.slashCommand.name === interaction.commandName);
 
-    if (!slashCommand) {
+    if (slashCommand === undefined) {
+        slashCommand = DebugCommands.find(c => c.slashCommand.name === interaction.commandName);
+    }
+
+    if(slashCommand === undefined){
         await interaction.reply({ content: "An error has occurred" });
         return;
     }

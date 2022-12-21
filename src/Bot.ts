@@ -4,7 +4,6 @@ import { getFirestore } from "firebase/firestore/lite"
 import * as DotEnv from "dotenv";
 import ready from "./listeners/Ready";
 import interactionCreate from "./listeners/InteractionCreate";
-import { PackDropper } from "./events/PackDropper";
 
 DotEnv.config();
 
@@ -20,13 +19,13 @@ const firebaseConfig = {
     measurementId: "G-SLSDV1DJR9"
 };
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+export const db = getFirestore(app);
 
 
 //Initialize discord bot
 const token = process.env.BOT_TOKEN;
 
-const client = new Client({
+export const client = new Client({
     intents: [
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.Guilds,
@@ -35,9 +34,12 @@ const client = new Client({
     partials: [Partials.Channel, Partials.Reaction, Partials.Message],
 });
 
-ready(client);
+ready(client, db);
 interactionCreate(client, db);
 
 client.login(token);
 
-PackDropper(client, db)
+
+export function GetClient(){
+    return client;
+}

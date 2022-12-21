@@ -13,8 +13,11 @@ exports.default = (client, db) => {
     });
 };
 const handleSlashCommand = async (client, interaction, db) => {
-    const slashCommand = Commands_1.Commands.find(c => c.slashCommand.name === interaction.commandName);
-    if (!slashCommand) {
+    let slashCommand = Commands_1.Commands.find(c => c.slashCommand.name === interaction.commandName);
+    if (slashCommand === undefined) {
+        slashCommand = Commands_1.DebugCommands.find(c => c.slashCommand.name === interaction.commandName);
+    }
+    if (slashCommand === undefined) {
         await interaction.reply({ content: "An error has occurred" });
         return;
     }
