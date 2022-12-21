@@ -11,7 +11,7 @@ export const SPECIAL_RARITIES_PER_PACK: { readonly [key: string]: {readonly [key
         {"Epic": 1},
         {"Legendary": 1}
     ],
-	["Generic Pack"]: [
+    ["Generic Pack"]: [
         {"Common": 1},
         {"Common": 1},
         {"Common": 1},
