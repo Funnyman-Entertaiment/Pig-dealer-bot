@@ -33,7 +33,15 @@ exports.SetBotRole = new Command_1.Command(new discord_js_1.SlashCommandBuilder(
     else {
         serverInfo.Role = role.id;
     }
-    await (0, lite_1.setDoc)((0, lite_1.doc)(db, `serverInfo/${serverInfo.ID}`), serverInfo.GetData());
+    if (serverInfo.Role === undefined) {
+        await (0, lite_1.setDoc)((0, lite_1.doc)(db, `serverInfo/${serverInfo.ID}`), {
+            Channel: serverInfo.Channel,
+            HasSpawnedGoldenPig: serverInfo.HasSpawnedGoldenPig
+        });
+    }
+    else {
+        await (0, lite_1.setDoc)((0, lite_1.doc)(db, `serverInfo/${serverInfo.ID}`), serverInfo.GetData());
+    }
     const successEmbed = new discord_js_1.EmbedBuilder()
         .setTitle(`Role succesfully set to @${role.name}`)
         .setColor(discord_js_1.Colors.Green);
