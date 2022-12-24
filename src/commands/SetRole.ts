@@ -47,9 +47,9 @@ export const SetBotRole = new Command(
         }
 
         //We need to update the db because we later get these with a direct query
-        if(serverInfo.Role === undefined){
+        if(serverInfo.Channel === undefined){
             await setDoc(doc(db, `serverInfo/${serverInfo.ID}`), {
-                Channel: serverInfo.Channel,
+                Role: serverInfo.Role,
                 HasSpawnedGoldenPig: serverInfo.HasSpawnedGoldenPig
             });
         }else{

@@ -59,11 +59,13 @@ class PigGalleryMessage extends MessageInfo {
     CurrentPig;
     Pigs;
     NewPigs;
-    constructor(id, serverId, currentPig, pigs, newPigs, user) {
+    SeenPigs;
+    constructor(id, serverId, currentPig, pigs, newPigs, seenPigs, user) {
         super(id, serverId, "PigGallery", user);
         this.CurrentPig = currentPig;
         this.Pigs = pigs;
         this.NewPigs = newPigs;
+        this.SeenPigs = seenPigs;
     }
     GetData() {
         if (this.User === undefined) {

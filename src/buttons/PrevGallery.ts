@@ -4,6 +4,7 @@ import { GetPig } from "../database/Pigs";
 import { MakeErrorEmbed } from "../Utils/Errors";
 import { Button } from "../Button";
 import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
+import { DoesPigIdHaveUniqueEvent, TriggerUniquePigEvent } from "../uniquePigEvents/UniquePigEvents";
 
 
 export const PrevGallery = new Button("GalleryPrevious",
@@ -71,8 +72,12 @@ export const PrevGallery = new Button("GalleryPrevious",
             return;
         }
 
-        const imgPath = AddPigRenderToEmbed(editedEmbed, pig, msgInfo.NewPigs.includes(pig.ID));
-
+        const imgPath = AddPigRenderToEmbed(
+            editedEmbed,
+            pig,
+            msgInfo.NewPigs.includes(pig.ID),
+            !DoesPigIdHaveUniqueEvent(pigToLoad)
+        );
         const row = new ActionRowBuilder<ButtonBuilder>()
         .addComponents(
             new ButtonBuilder()
@@ -91,6 +96,11 @@ export const PrevGallery = new Button("GalleryPrevious",
             embeds: [editedEmbed],
             files: [imgPath],
             components: [row]
-        })
+        });
+
+        if(!msgInfo.SeenPigs.includes(msgInfo.CurrentPig)){
+            msgInfo.SeenPigs.push(msgInfo.CurrentPig);
+            TriggerUniquePigEvent(pigToLoad, interaction);
+        }
     }
 );

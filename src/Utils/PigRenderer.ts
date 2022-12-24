@@ -4,7 +4,7 @@ import { Pig } from "../database/Pigs";
 import { COLOR_PER_PIG_RARITY } from "../Constants/ColorPerPigRarity";
 
 
-export function AddPigRenderToEmbed(embed: EmbedBuilder, pig: Pig, isNew: boolean): string{
+export function AddPigRenderToEmbed(embed: EmbedBuilder, pig: Pig, isNew: boolean, showId: boolean): string{
     let img = `${pig.ID}.png`;
     if(pig.Tags.includes("gif")){
         img = `${pig.ID}.gif`;
@@ -22,7 +22,9 @@ export function AddPigRenderToEmbed(embed: EmbedBuilder, pig: Pig, isNew: boolea
 
     embedDescriptionLines.push(`_${pig.Rarity}_`);
     embedDescriptionLines.push(pig.Description.length > 0? pig.Description : "...");
-    embedDescriptionLines.push(`#${pig.ID.padStart(3, "0")}`);
+    if(showId){
+        embedDescriptionLines.push(`#${pig.ID.padStart(3, "0")}`);
+    }
 
     const embedDescription = embedDescriptionLines.join("\n");
 

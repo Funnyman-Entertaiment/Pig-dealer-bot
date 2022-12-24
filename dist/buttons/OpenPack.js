@@ -17,8 +17,6 @@ const Pigs_1 = require("../database/Pigs");
 const ServerInfo_1 = require("../database/ServerInfo");
 const SeasonalEvents_1 = require("../Utils/SeasonalEvents");
 const Log_1 = require("../Utils/Log");
-const Packs_1 = require("../database/Packs");
-const DropPack_1 = require("../Utils/DropPack");
 const v = {
     SpawnStocking: false
 };
@@ -98,11 +96,11 @@ async function ChoosePigs(db, serverId, availablePigs, msgInfo) {
             chosenPigs.push(chosenPig);
         }
     });
-    if ((0, SeasonalEvents_1.IsChristmas)() && Math.random() < 0.1 && msgInfo.Name !== "Stocking") {
-        if (Math.random() < 0.05) {
+    if ((0, SeasonalEvents_1.IsChristmas)() && msgInfo.Name !== "Stocking") {
+        if (Math.random() < 1) {
             v.SpawnStocking = true;
         }
-        else {
+        else if (Math.random() < 0.1) {
             const christmasPigs = (0, Pigs_1.GetPigsByRarity)("Christmas");
             const chosenChristmasPig = christmasPigs[Math.floor(Math.random() * christmasPigs.length)];
             chosenPigs.push(chosenChristmasPig);
@@ -140,7 +138,7 @@ function GetOpenPackFollowUp(packName, chosenPigs, newPigs, interaction) {
     const openedPackEmbed = new builders_1.EmbedBuilder()
         .setTitle(`You've opened a ${packName}`)
         .setDescription(`1/${chosenPigs.length}`);
-    const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(openedPackEmbed, chosenPigs[0], newPigs.includes(chosenPigs[0].ID));
+    const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(openedPackEmbed, chosenPigs[0], newPigs.includes(chosenPigs[0].ID), true);
     if (imgPath === undefined) {
         return;
     }
@@ -215,7 +213,7 @@ function GetAssemblyPigsFollowUps(completedAssemblyPigs, interaction) {
         const pig = completedAssemblyPigs[i];
         const openedPackEmbed = new builders_1.EmbedBuilder()
             .setTitle(`You've completed a set and obtained a bonus pig!`);
-        const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(openedPackEmbed, pig, false);
+        const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(openedPackEmbed, pig, false, true);
         if (imgPath === undefined) {
             return;
         }
@@ -259,13 +257,16 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
         });
         return;
     }
+    if (msgInfo.User !== undefined && msgInfo.User !== interaction.user.id) {
+        return;
+    }
     if (msgInfo.Opened) {
         return;
     }
     const userInfo = await GetUserInfoData(db, server.id, interaction.user.id);
     const lastTimeOpened = userInfo.LastTimeOpened;
     const currentTime = lite_1.Timestamp.now();
-    if (lastTimeOpened !== undefined && currentTime.seconds - lastTimeOpened.seconds <= 60 * 30) {
+    if (lastTimeOpened !== undefined && currentTime.seconds - lastTimeOpened.seconds <= 60 * 30 && msgInfo.Name !== "Stocking") {
         const totalDiff = (60 * 30) - (currentTime.seconds - lastTimeOpened.seconds);
         const minutes = Math.floor(totalDiff / 60);
         const seconds = totalDiff % 60;
@@ -299,7 +300,21 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
     const chosenPigs = await ChoosePigs(db, server.id, availablePigs, msgInfo);
     await AddPigsToDB(db, chosenPigs, server.id, interaction.user.id);
     const newPigs = GetNewPigs(chosenPigs, userPigs);
-    const openPackFollowUp = GetOpenPackFollowUp(msgInfo.Name, chosenPigs, newPigs, interaction);
+    let openPackFollowUp = GetOpenPackFollowUp(msgInfo.Name, chosenPigs, newPigs, interaction);
+    if (v.SpawnStocking) {
+        const stockingPig = (0, Pigs_1.GetPig)("306");
+        if (stockingPig === undefined) {
+            (0, Log_1.LogError)(`Couldn't find stocking pig.`);
+            const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`Couldn't find stocking pig`);
+            interaction.followUp({
+                embeds: [errorEmbed]
+            });
+            return;
+        }
+        const pigsToShow = [...chosenPigs];
+        pigsToShow.push(stockingPig);
+        openPackFollowUp = GetOpenPackFollowUp(msgInfo.Name, pigsToShow, newPigs, interaction);
+    }
     if (openPackFollowUp === undefined) {
         (0, Log_1.LogError)(`Couldn't create a follow up for this pack opening`);
         const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Error creating open pack follow up");
@@ -335,26 +350,25 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
         return;
     }
     await interaction.followUp(openPackFollowUp).then(message => {
-        const messageDoc = (0, lite_1.doc)(db, `serverInfo/${server.id}/messages/${message.id}`);
-        (0, lite_1.setDoc)(messageDoc, {
-            Type: "PigGallery",
-            Pigs: chosenPigs.map(pig => pig.ID),
-            NewPigs: newPigs,
-            CurrentPig: 0,
-            User: interaction.user.id
-        });
+        let pigsToShow = [...chosenPigs];
+        if (v.SpawnStocking) {
+            const stockingPig = (0, Pigs_1.GetPig)("306");
+            if (stockingPig === undefined) {
+                (0, Log_1.LogError)(`Couldn't find stocking pig.`);
+                const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`Couldn't find stocking pig`);
+                interaction.followUp({
+                    embeds: [errorEmbed]
+                });
+                return;
+            }
+            pigsToShow.push(stockingPig);
+        }
+        const newMsgInfo = new MessageInfo_1.PigGalleryMessage(message.id, server.id, 0, pigsToShow.map(pig => pig.ID), newPigs, [], interaction.user.id);
+        (0, MessageInfo_1.AddMessageInfoToCache)(newMsgInfo, db);
     });
     assemblyPigsFollowUps.forEach(async (assemblyPigsFollowUp) => {
         await interaction.followUp(assemblyPigsFollowUp);
     });
-    if (v.SpawnStocking) {
-        const channel = interaction.channel;
-        const pack = (0, Packs_1.GetPack)("16");
-        if (pack !== undefined && channel !== null && server !== null) {
-            const serverInfo = await (0, ServerInfo_1.GetServerInfo)(server.id, db);
-            (0, DropPack_1.DropPack)(`${interaction.user.username} found a stocking!`, pack, channel, server, serverInfo, interaction.user.id, false);
-        }
-    }
     v.SpawnStocking = false;
     console.log("\n");
 });

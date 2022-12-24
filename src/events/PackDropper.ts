@@ -33,22 +33,29 @@ async function SpawnRandomPack(client: Client, db: Firestore) {
                         chosenRarity = "Rare"
                     } else {
                         chosenRarity = "Super Rare"
-                    }   
+                    }
                 }
 
                 const possiblePacks: Pack[] = GetPacksByRarity(chosenRarity);
 
                 var pack = possiblePacks[Math.floor(Math.random() * possiblePacks.length)];
 
-                const serverInfo = CreateServerInfoFromData(server.id, server.data())
+                const serverInfo = CreateServerInfoFromData(server.id, server.data());
 
-                DropPack(`A ${pack.Name} HAS APPEARED!`, pack, channel as GuildTextBasedChannel, guild, serverInfo, undefined, true)
+                let embedTitle = `A ${pack.Name} HAS APPEARED!`;
+                let vowelRegex = '^[aieouAIEOU].*';
+                let matched = pack.Name.match(vowelRegex);
+                if (matched) {
+                    embedTitle = `AN ${pack.Name} HAS APPEARED!`;
+                }
+
+                DropPack(embedTitle, pack, channel as GuildTextBasedChannel, guild, serverInfo, undefined, true);
             });
         } catch (error) {
             LogError(`Bot doesn't have access to server ${server.id}`);
         }
     });
-    
+
     console.log("\n");
 }
 

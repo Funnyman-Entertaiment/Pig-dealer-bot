@@ -29,7 +29,7 @@ exports.TestPig = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     }
     const pigEmbed = new discord_js_1.EmbedBuilder()
         .setTitle("Here's your pig");
-    const img = (0, PigRenderer_1.AddPigRenderToEmbed)(pigEmbed, pig, false);
+    const img = (0, PigRenderer_1.AddPigRenderToEmbed)(pigEmbed, pig, false, true);
     await interaction.followUp({
         ephemeral: true,
         embeds: [pigEmbed],

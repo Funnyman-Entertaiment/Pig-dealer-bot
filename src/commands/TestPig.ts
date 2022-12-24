@@ -38,7 +38,7 @@ export const TestPig = new Command(
         const pigEmbed = new EmbedBuilder()
             .setTitle("Here's your pig");
 
-        const img = AddPigRenderToEmbed(pigEmbed, pig, false);
+        const img = AddPigRenderToEmbed(pigEmbed, pig, false, true);
 
         await interaction.followUp({
             ephemeral: true,

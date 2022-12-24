@@ -1,7 +1,7 @@
 import { DocumentData } from "firebase/firestore/lite";
 import { DatabaseElement } from "./DatabaseElement";
 
-type PigRarity = "Common" | "Rare" | "Epic" | "Legendary" | "Assembly" | "One of a kind" | "Christmas" | "Postcard" | "Postcard (Animated)"
+type PigRarity = "Common" | "Rare" | "Epic" | "Legendary" | "Assembly" | "One of a kind" | "Christmas" | "Postcard" | "Postcard (Animated)" | "Christmas Bundle"
 
 
 export class Pig extends DatabaseElement {

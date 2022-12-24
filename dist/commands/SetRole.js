@@ -33,9 +33,9 @@ exports.SetBotRole = new Command_1.Command(new discord_js_1.SlashCommandBuilder(
     else {
         serverInfo.Role = role.id;
     }
-    if (serverInfo.Role === undefined) {
+    if (serverInfo.Channel === undefined) {
         await (0, lite_1.setDoc)((0, lite_1.doc)(db, `serverInfo/${serverInfo.ID}`), {
-            Channel: serverInfo.Channel,
+            Role: serverInfo.Role,
             HasSpawnedGoldenPig: serverInfo.HasSpawnedGoldenPig
         });
     }

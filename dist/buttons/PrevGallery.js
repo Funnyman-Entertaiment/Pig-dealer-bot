@@ -7,6 +7,7 @@ const Pigs_1 = require("../database/Pigs");
 const Errors_1 = require("../Utils/Errors");
 const Button_1 = require("../Button");
 const PigRenderer_1 = require("../Utils/PigRenderer");
+const UniquePigEvents_1 = require("../uniquePigEvents/UniquePigEvents");
 exports.PrevGallery = new Button_1.Button("GalleryPrevious", async (_, interaction, db) => {
     await interaction.deferUpdate();
     const server = interaction.guild;
@@ -47,7 +48,7 @@ exports.PrevGallery = new Button_1.Button("GalleryPrevious", async (_, interacti
         });
         return;
     }
-    const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(editedEmbed, pig, msgInfo.NewPigs.includes(pig.ID));
+    const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(editedEmbed, pig, msgInfo.NewPigs.includes(pig.ID), !(0, UniquePigEvents_1.DoesPigIdHaveUniqueEvent)(pigToLoad));
     const row = new discord_js_1.ActionRowBuilder()
         .addComponents(new discord_js_1.ButtonBuilder()
         .setCustomId('GalleryPrevious')
@@ -63,4 +64,8 @@ exports.PrevGallery = new Button_1.Button("GalleryPrevious", async (_, interacti
         files: [imgPath],
         components: [row]
     });
+    if (!msgInfo.SeenPigs.includes(msgInfo.CurrentPig)) {
+        msgInfo.SeenPigs.push(msgInfo.CurrentPig);
+        (0, UniquePigEvents_1.TriggerUniquePigEvent)(pigToLoad, interaction);
+    }
 });

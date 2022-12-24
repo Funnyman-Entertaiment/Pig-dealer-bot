@@ -63,12 +63,14 @@ export class PigGalleryMessage extends MessageInfo {
     CurrentPig: number;
     Pigs: string[];
     NewPigs: string[];
+    SeenPigs: number[];
 
-    constructor(id: string, serverId: string, currentPig: number, pigs: string[], newPigs: string[], user?: string) {
+    constructor(id: string, serverId: string, currentPig: number, pigs: string[], newPigs: string[], seenPigs: number[], user?: string) {
         super(id, serverId, "PigGallery", user);
         this.CurrentPig = currentPig;
         this.Pigs = pigs;
         this.NewPigs = newPigs;
+        this.SeenPigs = seenPigs;
     }
 
     GetData(): object {
