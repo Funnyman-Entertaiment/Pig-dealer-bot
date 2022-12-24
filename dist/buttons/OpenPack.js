@@ -97,7 +97,7 @@ async function ChoosePigs(db, serverId, availablePigs, msgInfo) {
         }
     });
     if ((0, SeasonalEvents_1.IsChristmas)() && msgInfo.Name !== "Stocking") {
-        if (Math.random() < 1) {
+        if (Math.random() < 0.05) {
             v.SpawnStocking = true;
         }
         else if (Math.random() < 0.1) {

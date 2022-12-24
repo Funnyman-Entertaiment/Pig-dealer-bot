@@ -126,7 +126,7 @@ async function ChoosePigs(db: Firestore, serverId: string, availablePigs: { [key
     });
 
     if(IsChristmas() && msgInfo.Name !== "Stocking"){
-        if(Math.random() < 1){
+        if(Math.random() < 0.05){
             v.SpawnStocking = true;
         }else if(Math.random() < 0.1){
             const christmasPigs: Pig[] = GetPigsByRarity("Christmas");
