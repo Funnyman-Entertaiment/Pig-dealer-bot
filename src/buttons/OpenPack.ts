@@ -450,25 +450,24 @@ export const OpenPack = new Button("OpenPack",
         }
 
         const allCompletedAssemblyPigs: Pig[] = []
+        let oldAssemblyPigsLength = 0;
 
-        while (true) {
+        do{
+            oldAssemblyPigsLength = allCompletedAssemblyPigs.length;
             const userAssembledPigs = GetUserAssembledPigs(userInfo);
+            console.log(`User assembled pigs = ${userAssembledPigs}`);
 
             const possibleAssemblyPigs = await GetPossibleAssemblyPigs(chosenPigs, userAssembledPigs);
+            console.log(`Possible assembly pigs = ${possibleAssemblyPigs.map(x => x.ID)}`);
 
             const completedAssemblyPigs = GetCompletedAssemblyPigs(possibleAssemblyPigs, userPigs);
+            console.log(`Completed assembly pigs = ${completedAssemblyPigs.map(x => x.ID)}`);
+
             completedAssemblyPigs.forEach(assemblyPig => {
-                userAssembledPigs.push(assemblyPig.ID);
+                userInfo.AssembledPigs.push(assemblyPig.ID);
             });
-
             allCompletedAssemblyPigs.concat(completedAssemblyPigs);
-
-            userInfo.AssembledPigs = userAssembledPigs;
-
-            if (completedAssemblyPigs.length === 0) {
-                break;
-            }
-        }
+        }while(allCompletedAssemblyPigs.length !== oldAssemblyPigsLength);
 
         const assemblyPigsFollowUps = GetAssemblyPigsFollowUps(allCompletedAssemblyPigs, interaction);
 

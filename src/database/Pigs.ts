@@ -92,7 +92,7 @@ export function GetPigsWithTag(tags: string[]): Pig[]{
 }
 
 
-export function GetPigsByRarity(rarity: string): Pig[]{
+export function GetPigsByRarity(rarity: PigRarity): Pig[]{
     return Pigs.filter(pig =>{
         return pig.Rarity === rarity;
     });

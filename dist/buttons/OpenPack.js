@@ -324,19 +324,20 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
         return;
     }
     const allCompletedAssemblyPigs = [];
-    while (true) {
+    let oldAssemblyPigsLength = 0;
+    do {
+        oldAssemblyPigsLength = allCompletedAssemblyPigs.length;
         const userAssembledPigs = GetUserAssembledPigs(userInfo);
+        console.log(`User assembled pigs = ${userAssembledPigs}`);
         const possibleAssemblyPigs = await GetPossibleAssemblyPigs(chosenPigs, userAssembledPigs);
+        console.log(`Possible assembly pigs = ${possibleAssemblyPigs.map(x => x.ID)}`);
         const completedAssemblyPigs = GetCompletedAssemblyPigs(possibleAssemblyPigs, userPigs);
+        console.log(`Completed assembly pigs = ${completedAssemblyPigs.map(x => x.ID)}`);
         completedAssemblyPigs.forEach(assemblyPig => {
-            userAssembledPigs.push(assemblyPig.ID);
+            userInfo.AssembledPigs.push(assemblyPig.ID);
         });
         allCompletedAssemblyPigs.concat(completedAssemblyPigs);
-        userInfo.AssembledPigs = userAssembledPigs;
-        if (completedAssemblyPigs.length === 0) {
-            break;
-        }
-    }
+    } while (allCompletedAssemblyPigs.length !== oldAssemblyPigsLength);
     const assemblyPigsFollowUps = GetAssemblyPigsFollowUps(allCompletedAssemblyPigs, interaction);
     if (assemblyPigsFollowUps === undefined) {
         (0, Log_1.LogError)(`Couldn't create a follow up for this pack's assembly pigs`);
