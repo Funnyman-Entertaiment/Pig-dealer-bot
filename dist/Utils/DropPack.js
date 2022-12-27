@@ -23,7 +23,11 @@ function SendNotEnoughPermissionsMsg(channel, server) {
     }
 }
 function SendGhostPing(channel, roleId) {
-    channel.send((0, discord_js_1.roleMention)(roleId)).then(message => message.delete());
+    try {
+        channel.send((0, discord_js_1.roleMention)(roleId)).then(message => message.delete());
+    }
+    catch (error) {
+    }
 }
 async function DropPack(title, pack, channel, server, serverInfo, userId, ping = false) {
     if (channel.type !== discord_js_1.ChannelType.GuildText) {
@@ -52,13 +56,17 @@ async function DropPack(title, pack, channel, server, serverInfo, userId, ping =
     if (serverInfo.Role !== undefined && ping) {
         SendGhostPing(channel, serverInfo.Role);
     }
-    channel.send({
-        components: [row],
-        embeds: [packEmbed],
-        files: [`./img/packs/${img}`]
-    }).then(async (message) => {
-        const newMessage = new MessageInfo_1.RandomPackMessage(message.id, server.id, pack.Name, pack.PigCount, pack.Set, pack.Tags, false, userId);
-        (0, MessageInfo_1.AddMessageInfoToCache)(newMessage, Bot_1.db);
-    });
+    try {
+        channel.send({
+            components: [row],
+            embeds: [packEmbed],
+            files: [`./img/packs/${img}`]
+        }).then(async (message) => {
+            const newMessage = new MessageInfo_1.RandomPackMessage(message.id, server.id, pack.Name, pack.PigCount, pack.Set, pack.Tags, false, userId);
+            (0, MessageInfo_1.AddMessageInfoToCache)(newMessage, Bot_1.db);
+        });
+    }
+    catch (error) {
+    }
 }
 exports.DropPack = DropPack;
