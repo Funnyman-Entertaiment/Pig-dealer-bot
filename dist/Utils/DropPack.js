@@ -33,7 +33,7 @@ async function DropPack(title, pack, channel, server, serverInfo, userId, ping =
     if (channel.type !== discord_js_1.ChannelType.GuildText) {
         return;
     }
-    if (server.id !== "1009766631364382731") {
+    if (server.id !== "1009766631364382731" && server.id !== "699206185538289704") {
         return;
     }
     let img = `${pack.ID}.png`;

@@ -43,7 +43,7 @@ function SendGhostPing(channel: GuildTextBasedChannel, roleId: string) {
 export async function DropPack(title: string, pack: Pack, channel: GuildTextBasedChannel, server: Guild, serverInfo: ServerInfo, userId?: string, ping = false) {
     if (channel.type !== ChannelType.GuildText) { return; }
 
-    if (server.id !== "1009766631364382731") { return; }
+    if (server.id !== "1009766631364382731" && server.id !== "699206185538289704") { return; }
 
     let img = `${pack.ID}.png`;
 
