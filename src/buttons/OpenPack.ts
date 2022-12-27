@@ -1,5 +1,5 @@
 import { EmbedBuilder } from "@discordjs/builders";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, GuildTextBasedChannel, Interaction, TextBasedChannel } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, Embed, GuildTextBasedChannel, Interaction, TextBasedChannel } from "discord.js";
 import { addDoc, collection, doc, Firestore, getDocs, setDoc, Timestamp } from "firebase/firestore/lite";
 import { Button } from "../Button";
 import { SPECIAL_RARITIES_PER_PACK } from "../Constants/SpecialRaritiesPerPack";
@@ -14,8 +14,9 @@ import { GetAllPigs, GetPig, GetPigsByRarity, GetPigsBySet, GetPigsWithTag, Pig 
 import { GetServerInfo, ServerInfo } from "../database/ServerInfo";
 import { IsChristmas } from "../Utils/SeasonalEvents";
 import { LogError, LogInfo, PrintServer, PrintUser } from "../Utils/Log";
-import { GetPack } from "../database/Packs";
+import { GetPack, GetPackByName } from "../database/Packs";
 import { DropPack } from "../Utils/DropPack";
+import { existsSync } from "fs";
 
 
 const v = {
@@ -323,6 +324,23 @@ function GetAssemblyPigsFollowUps(completedAssemblyPigs: Pig[], interaction: Int
 }
 
 
+function GetEditedEmbed(embed: EmbedBuilder, msgInfo: RandomPackMessage){
+    const pack = GetPackByName(msgInfo.Name);
+
+    if(pack === undefined){ return; }
+
+    let openedImg = `./img/packs/opened/${pack.ID}.png`;
+
+    if(!existsSync(openedImg)){
+        return;
+    }
+
+    embed.setImage(`attachment://${pack.ID}.png`);
+
+    return openedImg;
+}
+
+
 export const OpenPack = new Button("OpenPack",
     async (_, interaction, db) => {
         await interaction.deferReply();
@@ -393,6 +411,10 @@ export const OpenPack = new Button("OpenPack",
         msgInfo.Opened = true;
         userInfo.LastTimeOpened = currentTime;
 
+        const embed = interaction.message.embeds[0];
+        const editedEmbed = new EmbedBuilder(embed.data);
+        const openedImg = GetEditedEmbed(editedEmbed, msgInfo);
+        
         const row = new ActionRowBuilder<ButtonBuilder>()
             .addComponents(
                 new ButtonBuilder()
@@ -401,9 +423,18 @@ export const OpenPack = new Button("OpenPack",
                     .setStyle(ButtonStyle.Primary)
                     .setDisabled(true),
             );
-        message.edit({
-            components: [row]
-        });
+
+        if (openedImg === undefined){
+            message.edit({
+                components: [row]
+            });
+        }else{
+            message.edit({
+                embeds: [editedEmbed],
+                components: [row],
+                files: [openedImg],
+            });
+        }
 
         LogInfo(`User ${PrintUser(interaction.user)} opened ${msgInfo.Name} pack in server ${PrintServer(server)}`);
 

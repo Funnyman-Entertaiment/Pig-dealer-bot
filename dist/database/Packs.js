@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetPacksByRarity = exports.GetPack = exports.CreatePackFromData = exports.AddPack = exports.Pack = void 0;
+exports.GetPackByName = exports.GetPacksByRarity = exports.GetPack = exports.CreatePackFromData = exports.AddPack = exports.Pack = void 0;
 const DatabaseElement_1 = require("./DatabaseElement");
 class Pack extends DatabaseElement_1.DatabaseElement {
     Name;
@@ -49,3 +49,9 @@ function GetPacksByRarity(rarity) {
     });
 }
 exports.GetPacksByRarity = GetPacksByRarity;
+function GetPackByName(name) {
+    return Packs.find(pack => {
+        return pack.Name === name;
+    });
+}
+exports.GetPackByName = GetPackByName;

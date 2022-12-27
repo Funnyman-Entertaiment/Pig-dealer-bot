@@ -17,6 +17,8 @@ const Pigs_1 = require("../database/Pigs");
 const ServerInfo_1 = require("../database/ServerInfo");
 const SeasonalEvents_1 = require("../Utils/SeasonalEvents");
 const Log_1 = require("../Utils/Log");
+const Packs_1 = require("../database/Packs");
+const fs_1 = require("fs");
 const v = {
     SpawnStocking: false
 };
@@ -238,6 +240,18 @@ function GetAssemblyPigsFollowUps(completedAssemblyPigs, interaction) {
     }
     return assemblyPigsFollowUps;
 }
+function GetEditedEmbed(embed, msgInfo) {
+    const pack = (0, Packs_1.GetPackByName)(msgInfo.Name);
+    if (pack === undefined) {
+        return;
+    }
+    let openedImg = `./img/packs/opened/${pack.ID}.png`;
+    if (!(0, fs_1.existsSync)(openedImg)) {
+        return;
+    }
+    embed.setImage(`attachment://${pack.ID}.png`);
+    return openedImg;
+}
 exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) => {
     await interaction.deferReply();
     const server = interaction.guild;
@@ -285,15 +299,27 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
     }
     msgInfo.Opened = true;
     userInfo.LastTimeOpened = currentTime;
+    const embed = interaction.message.embeds[0];
+    const editedEmbed = new builders_1.EmbedBuilder(embed.data);
+    const openedImg = GetEditedEmbed(editedEmbed, msgInfo);
     const row = new discord_js_1.ActionRowBuilder()
         .addComponents(new discord_js_1.ButtonBuilder()
         .setCustomId('OpenPack')
         .setLabel('Open!')
         .setStyle(discord_js_1.ButtonStyle.Primary)
         .setDisabled(true));
-    message.edit({
-        components: [row]
-    });
+    if (openedImg === undefined) {
+        message.edit({
+            components: [row]
+        });
+    }
+    else {
+        message.edit({
+            embeds: [editedEmbed],
+            components: [row],
+            files: [openedImg],
+        });
+    }
     (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} opened ${msgInfo.Name} pack in server ${(0, Log_1.PrintServer)(server)}`);
     const userPigs = await GetUserPigs(db, server.id, interaction.user.id);
     const availablePigs = await GetAvailablePigsFromPack(msgInfo);

@@ -7,6 +7,7 @@ const ColorPerPackRarity_1 = require("../Constants/ColorPerPackRarity");
 const Errors_1 = require("./Errors");
 const MessageInfo_1 = require("../database/MessageInfo");
 const Log_1 = require("./Log");
+const lite_1 = require("firebase/firestore/lite");
 function SendNotEnoughPermissionsMsg(channel, server) {
     const channelName = channel.name;
     const serverName = server.name;
@@ -33,9 +34,6 @@ async function DropPack(title, pack, channel, server, serverInfo, userId, ping =
     if (channel.type !== discord_js_1.ChannelType.GuildText) {
         return;
     }
-    if (server.id !== "1009766631364382731" && server.id !== "699206185538289704") {
-        return;
-    }
     let img = `${pack.ID}.png`;
     const packEmbed = new discord_js_1.EmbedBuilder()
         .setTitle(title)
@@ -48,10 +46,17 @@ async function DropPack(title, pack, channel, server, serverInfo, userId, ping =
         .setStyle(discord_js_1.ButtonStyle.Primary));
     (0, Log_1.LogInfo)(`Sending ${pack.Name} to server with id: ${(0, Log_1.PrintServer)(server)}`);
     const permissions = server.members.me?.permissionsIn(channel);
+    const timeoutedDate = server.members.me?.communicationDisabledUntil;
+    if (timeoutedDate !== undefined && timeoutedDate !== null) {
+        const currentDate = lite_1.Timestamp.now().toDate();
+        if (currentDate < timeoutedDate) {
+            (0, Log_1.LogWarn)(`Bot is timeouted in ${(0, Log_1.PrintServer)(server)}`);
+            return;
+        }
+    }
     if (permissions === undefined) {
         return;
     }
-    console.log(permissions.toArray());
     if (!permissions.has("SendMessages") || !permissions.has("ViewChannel")) {
         (0, Log_1.LogWarn)(`Not enough permissions to send messages in ${(0, Log_1.PrintServer)(server)}`);
         SendNotEnoughPermissionsMsg(channel, server);
