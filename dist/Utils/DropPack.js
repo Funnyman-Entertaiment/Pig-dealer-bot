@@ -51,7 +51,7 @@ async function DropPack(title, pack, channel, server, serverInfo, userId, ping =
     if (permissions === undefined) {
         return;
     }
-    console.log(permissions);
+    console.log(permissions.toArray());
     if (!permissions.has("SendMessages") || !permissions.has("ViewChannel")) {
         (0, Log_1.LogWarn)(`Not enough permissions to send messages in ${(0, Log_1.PrintServer)(server)}`);
         SendNotEnoughPermissionsMsg(channel, server);

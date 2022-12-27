@@ -66,7 +66,7 @@ export async function DropPack(title: string, pack: Pack, channel: GuildTextBase
 
     if (permissions === undefined) { return; }
 
-    console.log(permissions);
+    console.log(permissions.toArray());
 
     if (!permissions.has("SendMessages") || !permissions.has("ViewChannel")) {
         LogWarn(`Not enough permissions to send messages in ${PrintServer(server)}`);
