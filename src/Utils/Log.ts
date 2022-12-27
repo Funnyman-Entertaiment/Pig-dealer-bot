@@ -19,7 +19,8 @@ export function PrintServer(server: Guild): string{
     return `${server.id} [${server.name}]`
 }
 
-export function PrintChannel(channel: GuildChannel): string{
+export function PrintChannel(channel: GuildChannel | undefined | null): string{
+    if(channel === undefined || channel === null){ return "- [-]"; }
     return `${channel.id} [${channel.name}]`
 }
 

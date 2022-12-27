@@ -9,6 +9,7 @@ const Errors_1 = require("../Utils/Errors");
 const Button_1 = require("../Button");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const UniquePigEvents_1 = require("../uniquePigEvents/UniquePigEvents");
+const Log_1 = require("../Utils/Log");
 exports.NextGallery = new Button_1.Button("GalleryNext", async (_, interaction, db) => {
     await interaction.deferUpdate();
     const server = interaction.guild;
@@ -39,6 +40,14 @@ exports.NextGallery = new Button_1.Button("GalleryNext", async (_, interaction, 
     }
     const pigToLoad = msgInfo.Pigs[msgInfo.CurrentPig + 1];
     msgInfo.CurrentPig++;
+    if (message.embeds[0] === undefined) {
+        (0, Log_1.LogError)(`Couldn't get embed from message in channel ${(0, Log_1.PrintChannel)(interaction.channel)} in server ${(0, Log_1.PrintServer)(server)}`);
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`Couldn't get embed from message`, `Make sure the bot is able to send embeds`);
+        interaction.followUp({
+            embeds: [errorEmbed]
+        });
+        return;
+    }
     const editedEmbed = new builders_1.EmbedBuilder(message.embeds[0].data)
         .setDescription(`${msgInfo.CurrentPig + 1}/${msgInfo.Pigs.length}`);
     const pig = (0, Pigs_1.GetPig)(pigToLoad);

@@ -1,6 +1,6 @@
 import { EmbedBuilder } from "@discordjs/builders";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, Embed, GuildTextBasedChannel, Interaction, TextBasedChannel } from "discord.js";
-import { addDoc, collection, doc, Firestore, getDocs, setDoc, Timestamp } from "firebase/firestore/lite";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, GuildChannel, Interaction } from "discord.js";
+import { addDoc, collection, Firestore, getDocs, Timestamp } from "firebase/firestore/lite";
 import { Button } from "../Button";
 import { SPECIAL_RARITIES_PER_PACK } from "../Constants/SpecialRaritiesPerPack";
 import { PIG_RARITY_ORDER } from "../Constants/PigRarityOrder";
@@ -13,9 +13,8 @@ import { AddMessageInfoToCache, GetMessageInfo, PigGalleryMessage, RandomPackMes
 import { GetAllPigs, GetPig, GetPigsByRarity, GetPigsBySet, GetPigsWithTag, Pig } from "../database/Pigs";
 import { GetServerInfo, ServerInfo } from "../database/ServerInfo";
 import { IsChristmas } from "../Utils/SeasonalEvents";
-import { LogError, LogInfo, PrintServer, PrintUser } from "../Utils/Log";
-import { GetPack, GetPackByName } from "../database/Packs";
-import { DropPack } from "../Utils/DropPack";
+import { LogError, LogInfo, PrintChannel, PrintServer, PrintUser } from "../Utils/Log";
+import { GetPackByName } from "../database/Packs";
 import { existsSync } from "fs";
 
 
@@ -412,6 +411,16 @@ export const OpenPack = new Button("OpenPack",
         userInfo.LastTimeOpened = currentTime;
 
         const embed = interaction.message.embeds[0];
+
+        if(embed === undefined){
+            LogError(`Couldn't get embed from message in channel ${PrintChannel(interaction.channel as any as GuildChannel)} in server ${PrintServer(server)}`)
+            const errorEmbed = MakeErrorEmbed(`Couldn't get embed from message`, `Make sure the bot is able to send embeds`);
+            interaction.followUp({
+                embeds: [errorEmbed]
+            });
+            return;
+        }
+
         const editedEmbed = new EmbedBuilder(embed.data);
         const openedImg = GetEditedEmbed(editedEmbed, msgInfo);
         

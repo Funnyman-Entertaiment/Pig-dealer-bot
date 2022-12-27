@@ -300,6 +300,14 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (_, interaction, db) =>
     msgInfo.Opened = true;
     userInfo.LastTimeOpened = currentTime;
     const embed = interaction.message.embeds[0];
+    if (embed === undefined) {
+        (0, Log_1.LogError)(`Couldn't get embed from message in channel ${(0, Log_1.PrintChannel)(interaction.channel)} in server ${(0, Log_1.PrintServer)(server)}`);
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`Couldn't get embed from message`, `Make sure the bot is able to send embeds`);
+        interaction.followUp({
+            embeds: [errorEmbed]
+        });
+        return;
+    }
     const editedEmbed = new builders_1.EmbedBuilder(embed.data);
     const openedImg = GetEditedEmbed(editedEmbed, msgInfo);
     const row = new discord_js_1.ActionRowBuilder()
