@@ -33,6 +33,9 @@ async function DropPack(title, pack, channel, server, serverInfo, userId, ping =
     if (channel.type !== discord_js_1.ChannelType.GuildText) {
         return;
     }
+    if (server.id !== "1009766631364382731") {
+        return;
+    }
     let img = `${pack.ID}.png`;
     const packEmbed = new discord_js_1.EmbedBuilder()
         .setTitle(title)
@@ -48,8 +51,9 @@ async function DropPack(title, pack, channel, server, serverInfo, userId, ping =
     if (permissions === undefined) {
         return;
     }
+    console.log(permissions);
     if (!permissions.has("SendMessages") || !permissions.has("ViewChannel")) {
-        console.log(`[WARN] Not enough permissions to send messages in ${(0, Log_1.PrintServer)(server)}`);
+        (0, Log_1.LogWarn)(`Not enough permissions to send messages in ${(0, Log_1.PrintServer)(server)}`);
         SendNotEnoughPermissionsMsg(channel, server);
         return;
     }
