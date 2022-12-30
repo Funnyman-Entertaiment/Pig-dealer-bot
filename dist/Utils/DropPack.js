@@ -7,6 +7,7 @@ const ColorPerPackRarity_1 = require("../Constants/ColorPerPackRarity");
 const Errors_1 = require("./Errors");
 const MessageInfo_1 = require("../database/MessageInfo");
 const Log_1 = require("./Log");
+const lite_1 = require("firebase/firestore/lite");
 function SendNotEnoughPermissionsMsg(channel, server) {
     const channelName = channel.name;
     const serverName = server.name;
@@ -23,7 +24,11 @@ function SendNotEnoughPermissionsMsg(channel, server) {
     }
 }
 function SendGhostPing(channel, roleId) {
-    channel.send((0, discord_js_1.roleMention)(roleId)).then(message => message.delete());
+    try {
+        channel.send((0, discord_js_1.roleMention)(roleId)).then(message => message.delete());
+    }
+    catch (error) {
+    }
 }
 async function DropPack(title, pack, channel, server, serverInfo, userId, ping = false) {
     if (channel.type !== discord_js_1.ChannelType.GuildText) {
@@ -41,24 +46,36 @@ async function DropPack(title, pack, channel, server, serverInfo, userId, ping =
         .setStyle(discord_js_1.ButtonStyle.Primary));
     (0, Log_1.LogInfo)(`Sending ${pack.Name} to server with id: ${(0, Log_1.PrintServer)(server)}`);
     const permissions = server.members.me?.permissionsIn(channel);
+    const timeoutedDate = server.members.me?.communicationDisabledUntil;
+    if (timeoutedDate !== undefined && timeoutedDate !== null) {
+        const currentDate = lite_1.Timestamp.now().toDate();
+        if (currentDate < timeoutedDate) {
+            (0, Log_1.LogWarn)(`Bot is timeouted in ${(0, Log_1.PrintServer)(server)}`);
+            return;
+        }
+    }
     if (permissions === undefined) {
         return;
     }
     if (!permissions.has("SendMessages") || !permissions.has("ViewChannel")) {
-        console.log(`[WARN] Not enough permissions to send messages in ${(0, Log_1.PrintServer)(server)}`);
+        (0, Log_1.LogWarn)(`Not enough permissions to send messages in ${(0, Log_1.PrintServer)(server)}`);
         SendNotEnoughPermissionsMsg(channel, server);
         return;
     }
     if (serverInfo.Role !== undefined && ping) {
         SendGhostPing(channel, serverInfo.Role);
     }
-    channel.send({
-        components: [row],
-        embeds: [packEmbed],
-        files: [`./img/packs/${img}`]
-    }).then(async (message) => {
-        const newMessage = new MessageInfo_1.RandomPackMessage(message.id, server.id, pack.Name, pack.PigCount, pack.Set, pack.Tags, false, userId);
-        (0, MessageInfo_1.AddMessageInfoToCache)(newMessage, Bot_1.db);
-    });
+    try {
+        channel.send({
+            components: [row],
+            embeds: [packEmbed],
+            files: [`./img/packs/${img}`]
+        }).then(async (message) => {
+            const newMessage = new MessageInfo_1.RandomPackMessage(message.id, server.id, pack.Name, pack.PigCount, pack.Set, pack.Tags, false, userId);
+            (0, MessageInfo_1.AddMessageInfoToCache)(newMessage, Bot_1.db);
+        });
+    }
+    catch (error) {
+    }
 }
 exports.DropPack = DropPack;

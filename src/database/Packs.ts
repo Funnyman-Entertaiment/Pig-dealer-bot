@@ -67,3 +67,10 @@ export function GetPacksByRarity(rarity: PackRarity): Pack[]{
         return pack.Rarity === rarity;
     })
 }
+
+
+export function GetPackByName(name: string): Pack | undefined{
+    return Packs.find(pack => {
+        return pack.Name === name;
+    });
+}

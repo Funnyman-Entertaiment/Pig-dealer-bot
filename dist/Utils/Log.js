@@ -18,6 +18,9 @@ function PrintServer(server) {
 }
 exports.PrintServer = PrintServer;
 function PrintChannel(channel) {
+    if (channel === undefined || channel === null) {
+        return "- [-]";
+    }
     return `${channel.id} [${channel.name}]`;
 }
 exports.PrintChannel = PrintChannel;

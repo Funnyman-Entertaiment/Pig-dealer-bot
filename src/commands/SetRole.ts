@@ -47,7 +47,14 @@ export const SetBotRole = new Command(
         }
 
         //We need to update the db because we later get these with a direct query
-        await setDoc(doc(db, `serverInfo/${serverInfo.ID}`), serverInfo.GetData());
+        if(serverInfo.Channel === undefined){
+            await setDoc(doc(db, `serverInfo/${serverInfo.ID}`), {
+                Role: serverInfo.Role,
+                HasSpawnedGoldenPig: serverInfo.HasSpawnedGoldenPig
+            });
+        }else{
+            await setDoc(doc(db, `serverInfo/${serverInfo.ID}`), serverInfo.GetData());
+        }
 
         const successEmbed = new EmbedBuilder()
             .setTitle(`Role succesfully set to @${role.name}`)

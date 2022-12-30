@@ -93,7 +93,7 @@ export const ShowBinder = new Command(
             .setDescription(`1/${pigsSet.length}`)
             .setAuthor(author);
 
-        const imgPath = AddPigRenderToEmbed(openedPackEmbed, firstPig, false);
+        const imgPath = AddPigRenderToEmbed(openedPackEmbed, firstPig, false, true);
 
         const row = new ActionRowBuilder<ButtonBuilder>()
         .addComponents(
@@ -117,6 +117,7 @@ export const ShowBinder = new Command(
                 server.id,
                 0,
                 pigsSet,
+                [],
                 [],
                 interaction.user.id
             );

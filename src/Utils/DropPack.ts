@@ -5,10 +5,11 @@ import { Pack } from "../database/Packs";
 import { MakeErrorEmbed } from "./Errors";
 import { ServerInfo } from "../database/ServerInfo";
 import { RandomPackMessage, AddMessageInfoToCache } from "../database/MessageInfo";
-import { LogInfo, PrintServer } from "./Log";
+import { LogInfo, LogWarn, PrintServer } from "./Log";
+import { Timestamp } from "firebase/firestore/lite";
 
 
-function SendNotEnoughPermissionsMsg(channel: GuildTextBasedChannel, server: Guild){
+function SendNotEnoughPermissionsMsg(channel: GuildTextBasedChannel, server: Guild) {
     const channelName = channel.name;
     const serverName = server.name;
 
@@ -21,9 +22,9 @@ function SendNotEnoughPermissionsMsg(channel: GuildTextBasedChannel, server: Gui
         `the ${channelName} channel in the ${serverName} server.`
     );
 
-    if(owner === undefined){
+    if (owner === undefined) {
         console.log(`No owner has been found`);
-    }else{
+    } else {
         owner.send({
             embeds: [errorEmbed]
         });
@@ -31,8 +32,12 @@ function SendNotEnoughPermissionsMsg(channel: GuildTextBasedChannel, server: Gui
 }
 
 
-function SendGhostPing(channel: GuildTextBasedChannel, roleId: string){
-    channel.send(roleMention(roleId)).then(message => message.delete());
+function SendGhostPing(channel: GuildTextBasedChannel, roleId: string) {
+    try {
+        channel.send(roleMention(roleId)).then(message => message.delete());
+    } catch (error) {
+
+    }
 }
 
 
@@ -57,35 +62,49 @@ export async function DropPack(title: string, pack: Pack, channel: GuildTextBase
     LogInfo(`Sending ${pack.Name} to server with id: ${PrintServer(server)}`);
 
     const permissions = server.members.me?.permissionsIn(channel);
+    const timeoutedDate = server.members.me?.communicationDisabledUntil;
 
-    if(permissions === undefined){ return; }
+    if (timeoutedDate !== undefined && timeoutedDate !== null){
+        const currentDate = Timestamp.now().toDate();
 
-    if(!permissions.has("SendMessages") || !permissions.has("ViewChannel")){
-        console.log(`[WARN] Not enough permissions to send messages in ${PrintServer(server)}`);
+        if(currentDate < timeoutedDate){
+            LogWarn(`Bot is timeouted in ${PrintServer(server)}`);
+            return;
+        }
+    }
+
+    if (permissions === undefined) { return; }
+
+    if (!permissions.has("SendMessages") || !permissions.has("ViewChannel")) {
+        LogWarn(`Not enough permissions to send messages in ${PrintServer(server)}`);
         SendNotEnoughPermissionsMsg(channel, server);
         return;
     }
 
-    if(serverInfo.Role !== undefined && ping){
+    if (serverInfo.Role !== undefined && ping) {
         SendGhostPing(channel, serverInfo.Role);
     }
 
-    channel.send({
-        components: [row],
-        embeds: [packEmbed],
-        files: [`./img/packs/${img}`]
-    }).then(async message => {
-        const newMessage = new RandomPackMessage(
-            message.id,
-            server.id,
-            pack.Name,
-            pack.PigCount,
-            pack.Set,
-            pack.Tags,
-            false,
-            userId
-        );
+    try {
+        channel.send({
+            components: [row],
+            embeds: [packEmbed],
+            files: [`./img/packs/${img}`]
+        }).then(async message => {
+            const newMessage = new RandomPackMessage(
+                message.id,
+                server.id,
+                pack.Name,
+                pack.PigCount,
+                pack.Set,
+                pack.Tags,
+                false,
+                userId
+            );
 
-        AddMessageInfoToCache(newMessage, db);
-    });
+            AddMessageInfoToCache(newMessage, db);
+        });
+    } catch (error) {
+
+    }
 }

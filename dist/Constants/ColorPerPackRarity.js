@@ -6,5 +6,6 @@ exports.COLOR_PER_PACK_RARITY = {
     Default: discord_js_1.Colors.NotQuiteBlack,
     Common: discord_js_1.Colors.Green,
     Rare: discord_js_1.Colors.Blue,
-    [`Super Rare`]: discord_js_1.Colors.Orange
+    [`Super Rare`]: discord_js_1.Colors.Orange,
+    [`Special`]: discord_js_1.Colors.DarkGreen
 };

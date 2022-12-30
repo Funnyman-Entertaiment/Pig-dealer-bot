@@ -1,10 +1,12 @@
 import { EmbedBuilder } from "@discordjs/builders";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
-import { GetMessageInfo, GetMsgInfoCacheForServer, PigGalleryMessage } from "../database/MessageInfo";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, GuildChannel } from "discord.js";
+import { GetMessageInfo, PigGalleryMessage } from "../database/MessageInfo";
 import { GetPig } from "../database/Pigs";
 import { MakeErrorEmbed } from "../Utils/Errors";
 import { Button } from "../Button";
 import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
+import { DoesPigIdHaveUniqueEvent, TriggerUniquePigEvent } from "../uniquePigEvents/UniquePigEvents";
+import { LogError, PrintChannel, PrintServer } from "../Utils/Log";
 
 
 export const NextGallery = new Button("GalleryNext",
@@ -52,6 +54,15 @@ export const NextGallery = new Button("GalleryNext",
 
         msgInfo.CurrentPig++;
 
+        if(message.embeds[0] === undefined){
+            LogError(`Couldn't get embed from message in channel ${PrintChannel(interaction.channel as any as GuildChannel)} in server ${PrintServer(server)}`)
+            const errorEmbed = MakeErrorEmbed(`Couldn't get embed from message`, `Make sure the bot is able to send embeds`);
+            interaction.followUp({
+                embeds: [errorEmbed]
+            });
+            return;
+        }
+
         const editedEmbed = new EmbedBuilder(message.embeds[0].data)
             .setDescription(`${msgInfo.CurrentPig+1}/${msgInfo.Pigs.length}`);
 
@@ -72,7 +83,12 @@ export const NextGallery = new Button("GalleryNext",
             return;
         }
 
-        const imgPath = AddPigRenderToEmbed(editedEmbed, pig, msgInfo.NewPigs.includes(pig.ID));
+        const imgPath = AddPigRenderToEmbed(
+            editedEmbed,
+            pig,
+            msgInfo.NewPigs.includes(pig.ID),
+            !DoesPigIdHaveUniqueEvent(pigToLoad)
+        );
 
         const row = new ActionRowBuilder<ButtonBuilder>()
         .addComponents(
@@ -93,5 +109,10 @@ export const NextGallery = new Button("GalleryNext",
             files: [imgPath],
             components: [row]
         });
+
+        if(!msgInfo.SeenPigs.includes(msgInfo.CurrentPig)){
+            msgInfo.SeenPigs.push(msgInfo.CurrentPig);
+            TriggerUniquePigEvent(pigToLoad, interaction);
+        }
     }
 );

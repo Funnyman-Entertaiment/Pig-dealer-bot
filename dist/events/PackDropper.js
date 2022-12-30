@@ -36,7 +36,13 @@ async function SpawnRandomPack(client, db) {
                 const possiblePacks = (0, Packs_1.GetPacksByRarity)(chosenRarity);
                 var pack = possiblePacks[Math.floor(Math.random() * possiblePacks.length)];
                 const serverInfo = (0, ServerInfo_1.CreateServerInfoFromData)(server.id, server.data());
-                (0, DropPack_1.DropPack)(`A ${pack.Name} HAS APPEARED!`, pack, channel, guild, serverInfo, undefined, true);
+                let embedTitle = `A ${pack.Name} HAS APPEARED!`;
+                let vowelRegex = '^[aieouAIEOU].*';
+                let matched = pack.Name.match(vowelRegex);
+                if (matched) {
+                    embedTitle = `AN ${pack.Name} HAS APPEARED!`;
+                }
+                (0, DropPack_1.DropPack)(embedTitle, pack, channel, guild, serverInfo, undefined, true);
             });
         }
         catch (error) {

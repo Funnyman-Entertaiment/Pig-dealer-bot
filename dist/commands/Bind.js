@@ -76,7 +76,7 @@ exports.ShowBinder = new Command_1.Command(new discord_js_1.SlashCommandBuilder(
         .setTitle(`${author.name}'s pig bind`)
         .setDescription(`1/${pigsSet.length}`)
         .setAuthor(author);
-    const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(openedPackEmbed, firstPig, false);
+    const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(openedPackEmbed, firstPig, false, true);
     const row = new discord_js_1.ActionRowBuilder()
         .addComponents(new discord_js_1.ButtonBuilder()
         .setCustomId('GalleryPrevious')
@@ -90,7 +90,7 @@ exports.ShowBinder = new Command_1.Command(new discord_js_1.SlashCommandBuilder(
         components: [row],
         files: [imgPath]
     }).then(message => {
-        const newMessage = new MessageInfo_1.PigGalleryMessage(message.id, server.id, 0, pigsSet, [], interaction.user.id);
+        const newMessage = new MessageInfo_1.PigGalleryMessage(message.id, server.id, 0, pigsSet, [], [], interaction.user.id);
         (0, MessageInfo_1.AddMessageInfoToCache)(newMessage, db);
     });
     console.log("\n");
