@@ -16,6 +16,7 @@ import { GivePig } from "./commands/GivePig";
 import { SearchPig } from "./commands/SearchPig";
 import { Trade } from "./commands/Trade";
 import { Change12PackCooldown, Change5PackCooldown, ChangeOpeningCooldown, ChangePackCooldown } from "./commands/ChangeCooldowns";
+import { GreatWipe } from "./commands/GreatWipe";
 
 export const Commands = [
     Sex,
@@ -41,5 +42,6 @@ export const DebugCommands = [
     ChangeOpeningCooldown,
     ChangePackCooldown,
     Change5PackCooldown,
-    Change12PackCooldown
+    Change12PackCooldown,
+    GreatWipe
 ];
