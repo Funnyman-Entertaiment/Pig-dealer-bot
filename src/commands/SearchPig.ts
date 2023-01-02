@@ -1,8 +1,8 @@
-import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, Colors } from "discord.js";
+import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, Colors, Guild } from "discord.js";
 import { Command } from "../Command";
 import { GetPig } from "../database/Pigs";
 import { query, collection, getDocs } from "firebase/firestore/lite";
-import { db } from "../Bot";
+import { client, db } from "../Bot";
 import { GetAuthor } from "../Utils/GetAuthor";
 import { SaveAllUserInfo } from "../database/UserInfo";
 
@@ -52,6 +52,7 @@ export const SearchPig = new Command(
 
         for (let i = 0; i < userInfoDocs.docs.length; i++) {
             const userInfoDoc = userInfoDocs.docs[i];
+            if(!server.members.cache.has(userInfoDoc.id)){ continue; }
             const userInServer = await server.members.fetch(userInfoDoc.id);
 
             if (
@@ -78,19 +79,17 @@ export const SearchPig = new Command(
 
         const descriptionLines: string[] = [];
 
-        server.approximateMemberCount
-
         for (let i = 0; i < foundUsersWithPig.length; i++) {
             const foundUserID = foundUsersWithPig[i];
-            const foundMember = await server.members.fetch(foundUserID);
 
-            if (foundMember === undefined) { continue; }
+            if(!server.members.cache.has(foundUserID)){ continue; }
+            const foundMember = await server.members.fetch(foundUserID);
 
             if (foundMember.nickname === null) {
                 descriptionLines.push(`-${foundMember.user.username}`);
             } else {
                 descriptionLines.push(`-${foundMember.nickname} (${foundMember.user.username})`);
-            }
+            }  
         }
 
         const foundUsersEmbed = new EmbedBuilder()

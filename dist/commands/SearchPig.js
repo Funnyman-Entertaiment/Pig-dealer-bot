@@ -42,6 +42,9 @@ exports.SearchPig = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     const foundUsersWithPig = [];
     for (let i = 0; i < userInfoDocs.docs.length; i++) {
         const userInfoDoc = userInfoDocs.docs[i];
+        if (!server.members.cache.has(userInfoDoc.id)) {
+            continue;
+        }
         const userInServer = await server.members.fetch(userInfoDoc.id);
         if (userInfoDoc.data().Pigs[pigID] !== undefined &&
             userInfoDoc.id !== user.id &&
@@ -60,13 +63,12 @@ exports.SearchPig = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
         return;
     }
     const descriptionLines = [];
-    server.approximateMemberCount;
     for (let i = 0; i < foundUsersWithPig.length; i++) {
         const foundUserID = foundUsersWithPig[i];
-        const foundMember = await server.members.fetch(foundUserID);
-        if (foundMember === undefined) {
+        if (!server.members.cache.has(foundUserID)) {
             continue;
         }
+        const foundMember = await server.members.fetch(foundUserID);
         if (foundMember.nickname === null) {
             descriptionLines.push(`-${foundMember.user.username}`);
         }
