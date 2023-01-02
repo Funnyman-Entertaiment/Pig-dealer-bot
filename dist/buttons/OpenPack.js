@@ -60,7 +60,7 @@ function CanUserOpenPack(interaction, userInfo, msgInfo) {
     if (lastTimeOpened !== undefined &&
         currentTime.seconds - lastTimeOpened.seconds <= 60 * Variables_1.Cooldowns.MINUTES_PACK_OPENING_CD &&
         !msgInfo.IgnoreCooldown) {
-        const totalDiff = (60 * 30) - (currentTime.seconds - lastTimeOpened.seconds);
+        const totalDiff = (60 * Variables_1.Cooldowns.MINUTES_PACK_OPENING_CD) - (currentTime.seconds - lastTimeOpened.seconds);
         const minutes = Math.floor(totalDiff / 60);
         const seconds = totalDiff % 60;
         const waitEmbed = new builders_1.EmbedBuilder()

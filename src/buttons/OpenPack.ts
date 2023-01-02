@@ -70,7 +70,7 @@ function CanUserOpenPack(interaction: ButtonInteraction, userInfo: UserInfo, msg
         currentTime.seconds - lastTimeOpened.seconds <= 60 * Cooldowns.MINUTES_PACK_OPENING_CD &&
         !msgInfo.IgnoreCooldown
     ) {
-        const totalDiff = (60 * 30) - (currentTime.seconds - lastTimeOpened.seconds);
+        const totalDiff = (60 * Cooldowns.MINUTES_PACK_OPENING_CD) - (currentTime.seconds - lastTimeOpened.seconds);
         const minutes = Math.floor(totalDiff / 60);
         const seconds = totalDiff % 60;
 
