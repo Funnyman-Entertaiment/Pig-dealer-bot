@@ -118,7 +118,8 @@ export const ShowBinderList = new Command(
 
         const firstPigsPage = pigsBySet[firstSet].slice(0, Math.min(pigsBySet[firstSet].length, 9));
         AddPigListRenderToEmbed(catalogueEmbed, {
-            pigs: firstPigsPage.map(id => GetPig(id)).filter(pig => pig !== undefined) as any as Pig[]
+            pigs: firstPigsPage.map(id => GetPig(id)).filter(pig => pig !== undefined) as any as Pig[],
+            pigCounts: userInfo?.Pigs?? {}
         });
 
         const row = new ActionRowBuilder<ButtonBuilder>();
@@ -167,6 +168,7 @@ export const ShowBinderList = new Command(
             const messageInfo = new PigListMessage(
                 message.id,
                 server.id,
+                userInfo === undefined? {}: userInfo.Pigs,
                 pigsBySet,
                 firstSet,
                 0,

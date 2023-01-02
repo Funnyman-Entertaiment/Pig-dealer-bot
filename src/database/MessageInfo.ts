@@ -52,13 +52,15 @@ export class RandomPackMessage extends MessageInfo {
 
 export class PigGalleryMessage extends MessageInfo {
     CurrentPig: number;
+    PigCounts: {[key: string]: number};
     Pigs: string[];
     NewPigs: string[];
     SeenPigs: number[];
 
-    constructor(id: string, serverId: string, currentPig: number, pigs: string[], newPigs: string[], seenPigs: number[], user?: string, timeSent?: Timestamp) {
+    constructor(id: string, serverId: string, currentPig: number, pigCounts: {[key: string]: number}, pigs: string[], newPigs: string[], seenPigs: number[], user?: string, timeSent?: Timestamp) {
         super(id, serverId, "PigGallery", user, timeSent);
         this.CurrentPig = currentPig;
+        this.PigCounts = pigCounts;
         this.Pigs = pigs;
         this.NewPigs = newPigs;
         this.SeenPigs = seenPigs;
@@ -86,12 +88,14 @@ export class PigGalleryMessage extends MessageInfo {
 
 
 export class PigListMessage extends MessageInfo {
+    PigCounts: {[key: string]: number};
     PigsBySet: { [key: string]: string[] };
     CurrentSet: string;
     CurrentPage: number;
 
-    constructor(id: string, serverId: string, pigsBySet: { [key: string]: string[] }, currentSet: string, currentPage: number, user?: string, timeSent?: Timestamp) {
+    constructor(id: string, serverId: string, pigCounts: {[key: string]: number}, pigsBySet: { [key: string]: string[] }, currentSet: string, currentPage: number, user?: string, timeSent?: Timestamp) {
         super(id, serverId, "PigList", user, timeSent);
+        this.PigCounts = pigCounts;
         this.PigsBySet = pigsBySet;
         this.CurrentSet = currentSet;
         this.CurrentPage = currentPage;

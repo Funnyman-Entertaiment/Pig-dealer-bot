@@ -70,7 +70,8 @@ export const NextList = new Button("ListNext",
 
         const firstPigsPage = pigList.slice(pageStart, pageEnd);
         AddPigListRenderToEmbed(editedEmbed, {
-            pigs: firstPigsPage.map(id => GetPig(id)).filter(pig => pig !== undefined) as any as Pig[]
+            pigs: firstPigsPage.map(id => GetPig(id)).filter(pig => pig !== undefined) as any as Pig[],
+            pigCounts: msgInfo.PigCounts
         });
 
         const originalRow = message.components[0];

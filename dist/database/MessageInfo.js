@@ -1,55 +1,46 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetMessageInfo = exports.AddMessageInfosToCache = exports.AddMessageInfoToCache = exports.GetMessageInfoFromCache = exports.GetMsgInfoCacheForServer = exports.CreateMessageInfoFromData = exports.PigGalleryMessage = exports.RandomPackMessage = exports.MessageInfo = void 0;
+exports.GetTradeOfferForUser = exports.RemoveMessageInfoFromCache = exports.IsUserInTrade = exports.GetMessageInfo = exports.AddMessageInfosToCache = exports.AddMessageInfoToCache = exports.GetMessageInfoFromCache = exports.GetMsgInfoCacheForServer = exports.CachedMessageInfosPerServer = exports.PigTradeMessage = exports.PigListMessage = exports.PigGalleryMessage = exports.RandomPackMessage = exports.MessageInfo = void 0;
 const lite_1 = require("firebase/firestore/lite");
-const DatabaseCacheList_1 = require("./DatabaseCacheList");
 const DatabaseElement_1 = require("./DatabaseElement");
 class MessageInfo extends DatabaseElement_1.DatabaseElement {
     ServerId;
     Type;
     User;
-    constructor(id, serverId, type, user) {
+    TimeSent;
+    constructor(id, serverId, type, user, timeSent) {
         super(id);
         this.ServerId = serverId;
         this.Type = type;
         this.User = user;
+        this.TimeSent = timeSent ?? lite_1.Timestamp.now();
     }
 }
 exports.MessageInfo = MessageInfo;
 class RandomPackMessage extends MessageInfo {
-    Name;
-    PigCount;
-    Set;
-    Tags;
+    Pack;
     Opened;
-    constructor(id, serverId, name, pigCount, set, tags, opened, user) {
-        super(id, serverId, "RandomPack", user);
-        this.Name = name;
-        this.PigCount = pigCount,
-            this.Set = set;
-        this.Tags = tags;
+    IgnoreCooldown;
+    constructor(id, serverId, pack, opened, ignoreCooldown, user, timeSent) {
+        super(id, serverId, "RandomPack", user, timeSent);
+        this.Pack = pack;
         this.Opened = opened;
+        this.IgnoreCooldown = ignoreCooldown;
     }
     GetData() {
         if (this.User === undefined) {
             return {
                 Type: this.Type,
-                Name: this.Name,
-                PigCount: this.PigCount,
-                Set: this.Set,
-                Tags: this.Tags,
-                Opened: this.Opened
+                Opened: this.Opened,
+                Pack: this.Pack
             };
         }
         else {
             return {
                 Type: this.Type,
                 User: this.User,
-                Name: this.Name,
-                PigCount: this.PigCount,
-                Set: this.Set,
-                Tags: this.Tags,
-                Opened: this.Opened
+                Opened: this.Opened,
+                Pack: this.Pack
             };
         }
     }
@@ -57,12 +48,14 @@ class RandomPackMessage extends MessageInfo {
 exports.RandomPackMessage = RandomPackMessage;
 class PigGalleryMessage extends MessageInfo {
     CurrentPig;
+    PigCounts;
     Pigs;
     NewPigs;
     SeenPigs;
-    constructor(id, serverId, currentPig, pigs, newPigs, seenPigs, user) {
-        super(id, serverId, "PigGallery", user);
+    constructor(id, serverId, currentPig, pigCounts, pigs, newPigs, seenPigs, user, timeSent) {
+        super(id, serverId, "PigGallery", user, timeSent);
         this.CurrentPig = currentPig;
+        this.PigCounts = pigCounts;
         this.Pigs = pigs;
         this.NewPigs = newPigs;
         this.SeenPigs = seenPigs;
@@ -88,63 +81,101 @@ class PigGalleryMessage extends MessageInfo {
     }
 }
 exports.PigGalleryMessage = PigGalleryMessage;
-const CachedMessageInfosPerServer = {};
-function CreateMessageInfoFromData(id, serverId, msgInfoData) {
-    const msgType = msgInfoData.Type;
-    if (msgType == "RandomPack") {
-        const newRandomPackMsg = new RandomPackMessage(id, serverId, msgInfoData.Name, msgInfoData.PigCount, msgInfoData.Set, msgInfoData.Tags, msgInfoData.Opened, msgInfoData.User);
-        return newRandomPackMsg;
-    }
-    else {
-        const newPigGalleryMsg = new PigGalleryMessage(id, serverId, msgInfoData.CurrentPig, msgInfoData.Pigs, msgInfoData.NewPigs, msgInfoData.User);
-        return newPigGalleryMsg;
+class PigListMessage extends MessageInfo {
+    PigCounts;
+    PigsBySet;
+    CurrentSet;
+    CurrentPage;
+    constructor(id, serverId, pigCounts, pigsBySet, currentSet, currentPage, user, timeSent) {
+        super(id, serverId, "PigList", user, timeSent);
+        this.PigCounts = pigCounts;
+        this.PigsBySet = pigsBySet;
+        this.CurrentSet = currentSet;
+        this.CurrentPage = currentPage;
     }
 }
-exports.CreateMessageInfoFromData = CreateMessageInfoFromData;
+exports.PigListMessage = PigListMessage;
+class PigTradeMessage extends MessageInfo {
+    TradeStarterID;
+    TradeReceiverID;
+    TradeStarterOffer;
+    TradeReceiverOffer;
+    ChannelSentID;
+    constructor(id, serverId, tradeStarterId, tradeReceiverId, tradeStarterOffer, tradeReceiverOffer, channelSentID) {
+        super(id, serverId, "PigTrade", tradeReceiverId);
+        this.TradeStarterID = tradeStarterId;
+        this.TradeReceiverID = tradeReceiverId;
+        this.TradeStarterOffer = tradeStarterOffer;
+        this.TradeReceiverOffer = tradeReceiverOffer;
+        this.ChannelSentID = channelSentID;
+    }
+}
+exports.PigTradeMessage = PigTradeMessage;
+exports.CachedMessageInfosPerServer = {};
 function GetMsgInfoCacheForServer(serverId) {
-    let msgInfoCacheForServer = CachedMessageInfosPerServer[serverId];
+    let msgInfoCacheForServer = exports.CachedMessageInfosPerServer[serverId];
     if (msgInfoCacheForServer === undefined) {
-        CachedMessageInfosPerServer[serverId] = new DatabaseCacheList_1.DatabaseElementList();
-        msgInfoCacheForServer = CachedMessageInfosPerServer[serverId];
+        exports.CachedMessageInfosPerServer[serverId] = [];
+        msgInfoCacheForServer = exports.CachedMessageInfosPerServer[serverId];
     }
     return msgInfoCacheForServer;
 }
 exports.GetMsgInfoCacheForServer = GetMsgInfoCacheForServer;
 function GetMessageInfoFromCache(serverId, msgId) {
     let cachedMessageInfos = GetMsgInfoCacheForServer(serverId);
-    const found = cachedMessageInfos.Get(msgId);
+    const found = cachedMessageInfos.find(msg => msg.ID === msgId);
     return found;
 }
 exports.GetMessageInfoFromCache = GetMessageInfoFromCache;
-async function AddMessageInfoToCache(msgInfo, db) {
+function AddMessageInfoToCache(msgInfo) {
     let cachedMessageInfos = GetMsgInfoCacheForServer(msgInfo.ServerId);
-    await cachedMessageInfos.Add(msgInfo, db);
+    cachedMessageInfos.push(msgInfo);
 }
 exports.AddMessageInfoToCache = AddMessageInfoToCache;
-async function AddMessageInfosToCache(packs, db) {
+function AddMessageInfosToCache(packs) {
     for (let i = 0; i < packs.length; i++) {
         const pack = packs[i];
-        await AddMessageInfoToCache(pack, db);
+        AddMessageInfoToCache(pack);
     }
 }
 exports.AddMessageInfosToCache = AddMessageInfosToCache;
-async function GetMessageInfo(serverId, msgId, db) {
+function GetMessageInfo(serverId, msgId) {
     const cachedMsgInfo = GetMessageInfoFromCache(serverId, msgId);
-    if (cachedMsgInfo === undefined) {
-        const msgInfoDocument = (0, lite_1.doc)(db, `serverInfo/${serverId}/messages/${msgId}`);
-        const foundMsgInfo = await (0, lite_1.getDoc)(msgInfoDocument);
-        if (foundMsgInfo.exists()) {
-            const serverInfoData = foundMsgInfo.data();
-            const newServerInfo = CreateMessageInfoFromData(msgId, serverId, serverInfoData);
-            AddMessageInfoToCache(newServerInfo, db);
-            return newServerInfo;
-        }
-        else {
-            return undefined;
-        }
-    }
-    else {
-        return cachedMsgInfo;
-    }
+    return cachedMsgInfo;
 }
 exports.GetMessageInfo = GetMessageInfo;
+function IsUserInTrade(userId) {
+    for (const serverID in exports.CachedMessageInfosPerServer) {
+        const cachedMessages = exports.CachedMessageInfosPerServer[serverID];
+        const isInTrade = cachedMessages.some(m => {
+            const message = m;
+            return message.Type === "PigTrade" &&
+                (message.TradeStarterID === userId || message.TradeReceiverID === userId);
+        });
+        if (isInTrade) {
+            return true;
+        }
+    }
+    return false;
+}
+exports.IsUserInTrade = IsUserInTrade;
+function RemoveMessageInfoFromCache(msgInfo) {
+    const msgInfoCache = GetMsgInfoCacheForServer(msgInfo.ServerId);
+    const index = msgInfoCache.indexOf(msgInfo);
+    msgInfoCache.splice(index, 1);
+}
+exports.RemoveMessageInfoFromCache = RemoveMessageInfoFromCache;
+function GetTradeOfferForUser(userID) {
+    for (const serverID in exports.CachedMessageInfosPerServer) {
+        const messagesCache = exports.CachedMessageInfosPerServer[serverID];
+        const foundTrade = messagesCache.find(m => {
+            const message = m;
+            return message.Type === "PigTrade" && message.TradeReceiverID === userID;
+        });
+        if (foundTrade !== undefined) {
+            return foundTrade;
+        }
+    }
+    return undefined;
+}
+exports.GetTradeOfferForUser = GetTradeOfferForUser;

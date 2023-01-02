@@ -4,39 +4,19 @@ exports.DropPack = void 0;
 const discord_js_1 = require("discord.js");
 const Bot_1 = require("../Bot");
 const ColorPerPackRarity_1 = require("../Constants/ColorPerPackRarity");
-const Errors_1 = require("./Errors");
 const MessageInfo_1 = require("../database/MessageInfo");
 const Log_1 = require("./Log");
-const lite_1 = require("firebase/firestore/lite");
-function SendNotEnoughPermissionsMsg(channel, server) {
-    const channelName = channel.name;
-    const serverName = server.name;
-    const ownerId = server.ownerId;
-    const owner = Bot_1.client.users.cache.get(ownerId);
-    const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Pig dealer is missing permissions", "Pig dealer doesn't have enough permissions for", `the ${channelName} channel in the ${serverName} server.`);
-    if (owner === undefined) {
-        console.log(`No owner has been found`);
-    }
-    else {
-        owner.send({
-            embeds: [errorEmbed]
-        });
-    }
-}
-function SendGhostPing(channel, roleId) {
-    try {
-        channel.send((0, discord_js_1.roleMention)(roleId)).then(message => message.delete());
-    }
-    catch (error) {
-    }
-}
-async function DropPack(title, pack, channel, server, serverInfo, userId, ping = false) {
-    if (channel.type !== discord_js_1.ChannelType.GuildText) {
+const SendMessage_1 = require("./SendMessage");
+async function DropPack(serverInfo, options) {
+    const server = await Bot_1.client.guilds.fetch(serverInfo.ID);
+    if (serverInfo.Channel === undefined) {
+        (0, Log_1.LogWarn)(`Can't send pack to server ${(0, Log_1.PrintServer)(server)} because it doesn't have a set channel`);
         return;
     }
+    const pack = options.pack;
     let img = `${pack.ID}.png`;
     const packEmbed = new discord_js_1.EmbedBuilder()
-        .setTitle(title)
+        .setTitle(options.title)
         .setImage(`attachment://${img}`)
         .setColor(ColorPerPackRarity_1.COLOR_PER_PACK_RARITY[pack.Rarity]);
     const row = new discord_js_1.ActionRowBuilder()
@@ -45,37 +25,25 @@ async function DropPack(title, pack, channel, server, serverInfo, userId, ping =
         .setLabel('Open!')
         .setStyle(discord_js_1.ButtonStyle.Primary));
     (0, Log_1.LogInfo)(`Sending ${pack.Name} to server with id: ${(0, Log_1.PrintServer)(server)}`);
-    const permissions = server.members.me?.permissionsIn(channel);
-    const timeoutedDate = server.members.me?.communicationDisabledUntil;
-    if (timeoutedDate !== undefined && timeoutedDate !== null) {
-        const currentDate = lite_1.Timestamp.now().toDate();
-        if (currentDate < timeoutedDate) {
-            (0, Log_1.LogWarn)(`Bot is timeouted in ${(0, Log_1.PrintServer)(server)}`);
-            return;
-        }
-    }
-    if (permissions === undefined) {
-        return;
-    }
-    if (!permissions.has("SendMessages") || !permissions.has("ViewChannel")) {
-        (0, Log_1.LogWarn)(`Not enough permissions to send messages in ${(0, Log_1.PrintServer)(server)}`);
-        SendNotEnoughPermissionsMsg(channel, server);
-        return;
-    }
-    if (serverInfo.Role !== undefined && ping) {
-        SendGhostPing(channel, serverInfo.Role);
-    }
-    try {
-        channel.send({
-            components: [row],
-            embeds: [packEmbed],
-            files: [`./img/packs/${img}`]
-        }).then(async (message) => {
-            const newMessage = new MessageInfo_1.RandomPackMessage(message.id, server.id, pack.Name, pack.PigCount, pack.Set, pack.Tags, false, userId);
-            (0, MessageInfo_1.AddMessageInfoToCache)(newMessage, Bot_1.db);
+    if (serverInfo.Role !== undefined && (options.ping !== undefined && options.ping)) {
+        (0, SendMessage_1.TrySendAutoRemoveMessage)(serverInfo.ID, serverInfo.Channel, {
+            content: (0, discord_js_1.roleMention)(serverInfo.Role)
         });
     }
-    catch (error) {
+    const msgPromise = (0, SendMessage_1.TrySendMessageToChannel)(serverInfo.ID, serverInfo.Channel, {
+        embeds: [packEmbed],
+        components: [row],
+        files: [`./img/packs/${img}`]
+    });
+    if (msgPromise === undefined) {
+        return;
     }
+    msgPromise.then(message => {
+        if (message === undefined) {
+            return;
+        }
+        const newMessage = new MessageInfo_1.RandomPackMessage(message.id, server.id, pack.ID, false, options.ignoreCooldown ?? false, options.userId);
+        (0, MessageInfo_1.AddMessageInfoToCache)(newMessage);
+    });
 }
 exports.DropPack = DropPack;

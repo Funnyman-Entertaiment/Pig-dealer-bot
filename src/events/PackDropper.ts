@@ -114,7 +114,7 @@ async function Set12PackSpawn() {
 export const PackDropper = function () {
     setTimeout(async () => {
         SpawnRandomPack();
-    }, 1000 * 5);
+    }, 1000 * 60 * 7);
 
     Set5PackSpawn();
 

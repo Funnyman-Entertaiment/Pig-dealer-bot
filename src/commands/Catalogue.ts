@@ -61,7 +61,8 @@ export const Catalogue = new Command(
 
         const firstPigsPage = pigsBySet[firstSet].slice(0, Math.min(pigsBySet[firstSet].length, 9));
         AddPigListRenderToEmbed(catalogueEmbed, {
-            pigs: firstPigsPage.map(id => GetPig(id)).filter(pig => pig !== undefined) as any as Pig[]
+            pigs: firstPigsPage.map(id => GetPig(id)).filter(pig => pig !== undefined) as any as Pig[],
+            pigCounts: {}
         });
 
         const row = new ActionRowBuilder<ButtonBuilder>()
@@ -94,6 +95,7 @@ export const Catalogue = new Command(
             const messageInfo = new PigListMessage(
                 message.id,
                 serverId,
+                {},
                 pigsBySet,
                 firstSet,
                 0,

@@ -12,5 +12,6 @@ exports.COLOR_PER_PIG_RARITY = {
     Christmas: discord_js_1.Colors.DarkGreen,
     Postcard: discord_js_1.Colors.DarkRed,
     ["Postcard (Animated)"]: discord_js_1.Colors.DarkRed,
-    ["Christmas Bundle"]: discord_js_1.Colors.DarkGreen
+    ["Christmas Bundle"]: discord_js_1.Colors.DarkGreen,
+    ["Apology Present"]: discord_js_1.Colors.White
 };

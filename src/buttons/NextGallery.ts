@@ -86,7 +86,8 @@ export const NextGallery = new Button("GalleryNext",
         const imgPath = AddPigRenderToEmbed(editedEmbed, {
             pig: pig,
             new: msgInfo.NewPigs.includes(pig.ID),
-            showId: !DoesPigIdHaveUniqueEvent(pigToLoad)
+            showId: !DoesPigIdHaveUniqueEvent(pigToLoad),
+            count: msgInfo.PigCounts[pig.ID]
         });
 
         const row = new ActionRowBuilder<ButtonBuilder>()
@@ -95,7 +96,7 @@ export const NextGallery = new Button("GalleryNext",
                 .setCustomId('GalleryPrevious')
                 .setLabel('Previous')
                 .setStyle(ButtonStyle.Primary)
-                .setDisabled(false),
+                .setDisabled(msgInfo.Pigs.length === 1),
             new ButtonBuilder()
                 .setCustomId('GalleryNext')
                 .setLabel('Next')

@@ -79,7 +79,8 @@ export const NextSet = new Button("SetNext",
 
         const firstPigsPage = msgInfo.PigsBySet[newSet].slice(0, Math.min(msgInfo.PigsBySet[newSet].length, 9));
         AddPigListRenderToEmbed(editedEmbed, {
-            pigs: firstPigsPage.map(id => GetPig(id)).filter(pig => pig !== undefined) as any as Pig[]
+            pigs: firstPigsPage.map(id => GetPig(id)).filter(pig => pig !== undefined) as any as Pig[],
+            pigCounts: msgInfo.PigCounts
         });
 
         const originalRow = message.components[0];

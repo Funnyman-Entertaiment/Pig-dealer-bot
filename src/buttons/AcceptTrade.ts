@@ -18,7 +18,7 @@ function RemoveOfferedPigsFromUser(userInfo: UserInfo, pigOffer: {[key: string]:
 
         userInfo.Pigs[pigID] = Math.max(0, originalAmount - pigAmount);
 
-        if(userInfo.Pigs[pigID] === 0){
+        if(userInfo.Pigs[pigID] <= 0){
             delete userInfo.Pigs[pigID];
         }
     }

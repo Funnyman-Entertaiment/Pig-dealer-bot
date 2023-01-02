@@ -258,6 +258,7 @@ function GetOpenPackFollowUp(packName: string, chosenPigs: Pig[], newPigs: strin
     const imgPath = AddPigRenderToEmbed(openedPackEmbed, {
         pig: chosenPigs[0],
         new: newPigs.includes(chosenPigs[0].ID),
+        count: 1
     });
 
     if (imgPath === undefined) { return; }
@@ -305,6 +306,7 @@ function SendOpenPackFollowUp(userInfo: UserInfo, chosenPigs: Pig[], pigsToShowI
             message.id,
             serverId,
             0,
+            {},
             pigsToShowInPack.map(pig => pig.ID),
             newPigs,
             [],

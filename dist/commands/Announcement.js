@@ -193,7 +193,8 @@ exports.Announcement = new Command_1.Command(new discord_js_1.SlashCommandBuilde
     .addSubcommand(subcommand => subcommand
     .setName("send")
     .setDescription("Sends the embed announcement to every server the bot is in"))
-    .setDescription("Manages everything about announcements"), async (_client, interaction) => {
+    .setDescription("Manages everything about announcements"), async (interaction) => {
+    await interaction.deferReply();
     const subcommand = interaction.options.getSubcommand();
     if (subcommand === undefined) {
         return;

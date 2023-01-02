@@ -94,7 +94,8 @@ export const ShowBinder = new Command(
             .setAuthor(author);
 
         const imgPath = AddPigRenderToEmbed(openedPackEmbed, {
-            pig: firstPig
+            pig: firstPig,
+            count: userInfo?.Pigs[firstPig.ID]?? 1
         });
 
         const row = new ActionRowBuilder<ButtonBuilder>()
@@ -102,11 +103,13 @@ export const ShowBinder = new Command(
             new ButtonBuilder()
                 .setCustomId('GalleryPrevious')
                 .setLabel('Previous')
-                .setStyle(ButtonStyle.Primary),
+                .setStyle(ButtonStyle.Primary)
+                .setDisabled(true),
             new ButtonBuilder()
                 .setCustomId('GalleryNext')
                 .setLabel('Next')
                 .setStyle(ButtonStyle.Primary)
+                .setDisabled(pigs.length === 1)
         );
 
         await interaction.followUp({
@@ -118,6 +121,7 @@ export const ShowBinder = new Command(
                 message.id,
                 server.id,
                 0,
+                userInfo === undefined? {}: userInfo.Pigs,
                 pigs,
                 [],
                 [],

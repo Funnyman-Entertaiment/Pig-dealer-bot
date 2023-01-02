@@ -5,6 +5,7 @@ import { COLOR_PER_PIG_RARITY } from "../Constants/ColorPerPigRarity";
 
 export interface PigRenderOptions {
     pig: Pig,
+    count?: number,
     new?: boolean,
     showId?: boolean,
     favourite?: boolean
@@ -43,8 +44,10 @@ export function AddPigRenderToEmbed(embed: EmbedBuilder, options: PigRenderOptio
 
     const embedDescription = embedDescriptionLines.join("\n");
 
+    const count = options.count?? 1;
+
     embed.setFields({
-        name: pig.Name,
+        name: `${pig.Name} ${count === 1? "" : `(${count})`}`,
         value: embedDescription
     })
     .setImage(`attachment://${img}`)
@@ -55,15 +58,22 @@ export function AddPigRenderToEmbed(embed: EmbedBuilder, options: PigRenderOptio
 
 
 export interface PigListRenderOptions {
-    pigs: Pig[]
+    pigs: Pig[],
+    pigCounts: {[key: string]: number}
 }
 
 export function AddPigListRenderToEmbed(embed: EmbedBuilder, options: PigListRenderOptions){
     embed.setFields([]);
 
     embed.addFields(options.pigs.map(pig => {
+        const count = options.pigCounts[pig.ID]?? 1;
+        let number = "";
+        if(count !== 1){
+            number = ` (${count})`;
+        }
+
         return {
-            name: `${pig.Name} #${pig.ID.padStart(3, "0")}`,
+            name: `${pig.Name} #${pig.ID.padStart(3, "0")}${number}`,
             value: `_${pig.Rarity}_\n${pig.Description}`,
             inline: true
         };
