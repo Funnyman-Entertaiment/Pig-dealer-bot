@@ -4,8 +4,8 @@ import { GetMessageInfo, PigTradeMessage, RemoveMessageInfoFromCache } from "../
 import { MakeErrorEmbed } from "../Utils/Errors";
 import { EmbedBuilder } from "@discordjs/builders";
 import { Colors } from "discord.js";
-import { CheckAndSendAssemblyPigEmbeds } from "src/Utils/AssemblyyPigs";
-import { GetPig, Pig } from "src/database/Pigs";
+import { CheckAndSendAssemblyPigEmbeds } from "../Utils/AssemblyyPigs";
+import { GetPig, Pig } from "../database/Pigs";
 
 function RemoveOfferedPigsFromUser(userInfo: UserInfo, pigOffer: {[key: string]: number}){
     let hasAddedPig = false;

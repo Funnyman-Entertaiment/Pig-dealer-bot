@@ -12,7 +12,8 @@ export type PigRarity =
     "Postcard" | 
     "Postcard (Animated)" | 
     "Christmas Bundle" |
-    "New Year";
+    "New Year" |
+    "Apology Present";
 
 
 export class Pig extends DatabaseElement {

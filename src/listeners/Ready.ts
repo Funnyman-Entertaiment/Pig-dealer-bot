@@ -25,7 +25,7 @@ export default () => {
 
         console.log(`${client.user.username} is online`);
 
-        PackDropper(client, db);
+        PackDropper();
         SaveCachePeriodically();
         RemoveOldMessagesFromCache();
     });

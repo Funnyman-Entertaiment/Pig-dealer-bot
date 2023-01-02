@@ -1,11 +1,11 @@
 import { getDocs, query, collection } from "firebase/firestore/lite"
-import { GetPack, GetPacksByRarity, Pack, PackRarity } from "../database/Packs";
+import { GetPack } from "../database/Packs";
 import { DropPack } from "../Utils/DropPack";
 import { CreateServerInfoFromData } from "../database/ServerInfo";
-import { LogError, LogInfo } from "../Utils/Log";
-import { db, client } from "../Bot";
-import { Cooldowns } from "src/Constants/Variables";
-import { PACK_12, PACK_2, PACK_5 } from "src/Constants/SignificantPackIDs";
+import { LogInfo } from "../Utils/Log";
+import { db } from "../Bot";
+import { Cooldowns } from "../Constants/Variables";
+import { PACK_12, PACK_2, PACK_5 } from "../Constants/SignificantPackIDs";
 
 
 let packsUntil5Pack = -1;
@@ -75,13 +75,15 @@ async function SpawnRandomPack() {
 
 async function Set5PackSpawn() {
     const maxPackNum = Math.floor(Cooldowns.MINUTES_BETWEEN_5_PACKS / Cooldowns.MINUTES_BETWEEN_PACKS)
-
+    
     if (maxPackNum <= 0) {
         return;
     }
 
     if (packsUntil12Pack >= 0 && packsUntil12Pack <= maxPackNum) {
         packsUntil5Pack = GetRandomNumber(maxPackNum, packsUntil12Pack);
+    }else{
+        packsUntil5Pack = GetRandomNumber(maxPackNum);
     }
 
     setTimeout(() => {
@@ -98,6 +100,8 @@ async function Set12PackSpawn() {
     }
 
     if (packsUntil5Pack >= 0 && packsUntil5Pack <= maxPackNum) {
+        packsUntil12Pack = GetRandomNumber(maxPackNum, packsUntil5Pack);
+    }else{
         packsUntil12Pack = GetRandomNumber(maxPackNum, packsUntil5Pack);
     }
 
