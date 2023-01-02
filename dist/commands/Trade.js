@@ -9,13 +9,22 @@ const MessageInfo_1 = require("../database/MessageInfo");
 const UserInfo_1 = require("../database/UserInfo");
 const Bot_1 = require("../Bot");
 const Errors_1 = require("../Utils/Errors");
-function ParseTradePigsString(pigsString) {
+function ParseTradePigsString(interaction, pigsString) {
     const pigTokens = pigsString.split(',');
     const pigAmounts = {};
+    let hasFoundNonPig = undefined;
+    let hasFoundUnformattedPig = undefined;
     pigTokens.forEach(token => {
+        if (hasFoundNonPig !== undefined) {
+            return;
+        }
+        if (hasFoundUnformattedPig !== undefined) {
+            return;
+        }
         const pigID = token.split('(')[0].trim();
         const pig = (0, Pigs_1.GetPig)(pigID);
         if (pig === undefined) {
+            hasFoundNonPig = pigID;
             return;
         }
         const pigNumberStr = token.split('(')[1];
@@ -23,7 +32,8 @@ function ParseTradePigsString(pigsString) {
         if (pigNumberStr !== undefined) {
             pigNumber = parseInt(pigNumberStr.replace(')', '').trim());
         }
-        if (Number.isNaN(pigNumber)) {
+        if (Number.isNaN(pigNumber) || pigNumber <= 0) {
+            hasFoundUnformattedPig = token;
             return;
         }
         if (pigAmounts[pigID] === undefined) {
@@ -31,6 +41,28 @@ function ParseTradePigsString(pigsString) {
         }
         pigAmounts[pigID] += pigNumber;
     });
+    if (hasFoundNonPig !== undefined) {
+        const errorEmbed = new discord_js_1.EmbedBuilder()
+            .setTitle("You're trying to give something that isn't a pig")
+            .setDescription(`You need to type the pig's id, but you typed: ${hasFoundNonPig}`)
+            .setColor(discord_js_1.Colors.Red);
+        interaction.reply({
+            embeds: [errorEmbed],
+            ephemeral: true
+        });
+        return undefined;
+    }
+    if (hasFoundUnformattedPig !== undefined) {
+        const errorEmbed = new discord_js_1.EmbedBuilder()
+            .setTitle("You typed something wrong")
+            .setDescription(`The bot found some issue trying to figure out what pigs you wanted to give from here: ${hasFoundUnformattedPig}`)
+            .setColor(discord_js_1.Colors.Red);
+        interaction.reply({
+            embeds: [errorEmbed],
+            ephemeral: true
+        });
+        return undefined;
+    }
     return pigAmounts;
 }
 function GetFieldDescriptionFromPigAmounts(pigAmounts) {
@@ -98,7 +130,10 @@ async function NewTrade(interaction, options) {
     const receiverInfo = await (0, UserInfo_1.GetUserInfo)(tradeReceiver.id) ?? new UserInfo_1.UserInfo(tradeReceiver.id, [], {});
     await (0, UserInfo_1.AddUserInfosToCache)([starterInfo, receiverInfo]);
     const pigsString = options.getString("pigs") ?? "";
-    const pigAmounts = ParseTradePigsString(pigsString);
+    const pigAmounts = ParseTradePigsString(interaction, pigsString);
+    if (pigAmounts === undefined) {
+        return;
+    }
     for (const pigID in pigAmounts) {
         const amount = pigAmounts[pigID];
         const owned = starterInfo.Pigs[pigID] ?? 0;
@@ -163,7 +198,10 @@ async function CounterOfferTrade(interaction, options) {
     const receiverInfo = await (0, UserInfo_1.GetUserInfo)(msgInfo.TradeReceiverID) ?? new UserInfo_1.UserInfo(msgInfo.TradeReceiverID, [], {});
     await (0, UserInfo_1.AddUserInfosToCache)([starterInfo, receiverInfo]);
     const pigsString = options.getString("pigs") ?? "";
-    const pigAmounts = ParseTradePigsString(pigsString);
+    const pigAmounts = ParseTradePigsString(interaction, pigsString);
+    if (pigAmounts === undefined) {
+        return;
+    }
     for (const pigID in pigAmounts) {
         const amount = pigAmounts[pigID];
         const owned = receiverInfo.Pigs[pigID] ?? 0;

@@ -1,8 +1,8 @@
-import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, Colors, Guild } from "discord.js";
+import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, Colors } from "discord.js";
 import { Command } from "../Command";
 import { GetPig } from "../database/Pigs";
 import { query, collection, getDocs } from "firebase/firestore/lite";
-import { client, db } from "../Bot";
+import { db } from "../Bot";
 import { GetAuthor } from "../Utils/GetAuthor";
 import { SaveAllUserInfo } from "../database/UserInfo";
 

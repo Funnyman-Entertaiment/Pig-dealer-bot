@@ -7,17 +7,24 @@ import { AddUserInfosToCache, GetUserInfo, UserInfo } from "../database/UserInfo
 import { client } from "../Bot";
 import { MakeErrorEmbed } from "../Utils/Errors";
 
-function ParseTradePigsString(pigsString: string) {
+function ParseTradePigsString(interaction: CommandInteraction, pigsString: string) {
     const pigTokens = pigsString.split(',');
 
     const pigAmounts: { [key: string]: number } = {};
 
+    let hasFoundNonPig: string | undefined = undefined;
+    let hasFoundUnformattedPig: string | undefined = undefined;
+
     pigTokens.forEach(token => {
+        if(hasFoundNonPig !== undefined){ return; }
+        if(hasFoundUnformattedPig !== undefined){ return; }
+
         const pigID = token.split('(')[0].trim();
 
         const pig = GetPig(pigID);
 
         if (pig === undefined) {
+            hasFoundNonPig = pigID;
             return;
         }
 
@@ -28,7 +35,8 @@ function ParseTradePigsString(pigsString: string) {
             pigNumber = parseInt(pigNumberStr.replace(')', '').trim());
         }
 
-        if (Number.isNaN(pigNumber)) {
+        if (Number.isNaN(pigNumber) || pigNumber <= 0) {
+            hasFoundUnformattedPig = token;
             return;
         }
 
@@ -38,6 +46,32 @@ function ParseTradePigsString(pigsString: string) {
 
         pigAmounts[pigID] += pigNumber;
     });
+
+    if(hasFoundNonPig !== undefined){
+        const errorEmbed = new EmbedBuilder()
+            .setTitle("You're trying to give something that isn't a pig")
+            .setDescription(`You need to type the pig's id, but you typed: ${hasFoundNonPig}`)
+            .setColor(Colors.Red);
+        interaction.reply({
+            embeds: [errorEmbed],
+            ephemeral: true
+        });
+
+        return undefined;
+    }
+
+    if(hasFoundUnformattedPig !== undefined){
+        const errorEmbed = new EmbedBuilder()
+            .setTitle("You typed something wrong")
+            .setDescription(`The bot found some issue trying to figure out what pigs you wanted to give from here: ${hasFoundUnformattedPig}`)
+            .setColor(Colors.Red);
+        interaction.reply({
+            embeds: [errorEmbed],
+            ephemeral: true
+        });
+
+        return undefined;
+    }
 
     return pigAmounts;
 }
@@ -124,7 +158,11 @@ async function NewTrade(interaction: CommandInteraction, options: CommandInterac
 
     const pigsString = options.getString("pigs") ?? "";
 
-    const pigAmounts = ParseTradePigsString(pigsString);
+    const pigAmounts = ParseTradePigsString(interaction, pigsString);
+
+    if(pigAmounts === undefined){
+        return;
+    }
 
     for (const pigID in pigAmounts) {
         const amount = pigAmounts[pigID];
@@ -223,7 +261,11 @@ async function CounterOfferTrade(interaction: CommandInteraction, options: Comma
 
     const pigsString = options.getString("pigs") ?? "";
 
-    const pigAmounts = ParseTradePigsString(pigsString);
+    const pigAmounts = ParseTradePigsString(interaction, pigsString);
+
+    if(pigAmounts === undefined){
+        return;
+    }
 
     for (const pigID in pigAmounts) {
         const amount = pigAmounts[pigID];
