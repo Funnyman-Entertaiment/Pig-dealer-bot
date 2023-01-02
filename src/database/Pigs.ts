@@ -1,7 +1,18 @@
 import { DocumentData } from "firebase/firestore/lite";
 import { DatabaseElement } from "./DatabaseElement";
 
-type PigRarity = "Common" | "Rare" | "Epic" | "Legendary" | "Assembly" | "One of a kind" | "Christmas" | "Postcard" | "Postcard (Animated)" | "Christmas Bundle"
+export type PigRarity = 
+    "Common" | 
+    "Rare" | 
+    "Epic" | 
+    "Legendary" | 
+    "Assembly" | 
+    "One of a kind" | 
+    "Christmas" | 
+    "Postcard" | 
+    "Postcard (Animated)" | 
+    "Christmas Bundle" |
+    "New Year";
 
 
 export class Pig extends DatabaseElement {
@@ -41,6 +52,11 @@ let Pigs: Pig[] = [];
 
 export function AddPig(pig: Pig){
     Pigs.push(pig);
+}
+
+
+export function ClearPigs(){
+    Pigs = [];
 }
 
 

@@ -1,71 +1,118 @@
-import { Client, GuildTextBasedChannel } from "discord.js";
-import { getDocs, query, collection, Firestore, where } from "firebase/firestore/lite"
-import { GetPacksByRarity, Pack, PackRarity } from "../database/Packs";
+import { getDocs, query, collection } from "firebase/firestore/lite"
+import { GetPack, GetPacksByRarity, Pack, PackRarity } from "../database/Packs";
 import { DropPack } from "../Utils/DropPack";
 import { CreateServerInfoFromData } from "../database/ServerInfo";
-import { LogError, LogInfo, PrintServer } from "../Utils/Log";
+import { LogError, LogInfo } from "../Utils/Log";
+import { db, client } from "../Bot";
+import { Cooldowns } from "src/Constants/Variables";
+import { PACK_12, PACK_2, PACK_5 } from "src/Constants/SignificantPackIDs";
 
 
-async function SpawnRandomPack(client: Client, db: Firestore) {
+let packsUntil5Pack = -1;
+let packsUntil12Pack = -1;
+
+
+function GetRandomNumber(max: number, exception?: number): number {
+    if (exception === undefined) {
+        return Math.floor(Math.random() * max);
+    }
+
+    let chosen = GetRandomNumber(max - 1);
+
+    if (chosen >= exception) {
+        return chosen + 1;
+    } else {
+        return chosen;
+    }
+}
+
+
+async function SpawnRandomPack() {
     const q = query(collection(db, "serverInfo"));
     const servers = await getDocs(q);
 
     LogInfo("Sending random packs.");
 
     servers.forEach(async server => {
-        if (server.data().Channel === undefined) { return; }
+        let pack = GetPack(PACK_2);
 
-        try {
-            await client.channels.fetch(server.data().Channel).then(async channel => {
-                if (channel === null) { return; }
-
-                const guild = await client.guilds.fetch(server.id);
-
-                //Get Random pack
-                let chosenRarity: PackRarity = "Default";
-
-                if (Math.random() <= 0.08) {
-                    const packChance = Math.random();
-
-                    if (packChance <= 0.7) {
-                        chosenRarity = "Common";
-                    } else if (packChance <= 0.9) {
-                        chosenRarity = "Rare"
-                    } else {
-                        chosenRarity = "Super Rare"
-                    }
-                }
-
-                const possiblePacks: Pack[] = GetPacksByRarity(chosenRarity);
-
-                var pack = possiblePacks[Math.floor(Math.random() * possiblePacks.length)];
-
-                const serverInfo = CreateServerInfoFromData(server.id, server.data());
-
-                let embedTitle = `A ${pack.Name} HAS APPEARED!`;
-                let vowelRegex = '^[aieouAIEOU].*';
-                let matched = pack.Name.match(vowelRegex);
-                if (matched) {
-                    embedTitle = `AN ${pack.Name} HAS APPEARED!`;
-                }
-
-                DropPack(embedTitle, pack, channel as GuildTextBasedChannel, guild, serverInfo, undefined, true);
-            });
-        } catch (error) {
-            LogError(`Bot doesn't have access to server ${server.id}`);
+        if (packsUntil5Pack === 0) {
+            pack = GetPack(PACK_5);
         }
+
+        if (packsUntil12Pack === 0) {
+            pack = GetPack(PACK_12);
+        }
+
+        if (packsUntil5Pack >= 0) { packsUntil5Pack--; }
+        if (packsUntil12Pack >= 0) { packsUntil12Pack--; }
+
+        if (pack === undefined) { return; }
+
+        const serverInfo = CreateServerInfoFromData(server.id, server.data());
+
+        let embedTitle = `A ${pack.Name} HAS APPEARED!`;
+        let vowelRegex = '^[aieouAIEOU].*';
+        let matched = pack.Name.match(vowelRegex);
+        if (matched) {
+            embedTitle = `AN ${pack.Name} HAS APPEARED!`;
+        }
+
+        DropPack(serverInfo, {
+            pack: pack,
+            title: embedTitle,
+            ping: true
+        });
     });
 
-    console.log("\n");
+    console.log("");
+
+    setTimeout(() => {
+        SpawnRandomPack();
+    }, 1000 * 60 * Cooldowns.MINUTES_BETWEEN_PACKS);
 }
 
 
-export const PackDropper = function (client: Client, db: Firestore) {
+async function Set5PackSpawn() {
+    const maxPackNum = Math.floor(Cooldowns.MINUTES_BETWEEN_5_PACKS / Cooldowns.MINUTES_BETWEEN_PACKS)
+
+    if (maxPackNum <= 0) {
+        return;
+    }
+
+    if (packsUntil12Pack >= 0 && packsUntil12Pack <= maxPackNum) {
+        packsUntil5Pack = GetRandomNumber(maxPackNum, packsUntil12Pack);
+    }
+
+    setTimeout(() => {
+        Set5PackSpawn();
+    }, 1000 * 60 * Cooldowns.MINUTES_BETWEEN_5_PACKS);
+}
+
+
+async function Set12PackSpawn() {
+    const maxPackNum = Math.floor(Cooldowns.MINUTES_BETWEEN_12_PACKS / Cooldowns.MINUTES_BETWEEN_PACKS)
+
+    if (maxPackNum <= 0) {
+        return;
+    }
+
+    if (packsUntil5Pack >= 0 && packsUntil5Pack <= maxPackNum) {
+        packsUntil12Pack = GetRandomNumber(maxPackNum, packsUntil5Pack);
+    }
+
+    setTimeout(() => {
+        Set5PackSpawn();
+    }, 1000 * 60 * Cooldowns.MINUTES_BETWEEN_12_PACKS);
+}
+
+
+export const PackDropper = function () {
     setTimeout(async () => {
-        SpawnRandomPack(client, db);
+        SpawnRandomPack();
     }, 1000 * 5);
 
-    setInterval(async () => {
-        await SpawnRandomPack(client, db);
-    }, 1000 * 60 * 20);
+    Set5PackSpawn();
+
+    Set12PackSpawn();
 }

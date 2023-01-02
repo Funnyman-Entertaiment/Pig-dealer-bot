@@ -5,10 +5,11 @@ import { Pack } from "./Packs";
 import { Pig } from "./Pigs";
 import { ServerInfo } from "./ServerInfo";
 import { UserInfo } from "./UserInfo";
+import { db } from "../Bot";
 
 const MAX_CACHE_SIZE = 300;
 
-function GetDocumentReference(element: DatabaseElement, db: Firestore): DocumentReference | undefined {
+function GetDocumentReference(element: DatabaseElement): DocumentReference | undefined {
     if (element instanceof Pig) {
         return doc(db, `pigs/${element.ID}`);
     } else if (element instanceof Pack) {
@@ -16,7 +17,7 @@ function GetDocumentReference(element: DatabaseElement, db: Firestore): Document
     } else if (element instanceof ServerInfo){
         return doc(db, `serverInfo/${element.ID}`);
     } else if (element instanceof UserInfo) {
-        return doc(db, `serverInfo/${element.ServerId}/users/${element.ID}`);
+        return doc(db, `users/${element.ID}`);
     } else if (element instanceof MessageInfo) {
         return doc(db, `serverInfo/${element.ServerId}/messages/${element.ID}`);
     }
@@ -31,12 +32,16 @@ export class DatabaseElementList<T extends DatabaseElement> {
         this.Elements = [];
     }
 
-    async Add(element: T, db: Firestore) {
+    async Add(element: T) {
+        if(this.Get(element.ID) !== undefined){
+            return;
+        }
+
         if (this.Elements.length >= MAX_CACHE_SIZE) {
             const firstElement = this.Elements.shift();
 
             if (firstElement !== undefined) {
-                const document = GetDocumentReference(firstElement, db);
+                const document = GetDocumentReference(firstElement);
 
                 if (document !== undefined) {
                     await setDoc(document, firstElement.GetData());
@@ -45,6 +50,16 @@ export class DatabaseElementList<T extends DatabaseElement> {
         }
 
         this.Elements.push(element);
+    }
+
+    async SaveAll(){
+        this.Elements.forEach(async element => {
+            const document = GetDocumentReference(element);
+
+            if (document !== undefined) {
+                await setDoc(document, element.GetData());
+            }
+        });
     }
 
     Get(id: string): T | undefined {

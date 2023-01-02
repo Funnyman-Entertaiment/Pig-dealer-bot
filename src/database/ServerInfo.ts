@@ -1,17 +1,20 @@
-import { doc, DocumentData, Firestore, getDoc } from "firebase/firestore/lite";
+import { doc, DocumentData, getDoc } from "firebase/firestore/lite";
 import { DatabaseElementList } from "./DatabaseCacheList";
 import { DatabaseElement } from "./DatabaseElement";
+import { db } from "../Bot";
 
 export class ServerInfo extends DatabaseElement {
     Channel: string | undefined;
     Role: string | undefined
     HasSpawnedGoldenPig: boolean;
+    YearsSpawnedAllNewYearDeco: number[];
 
-    constructor(id: string, channel: string | undefined, role: string | undefined, hasSpawnedGoldenPig: boolean) {
+    constructor(id: string, channel: string | undefined, role: string | undefined, hasSpawnedGoldenPig: boolean, yearsSpawnedAllNewYearDeco: number[]) {
         super(id);
         this.Channel = channel;
         this.Role = role;
         this.HasSpawnedGoldenPig = hasSpawnedGoldenPig;
+        this.YearsSpawnedAllNewYearDeco = yearsSpawnedAllNewYearDeco;
     }
 
     GetData(): object {
@@ -36,32 +39,38 @@ function GetCachedServerInfos(){
 }
 
 
+export function SaveAllServerInfo(){
+    CachedServerInfos?.SaveAll();
+}
+
+
 export function CreateServerInfoFromData(id: string, serverInfoData: DocumentData): ServerInfo{
     const newPack = new ServerInfo(
         id,
         serverInfoData.Channel,
         serverInfoData.Role,
-        serverInfoData.HasSpawnedGoldenPig ?? false
+        serverInfoData.HasSpawnedGoldenPig ?? false,
+        serverInfoData.YearsSpawnedAllNewYearDeco ?? []
     )
 
     return newPack;
 }
 
 
-export async function AddServerInfoToCache(serverInfo: ServerInfo, db: Firestore){
-    await GetCachedServerInfos().Add(serverInfo, db);
+export async function AddServerInfoToCache(serverInfo: ServerInfo){
+    await GetCachedServerInfos().Add(serverInfo);
 }
 
 
-export async function AddServerInfosToCache(packs: ServerInfo[], db: Firestore){
+export async function AddServerInfosToCache(packs: ServerInfo[]){
     for (let i = 0; i < packs.length; i++) {
         const pack = packs[i];
-        await AddServerInfoToCache(pack, db);
+        await AddServerInfoToCache(pack);
     }
 }
 
 
-export async function GetServerInfo(serverId: string, db: Firestore){
+export async function GetServerInfo(serverId: string){
     const cachedServerInfo = GetCachedServerInfos().Get(serverId);
 
     if(cachedServerInfo === undefined){
@@ -71,7 +80,7 @@ export async function GetServerInfo(serverId: string, db: Firestore){
         if(foundServerInfo.exists()){
             const serverInfoData = foundServerInfo.data();
             const newServerInfo = CreateServerInfoFromData(serverId, serverInfoData);
-            AddServerInfoToCache(newServerInfo, db);
+            AddServerInfoToCache(newServerInfo);
 
             return newServerInfo;
         }else{

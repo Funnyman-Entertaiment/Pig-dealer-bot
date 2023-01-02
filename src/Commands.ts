@@ -6,7 +6,40 @@ import { ShowBinder } from "./commands/Bind";
 import { SetBotRole } from "./commands/SetRole";
 import { Announcement } from "./commands/Announcement";
 import { Report } from "./commands/Report";
+import { ReloadPigsPacks } from "./commands/ReloadPigsAndPacks";
+import { SaveCache } from "./commands/SaveCache";
+import { Catalogue } from "./commands/Catalogue";
+import { ShowBinderList } from "./commands/BindList";
+import { SpawnPack } from "./commands/SpawnPack";
+import { SpawnPackUser } from "./commands/SpawnPackForUser";
+import { GivePig } from "./commands/GivePig";
+import { SearchPig } from "./commands/SearchPig";
+import { Trade } from "./commands/Trade";
+import { Change12PackCooldown, Change5PackCooldown, ChangeOpeningCooldown, ChangePackCooldown } from "./commands/ChangeCooldowns";
 
-export const Commands = [Sex, SetBotChannel, SetBotRole, ShowBinder, Report];
+export const Commands = [
+    Sex,
+    SetBotChannel,
+    SetBotRole,
+    ShowBinder,
+    ShowBinderList,
+    Report,
+    Catalogue,
+    SearchPig,
+    Trade
+];
 
-export const DebugCommands = [TestPack, TestPig, Announcement];
+export const DebugCommands = [
+    TestPack,
+    TestPig,
+    Announcement,
+    ReloadPigsPacks,
+    SaveCache,
+    SpawnPack,
+    SpawnPackUser,
+    GivePig,
+    ChangeOpeningCooldown,
+    ChangePackCooldown,
+    Change5PackCooldown,
+    Change12PackCooldown
+];

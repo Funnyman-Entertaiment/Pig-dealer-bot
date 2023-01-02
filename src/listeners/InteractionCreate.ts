@@ -1,19 +1,19 @@
-import { Client, Interaction, CommandInteraction, ButtonInteraction } from "discord.js";
-import { Firestore } from "firebase/firestore/lite";
+import { Interaction, CommandInteraction, ButtonInteraction } from "discord.js";
 import { Buttons } from "../Buttons";
 import { Commands, DebugCommands } from "../Commands";
+import { client } from "../Bot";
 
-export default (client: Client, db: Firestore) => {
+export default () => {
     client.on("interactionCreate", async (interaction: Interaction) => {
         if (interaction.isCommand() || interaction.isContextMenuCommand()) {
-            await handleSlashCommand(client, interaction as CommandInteraction, db);
+            await handleSlashCommand(interaction as CommandInteraction);
         }else if(interaction.isButton()){
-            await handleButtonCommand(client, interaction as ButtonInteraction, db);
+            await handleButtonCommand(interaction as ButtonInteraction);
         }
     });
 };
 
-const handleSlashCommand = async (client: Client, interaction: CommandInteraction, db: Firestore) => {
+const handleSlashCommand = async (interaction: CommandInteraction) => {
     let slashCommand = Commands.find(c => c.slashCommand.name === interaction.commandName);
 
     if (slashCommand === undefined) {
@@ -25,19 +25,17 @@ const handleSlashCommand = async (client: Client, interaction: CommandInteractio
         return;
     }
 
-    await interaction.deferReply();
-
-    slashCommand.response(client, interaction, db);
+    slashCommand.response(interaction);
 };
 
 
-const handleButtonCommand = async(client: Client, interaction: ButtonInteraction, db: Firestore) => {
-    const button = Buttons.find(c => c.id === interaction.customId);
+const handleButtonCommand = async(interaction: ButtonInteraction) => {
+    const button = Buttons.find(b => b.id === interaction.customId);
 
     if (!button) {
         await interaction.reply({ content: "An error has occurred" });
         return;
     }
 
-    button.response(client, interaction, db);
+    button.response(interaction);
 }

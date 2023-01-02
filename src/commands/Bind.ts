@@ -1,21 +1,19 @@
-import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, CommandInteraction, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } from "discord.js";
-import { collection, getDocs, query } from "firebase/firestore/lite";
+import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } from "discord.js";
 import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
 import { Command } from "../Command";
 import { GetPig } from "../database/Pigs";
 import { AddMessageInfoToCache, PigGalleryMessage } from "../database/MessageInfo";
 import { LogError, LogInfo, PrintUser } from "../Utils/Log";
+import { GetUserInfo, UserInfo } from "../database/UserInfo";
+import { GetAuthor } from "../Utils/GetAuthor";
 
-function GetAuthor(interaction: CommandInteraction){
-    if(interaction.user === null){
-        return null;
+function GetUserPigs(userInfo?: UserInfo) {
+    if(userInfo === undefined){ return []; }
+    const userPigs: string[] = [];
+    for (const pigId in userInfo.Pigs) {
+        userPigs.push(pigId);
     }
-
-    const user = interaction.user;
-    const username = user.username;
-    const avatar = user.avatarURL();
-    
-    return {name: username, iconURL: avatar === null? "" : avatar}
+    return userPigs;
 }
 
 export const ShowBinder = new Command(
@@ -24,9 +22,12 @@ export const ShowBinder = new Command(
         .addUserOption(option =>
             option.setName('user')
                 .setDescription('user to check the binder of'))
-        .setDescription("Let's you check your own or someone else's pig binder"),
+        .setDescription("Let's you check your own or someone else's pig binder")
+        .setDMPermission(false),
 
-    async (_, interaction, db) => {
+    async (interaction) => {
+        await interaction.deferReply();
+
         const server = interaction.guild;
         if(server === null) { return; }
 
@@ -52,10 +53,10 @@ export const ShowBinder = new Command(
             author = {name: username, iconURL: avatar === null? "" : avatar};
         }
 
-        const pigsQuery = query(collection(db, `serverInfo/${server.id}/users/${userId}/pigs`));
-        const pigs = await getDocs(pigsQuery);
+        const userInfo = await GetUserInfo(userId);
+        const pigs = GetUserPigs(userInfo);
 
-        if(pigs.empty){
+        if(pigs.length === 0){
             const emptyEmbed = new EmbedBuilder()
                 .setAuthor(author)
                 .setColor(Colors.DarkRed)
@@ -68,19 +69,18 @@ export const ShowBinder = new Command(
             return;
         }
 
-        const pigsSet: string[] = [];
+        pigs.sort((a, b) =>{
+            try{
+                const numA = parseInt(a);
+                const numB = parseInt(b);
 
-        pigs.forEach(pig =>{
-            if(!pigsSet.includes(pig.data().PigId)){
-                pigsSet.push(pig.data().PigId);
+                return numA - numB;
+            } catch {
+                return a.localeCompare(b);
             }
-        })
+        });
 
-        pigsSet.sort((a, b) => {
-            return parseInt(a) - parseInt(b);
-        })
-
-        const firstPigId = pigsSet[0];
+        const firstPigId = pigs[0];
         const firstPig = GetPig(firstPigId);
 
         if(firstPig === undefined){
@@ -90,10 +90,12 @@ export const ShowBinder = new Command(
 
         const openedPackEmbed = new EmbedBuilder()
             .setTitle(`${author.name}'s pig bind`)
-            .setDescription(`1/${pigsSet.length}`)
+            .setDescription(`1/${pigs.length}`)
             .setAuthor(author);
 
-        const imgPath = AddPigRenderToEmbed(openedPackEmbed, firstPig, false, true);
+        const imgPath = AddPigRenderToEmbed(openedPackEmbed, {
+            pig: firstPig
+        });
 
         const row = new ActionRowBuilder<ButtonBuilder>()
         .addComponents(
@@ -116,13 +118,13 @@ export const ShowBinder = new Command(
                 message.id,
                 server.id,
                 0,
-                pigsSet,
+                pigs,
                 [],
                 [],
                 interaction.user.id
             );
 
-            AddMessageInfoToCache(newMessage, db);
+            AddMessageInfoToCache(newMessage);
         });
 
         console.log("\n");

@@ -1,6 +1,6 @@
 import { EmbedBuilder } from "@discordjs/builders";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, GuildChannel, Interaction } from "discord.js";
-import { addDoc, collection, Firestore, getDocs, Timestamp } from "firebase/firestore/lite";
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, CommandInteraction, Embed, GuildChannel, Interaction, Message } from "discord.js";
+import { Timestamp } from "firebase/firestore/lite";
 import { Button } from "../Button";
 import { SPECIAL_RARITIES_PER_PACK } from "../Constants/SpecialRaritiesPerPack";
 import { PIG_RARITY_ORDER } from "../Constants/PigRarityOrder";
@@ -12,61 +12,136 @@ import { AddUserInfoToCache, GetUserInfo, UserInfo } from "../database/UserInfo"
 import { AddMessageInfoToCache, GetMessageInfo, PigGalleryMessage, RandomPackMessage } from "../database/MessageInfo";
 import { GetAllPigs, GetPig, GetPigsByRarity, GetPigsBySet, GetPigsWithTag, Pig } from "../database/Pigs";
 import { GetServerInfo, ServerInfo } from "../database/ServerInfo";
-import { IsChristmas } from "../Utils/SeasonalEvents";
+import { GetNewYearsYear, IsChristmas, IsNewYear } from "../Utils/SeasonalEvents";
 import { LogError, LogInfo, PrintChannel, PrintServer, PrintUser } from "../Utils/Log";
-import { GetPackByName } from "../database/Packs";
+import { GetPack, Pack } from "../database/Packs";
 import { existsSync } from "fs";
+import { ASSEMBLY_NEW_YEAR_PIG, GOLDEN_PIG, STOCKING_PIG } from "../Constants/SignificantPigIDs";
+import { STOCKING_PACK } from "../Constants/SignificantPackIDs";
+import { CheckAndSendAssemblyPigEmbeds } from "../Utils/AssemblyyPigs";
+import { GetAuthor } from "../Utils/GetAuthor";
+import { Cooldowns } from "../Constants/Variables";
 
+function GetEditedEmbed(embed: EmbedBuilder, pack: Pack) {
+    let openedImg = `./img/packs/opened/${pack.ID}.png`;
 
-const v = {
-    SpawnStocking: false
-};
-
-
-async function GetUserPigs(db: Firestore, severId: string, userId: string) {
-    const pigsCollection = collection(db, `serverInfo/${severId}/users/${userId}/pigs`);
-    const userPigs = await getDocs(pigsCollection);
-
-    const userPigsSet: string[] = [];
-
-    userPigs.forEach(pig => {
-        if (!userPigsSet.includes(pig.data().PigId)) {
-            userPigsSet.push(pig.data().PigId);
-        }
-    });
-
-    return userPigsSet;
-}
-
-
-function GetAuthor(interaction: Interaction) {
-    if (interaction.user === null) {
-        return null;
+    if (!existsSync(openedImg)) {
+        return;
     }
 
-    const user = interaction.user;
-    const username = user.username;
-    const avatar = user.avatarURL();
+    embed.setImage(`attachment://${pack.ID}.png`);
 
-    return { name: username, iconURL: avatar === null ? "" : avatar }
+    return openedImg;
 }
 
+function CanUserOpenPack(interaction: ButtonInteraction, userInfo: UserInfo, msgInfo: RandomPackMessage) {
+    if (msgInfo.User !== undefined && msgInfo.User !== userInfo.ID) {
+        const notYourPackEmbed = new EmbedBuilder()
+            .setTitle("This pack is not for you!")
+            .setDescription("Wait for another pack to drop and open that one you greedy pig.")
+            .setColor(Colors.Red);
 
-async function GetAvailablePigsFromPack(msgInfo: RandomPackMessage) {
+        interaction.reply({
+            embeds: [notYourPackEmbed],
+            ephemeral: true
+        })
+        return false;
+    }
+
+    if (msgInfo.Opened) {
+        const notYourPackEmbed = new EmbedBuilder()
+            .setTitle("This pack has already been opened!")
+            .setDescription("Give the message a moment to update and you'll see someone claimed it before you.")
+            .setColor(Colors.Red);
+
+        interaction.reply({
+            embeds: [notYourPackEmbed],
+            ephemeral: true
+        })
+
+        return false;
+    }
+
+    const lastTimeOpened = userInfo.LastTimeOpened;
+    const currentTime = Timestamp.now();
+
+    if (
+        lastTimeOpened !== undefined &&
+        currentTime.seconds - lastTimeOpened.seconds <= 60 * Cooldowns.MINUTES_PACK_OPENING_CD &&
+        !msgInfo.IgnoreCooldown
+    ) {
+        const totalDiff = (60 * 30) - (currentTime.seconds - lastTimeOpened.seconds);
+        const minutes = Math.floor(totalDiff / 60);
+        const seconds = totalDiff % 60;
+
+        const waitEmbed = new EmbedBuilder()
+            .setColor(Colors.DarkRed)
+            .setTitle(`You must wait for ${minutes}:${seconds.toString().padStart(2, "0")} minutes to open another pack`)
+            .setAuthor(GetAuthor(interaction as any as CommandInteraction));
+
+        interaction.reply({
+            embeds: [waitEmbed],
+            ephemeral: true,
+            options: {
+                ephemeral: true
+            }
+        });
+
+        return false;
+    }
+
+    return true;
+}
+
+function EditEmbedWithOpenedPack(message: Message, pack: Pack, embed: Embed) {
+    const editedEmbed = new EmbedBuilder(embed.data);
+    const openedImg = GetEditedEmbed(editedEmbed, pack);
+
+    const row = new ActionRowBuilder<ButtonBuilder>()
+        .addComponents(
+            new ButtonBuilder()
+                .setCustomId('OpenPack')
+                .setLabel('Open!')
+                .setStyle(ButtonStyle.Primary)
+                .setDisabled(true),
+        );
+
+    if (openedImg === undefined) {
+        message.edit({
+            components: [row]
+        });
+    } else {
+        message.edit({
+            embeds: [editedEmbed],
+            components: [row],
+            files: [openedImg],
+        });
+    }
+}
+
+function GetUserPigs(userInfo: UserInfo) {
+    const userPigs: string[] = [];
+    for (const pigId in userInfo.Pigs) {
+        userPigs.push(pigId);
+    }
+    return userPigs;
+}
+
+function GetAvailablePigsFromPack(pack: Pack) {
     let pigs: Pig[];
 
-    if (msgInfo.Set.length !== 0) {
-        pigs = GetPigsBySet(msgInfo.Set);
-    } else if ((msgInfo.Tags as string[]).length !== 0) {
-        pigs = GetPigsWithTag(msgInfo.Tags);
+    if (pack.Set.length !== 0) {
+        pigs = GetPigsBySet(pack.Set);
+    } else if ((pack.Tags as string[]).length !== 0) {
+        pigs = GetPigsWithTag(pack.Tags);
     } else {
         pigs = GetAllPigs();
     }
 
     const pigsPerRarity: { [key: string]: Pig[] } = {}
 
-    pigs.forEach(pig =>{
-        if(pigsPerRarity[pig.Rarity] === undefined){
+    pigs.forEach(pig => {
+        if (pigsPerRarity[pig.Rarity] === undefined) {
             pigsPerRarity[pig.Rarity] = [];
         }
 
@@ -77,45 +152,56 @@ async function GetAvailablePigsFromPack(msgInfo: RandomPackMessage) {
     return pigsPerRarity;
 }
 
-
-async function ChoosePigs(db: Firestore, serverId: string, availablePigs: { [key: string]: Pig[] }, msgInfo: RandomPackMessage) {
-    const serverInfo = await GetServerInfo(serverId, db) as any as ServerInfo;
-
-    let allowGoldenPig: boolean = true;
-
-    allowGoldenPig = !serverInfo.HasSpawnedGoldenPig;
-
-    let pigRarities: { readonly [key: string]: number }[] = SPECIAL_RARITIES_PER_PACK[msgInfo.Name];
-    if (pigRarities === undefined) {
-        pigRarities = RARITIES_PER_PIG_COUNT[msgInfo.PigCount];
+function GetPigRaritiesFromPack(pack: Pack) {
+    if (SPECIAL_RARITIES_PER_PACK[pack.Name] === undefined) {
+        return RARITIES_PER_PIG_COUNT[pack.PigCount];
     }
+
+    return SPECIAL_RARITIES_PER_PACK[pack.Name];
+}
+
+function GetRandomRarityFromWeightedList(rarities: { readonly [key: string]: number }) {
+    let rarity = "";
+
+    for (const possibleRarity in rarities) {
+        const chance = rarities[possibleRarity];
+
+        if (Math.random() > chance) {
+            break;
+        }
+
+        rarity = possibleRarity;
+    }
+
+    return rarity;
+}
+
+function ChooseRandomPigFromList(pigs: Pig[]): Pig {
+    return pigs[Math.floor(Math.random() * pigs.length)]
+}
+
+function ChoosePigs(serverInfo: ServerInfo, pack: Pack) {
+    const availablePigsForPack = GetAvailablePigsFromPack(pack);
+    const pigRaritiesForPack = GetPigRaritiesFromPack(pack);
+
+    let allowGoldenPig: boolean = !serverInfo.HasSpawnedGoldenPig;
 
     const chosenPigs: Pig[] = [];
 
-    pigRarities.forEach(async rarities => {
-        let rarity: string = "";
+    pigRaritiesForPack.forEach(async rarities => {
+        const rarity: string = GetRandomRarityFromWeightedList(rarities);
 
-        for (const possibleRarity in rarities) {
-            const chance = rarities[possibleRarity];
-
-            if (Math.random() > chance) {
-                break;
-            }
-
-            rarity = possibleRarity;
-        }
-
-        const pigsOfRarity = availablePigs[rarity];
+        const pigsOfRarity = availablePigsForPack[rarity];
         let chosenPig: Pig;
 
         do {
-            chosenPig = pigsOfRarity[Math.floor(Math.random() * pigsOfRarity.length)]
+            chosenPig = ChooseRandomPigFromList(pigsOfRarity);
         } while (chosenPigs.includes(chosenPig));
 
-        const goldenPigChance = GOLDEN_PIG_CHANCE_PER_RARITY[rarity]?? 0
+        const goldenPigChance = GOLDEN_PIG_CHANCE_PER_RARITY[rarity] ?? 0
 
         if (Math.random() <= goldenPigChance && allowGoldenPig) {
-            const goldenPig = GetPig("500");
+            const goldenPig = GetPig(GOLDEN_PIG);
             if (goldenPig !== undefined) {
                 chosenPigs.push(goldenPig);
                 allowGoldenPig = false;
@@ -124,16 +210,6 @@ async function ChoosePigs(db: Firestore, serverId: string, availablePigs: { [key
             chosenPigs.push(chosenPig);
         }
     });
-
-    if(IsChristmas() && msgInfo.Name !== "Stocking"){
-        if(Math.random() < 0.05){
-            v.SpawnStocking = true;
-        }else if(Math.random() < 0.1){
-            const christmasPigs: Pig[] = GetPigsByRarity("Christmas");
-            const chosenChristmasPig = christmasPigs[Math.floor(Math.random() * christmasPigs.length)];
-            chosenPigs.push(chosenChristmasPig);
-        }
-    }
 
     serverInfo.HasSpawnedGoldenPig = !allowGoldenPig;
 
@@ -147,40 +223,42 @@ async function ChoosePigs(db: Firestore, serverId: string, availablePigs: { [key
     return chosenPigs;
 }
 
+function ChristmasEvent(chosenPigs: Pig[], pigsToShowInPack: Pig[], pack: Pack) {
+    if (!IsChristmas()) { return; }
+    if (pack.ID === STOCKING_PACK) { return; }
 
-async function AddPigsToDB(db: Firestore, chosenPigs: Pig[], serverId: string, userId: string) {
-    for (let i = 0; i < chosenPigs.length; i++) {
-        const pig = chosenPigs[i];
-        const newPigCollection = collection(db, `serverInfo/${serverId}/users/${userId}/pigs`);
-        await addDoc(newPigCollection, {
-            PigId: pig.ID
-        });
+    if (Math.random() < 0.05) {
+        const stockingPig = GetPig(STOCKING_PIG);
+        if (stockingPig !== undefined) { pigsToShowInPack.push(stockingPig); }
+    } else if (Math.random() < 0.1) {
+        const christmasPigs = GetPigsByRarity("Christmas");
+        const chosenChristmasPig = ChooseRandomPigFromList(christmasPigs);
+        chosenPigs.push(chosenChristmasPig);
     }
 }
 
+function NewYearEvent(chosenPigs: Pig[], serverInfo: ServerInfo) {
+    return;
+    if (!IsNewYear()) { return; }
 
-function GetNewPigs(chosenPigs: Pig[], playerPigs: string[]) {
-    const newPigs: string[] = [];
+    const currentYear = GetNewYearsYear();
 
-    for (let i = 0; i < chosenPigs.length; i++) {
-        const pig = chosenPigs[i];
-
-        if (!playerPigs.includes(pig.ID)) {
-            newPigs.push(pig.ID);
-            playerPigs.push(pig.ID);
-        }
+    if (!serverInfo.YearsSpawnedAllNewYearDeco.includes(currentYear) && Math.random() < 0.1) {
+        const newYearPigs: Pig[] = GetPigsByRarity("New Year");
+        const chosenNewYearPigs = newYearPigs[Math.floor(Math.random() * newYearPigs.length)];
+        chosenPigs.push(chosenNewYearPigs);
     }
-
-    return newPigs;
 }
-
 
 function GetOpenPackFollowUp(packName: string, chosenPigs: Pig[], newPigs: string[], interaction: Interaction) {
     const openedPackEmbed = new EmbedBuilder()
         .setTitle(`You've opened a ${packName}`)
         .setDescription(`1/${chosenPigs.length}`);
 
-    const imgPath = AddPigRenderToEmbed(openedPackEmbed, chosenPigs[0], newPigs.includes(chosenPigs[0].ID), true);
+    const imgPath = AddPigRenderToEmbed(openedPackEmbed, {
+        pig: chosenPigs[0],
+        new: newPigs.includes(chosenPigs[0].ID),
+    });
 
     if (imgPath === undefined) { return; }
 
@@ -197,7 +275,7 @@ function GetOpenPackFollowUp(packName: string, chosenPigs: Pig[], newPigs: strin
                 .setStyle(ButtonStyle.Primary)
         );
 
-    const author = GetAuthor(interaction);
+    const author = GetAuthor(interaction as any as CommandInteraction);
     if (author !== null) {
         openedPackEmbed.setAuthor(author);
     }
@@ -209,359 +287,130 @@ function GetOpenPackFollowUp(packName: string, chosenPigs: Pig[], newPigs: strin
     }
 }
 
+function SendOpenPackFollowUp(userInfo: UserInfo, chosenPigs: Pig[], pigsToShowInPack: Pig[], pack: Pack, serverId: string, interaction: ButtonInteraction) {
+    const userPigs = GetUserPigs(userInfo);
 
-async function GetUserInfoData(db: Firestore, serverId: string, userId: string) {
-    const userInfo = await GetUserInfo(serverId, userId, db);
+    const newPigs = chosenPigs.filter(pig => !userPigs.includes(pig.ID)).map(pig => pig.ID);
 
-    if (userInfo === undefined) {
-        const newUserInfo = new UserInfo(
-            userId,
-            serverId,
-            []
-        );
-        await AddUserInfoToCache(newUserInfo, db);
+    const packFollowUp = GetOpenPackFollowUp(pack.Name, pigsToShowInPack, newPigs, interaction);
 
-        return newUserInfo
-    }
-
-    return userInfo;
-}
-
-
-function GetUserAssembledPigs(userInfo: UserInfo) {
-    let userAssembledPigs = userInfo.AssembledPigs;
-
-    return userAssembledPigs;
-}
-
-
-async function GetPossibleAssemblyPigs(chosenPigs: Pig[], userAssembledPigs: String[]) {
-    const assemblyPigs = GetPigsByRarity("Assembly");
-    const possibleAssemblyPigs: Pig[] = []
-
-    assemblyPigs.forEach(assemblyPig => {
-        for (let i = 0; i < chosenPigs.length; i++) {
-            const pig = chosenPigs[i];
-
-            if(assemblyPig.RequiredPigs.includes(pig.ID) &&
-            !userAssembledPigs.includes(pig.ID) &&
-            !possibleAssemblyPigs.some(x => x.ID === assemblyPig.ID)){
-                possibleAssemblyPigs.push(assemblyPig);
-            }
-        }
-    });
-
-    return possibleAssemblyPigs;
-}
-
-
-function GetCompletedAssemblyPigs(possibleAssemblyPigs: Pig[], userPigs: string[]) {
-    const completedAssemblyPigs: Pig[] = [];
-
-    for (let i = 0; i < possibleAssemblyPigs.length; i++) {
-        const assemblyPig = possibleAssemblyPigs[i];
-
-        let hasAllPigs = true;
-
-        for (let o = 0; o < assemblyPig.RequiredPigs.length; o++) {
-            const requiredPigId = assemblyPig.RequiredPigs[o];
-
-            if (!userPigs.includes(requiredPigId)) {
-                hasAllPigs = false;
-                break;
-            }
-        }
-
-        if (hasAllPigs) {
-            completedAssemblyPigs.push(assemblyPig);
-        }
-    }
-
-    return completedAssemblyPigs;
-}
-
-
-function GetAssemblyPigsFollowUps(completedAssemblyPigs: Pig[], interaction: Interaction) {
-    const assemblyPigsFollowUps = [];
-
-    for (let i = 0; i < completedAssemblyPigs.length; i++) {
-        const pig = completedAssemblyPigs[i];
-
-        const openedPackEmbed = new EmbedBuilder()
-            .setTitle(`You've completed a set and obtained a bonus pig!`)
-
-        const imgPath = AddPigRenderToEmbed(openedPackEmbed, pig, false, true);
-
-        if (imgPath === undefined) { return; }
-
-        const row = new ActionRowBuilder<ButtonBuilder>()
-            .addComponents(
-                new ButtonBuilder()
-                    .setCustomId('GalleryPrevious')
-                    .setLabel('Previous')
-                    .setStyle(ButtonStyle.Primary)
-                    .setDisabled(true),
-                new ButtonBuilder()
-                    .setCustomId('GalleryNext')
-                    .setLabel('Next')
-                    .setStyle(ButtonStyle.Primary)
-            );
-
-        const author = GetAuthor(interaction);
-        if (author !== null) {
-            openedPackEmbed.setAuthor(author);
-        }
-
-        assemblyPigsFollowUps.push({
-            embeds: [openedPackEmbed],
-            components: [row],
-            files: [imgPath]
-        });
-    }
-
-    return assemblyPigsFollowUps;
-}
-
-
-function GetEditedEmbed(embed: EmbedBuilder, msgInfo: RandomPackMessage){
-    const pack = GetPackByName(msgInfo.Name);
-
-    if(pack === undefined){ return; }
-
-    let openedImg = `./img/packs/opened/${pack.ID}.png`;
-
-    if(!existsSync(openedImg)){
+    if (packFollowUp === undefined) {
         return;
     }
 
-    embed.setImage(`attachment://${pack.ID}.png`);
+    interaction.followUp(packFollowUp).then(message => {
+        if (message === null) { return; }
 
-    return openedImg;
+        const newMsgInfo = new PigGalleryMessage(
+            message.id,
+            serverId,
+            0,
+            pigsToShowInPack.map(pig => pig.ID),
+            newPigs,
+            [],
+            interaction.user.id
+        );
+        AddMessageInfoToCache(newMsgInfo);
+    });
 }
 
+function AddPigsToUser(chosenPigs: Pig[], userInfo: UserInfo) {
+    chosenPigs.forEach(pig => {
+        const count = userInfo.Pigs[pig.ID];
+
+        if (count === undefined) {
+            userInfo.Pigs[pig.ID] = 1;
+        } else {
+            userInfo.Pigs[pig.ID] = count + 1;
+        }
+    })
+}
 
 export const OpenPack = new Button("OpenPack",
-    async (_, interaction, db) => {
-        await interaction.deferReply();
+    async (interaction) => {
+        if (interaction.guild === null) {
+            return;
+        }
 
         const server = interaction.guild;
-
-        if (server === null) {
-            const errorEmbed = MakeErrorEmbed(
-                "Error fetching server from interaction",
-                "Where did you find this message?"
-            );
-
-            await interaction.followUp({
-                embeds: [errorEmbed]
-            });
-
-            return;
-        }
+        const user = interaction.user;
         const message = interaction.message;
-        const msgInfo = await GetMessageInfo(server.id, message.id, db) as RandomPackMessage;
 
-        if (msgInfo === undefined || msgInfo.Type !== "RandomPack") {
-            const errorEmbed = MakeErrorEmbed(
-                "Error fetching message information",
-                `Server: ${server.id}`,
-                `Message: ${message.id}`
-            );
+        const serverID = server.id;
+        const userID = user.id;
+        const msgID = message.id;
 
-            await interaction.followUp({
-                embeds: [errorEmbed]
-            });
+        const serverInfo = await GetServerInfo(serverID) as any as ServerInfo;
+        const userInfo = await GetUserInfo(userID) ?? new UserInfo(
+            userID,
+            [],
+            {}
+        );
+        AddUserInfoToCache(userInfo);
+        const msgInfo = GetMessageInfo(serverID, msgID) as any as RandomPackMessage;
 
-            return;
-        }
+        const pack = GetPack(msgInfo.Pack);
 
-        if (msgInfo.User !== undefined && msgInfo.User !== interaction.user.id){
-            return;
-        }
+        if (pack === undefined) {
+            const errorEmbed = MakeErrorEmbed("Could't find pack for this message", `Pack Id: ${msgInfo.Pack}`);
 
-        if (msgInfo.Opened) { return; }
-
-        const userInfo = await GetUserInfoData(db, server.id, interaction.user.id);
-
-        const lastTimeOpened = userInfo.LastTimeOpened;
-        const currentTime = Timestamp.now();
-
-        if (lastTimeOpened !== undefined && currentTime.seconds - lastTimeOpened.seconds <= 60 * 30 && msgInfo.Name !== "Stocking") {
-            const totalDiff = (60 * 30) - (currentTime.seconds - lastTimeOpened.seconds);
-            const minutes = Math.floor(totalDiff / 60);
-            const seconds = totalDiff % 60;
-
-            const waitEmbed = new EmbedBuilder()
-                .setColor(Colors.DarkRed)
-                .setTitle(`You must wait for ${minutes}:${seconds.toString().padStart(2, "0")} minutes to open another pack`)
-                .setAuthor(GetAuthor(interaction));
-
-            await interaction.followUp({
-                embeds: [waitEmbed],
+            interaction.reply({
+                embeds: [errorEmbed],
                 ephemeral: true,
-                options: {
-                    ephemeral: true
-                }
             });
 
             return;
         }
+
+        if (!CanUserOpenPack(interaction, userInfo, msgInfo)) {
+            return;
+        }
+
+        await interaction.deferReply();
 
         msgInfo.Opened = true;
-        userInfo.LastTimeOpened = currentTime;
+        if (!msgInfo.IgnoreCooldown) {
+            userInfo.LastTimeOpened = Timestamp.now();
+            if (server.memberCount <= 5) {
+                userInfo.LastTimeOpened = Timestamp.fromMillis(userInfo.LastTimeOpened.toMillis() + 1000 * 60 * 60 * 96);
+            }
+        }
 
-        const embed = interaction.message.embeds[0];
+        const embed = message.embeds[0];
 
-        if(embed === undefined){
+        if (embed === undefined) {
             LogError(`Couldn't get embed from message in channel ${PrintChannel(interaction.channel as any as GuildChannel)} in server ${PrintServer(server)}`)
             const errorEmbed = MakeErrorEmbed(`Couldn't get embed from message`, `Make sure the bot is able to send embeds`);
-            interaction.followUp({
+            interaction.reply({
+                ephemeral: true,
                 embeds: [errorEmbed]
             });
             return;
         }
 
-        const editedEmbed = new EmbedBuilder(embed.data);
-        const openedImg = GetEditedEmbed(editedEmbed, msgInfo);
-        
-        const row = new ActionRowBuilder<ButtonBuilder>()
-            .addComponents(
-                new ButtonBuilder()
-                    .setCustomId('OpenPack')
-                    .setLabel('Open!')
-                    .setStyle(ButtonStyle.Primary)
-                    .setDisabled(true),
-            );
+        EditEmbedWithOpenedPack(message, pack, embed);
 
-        if (openedImg === undefined){
-            message.edit({
-                components: [row]
-            });
-        }else{
-            message.edit({
-                embeds: [editedEmbed],
-                components: [row],
-                files: [openedImg],
-            });
+        LogInfo(`User ${PrintUser(interaction.user)} opened ${pack.Name} pack in server ${PrintServer(server)}`);
+
+        const chosenPigs = ChoosePigs(serverInfo, pack).filter(x => x !== undefined);
+        const pigsToShowInPack = [...chosenPigs];
+
+        ChristmasEvent(chosenPigs, pigsToShowInPack, pack);
+        NewYearEvent(chosenPigs, serverInfo);
+
+        SendOpenPackFollowUp(userInfo, chosenPigs, pigsToShowInPack, pack, serverID, interaction);
+
+        AddPigsToUser(chosenPigs, userInfo);
+
+        const assembledPigs = await CheckAndSendAssemblyPigEmbeds(serverID, userID, chosenPigs);
+
+        if (assembledPigs === undefined) { return; }
+
+        if (assembledPigs.some(pig => pig.ID === ASSEMBLY_NEW_YEAR_PIG)) {
+            const serverInfo = await GetServerInfo(server.id) as any as ServerInfo;
+            const currentYear = GetNewYearsYear();
+
+            serverInfo.YearsSpawnedAllNewYearDeco.push(currentYear);
         }
-
-        LogInfo(`User ${PrintUser(interaction.user)} opened ${msgInfo.Name} pack in server ${PrintServer(server)}`);
-
-        const userPigs = await GetUserPigs(db, server.id, interaction.user.id);
-
-        const availablePigs = await GetAvailablePigsFromPack(msgInfo);
-
-        const chosenPigs = await ChoosePigs(db, server.id, availablePigs, msgInfo);
-
-        await AddPigsToDB(db, chosenPigs, server.id, interaction.user.id);
-
-        const newPigs: string[] = GetNewPigs(chosenPigs, userPigs);
-
-        let openPackFollowUp = GetOpenPackFollowUp(msgInfo.Name, chosenPigs, newPigs, interaction)
-
-        if(v.SpawnStocking){
-            const stockingPig = GetPig("306");
-            if(stockingPig === undefined){
-                LogError(`Couldn't find stocking pig.`);
-                const errorEmbed = MakeErrorEmbed(`Couldn't find stocking pig`);
-
-                interaction.followUp({
-                    embeds: [errorEmbed]
-                });
-                return;
-            }
-
-            const pigsToShow = [...chosenPigs];
-            pigsToShow.push(stockingPig);
-            openPackFollowUp = GetOpenPackFollowUp(msgInfo.Name, pigsToShow, newPigs, interaction);
-        }
-
-        if (openPackFollowUp === undefined) {
-            LogError(`Couldn't create a follow up for this pack opening`);
-            const errorEmbed = MakeErrorEmbed(
-                "Error creating open pack follow up"
-            );
-
-            await interaction.followUp({
-                embeds: [errorEmbed]
-            });
-
-            return;
-        }
-
-        const allCompletedAssemblyPigs: Pig[] = []
-        let oldAssemblyPigsLength = 0;
-
-        do{
-            oldAssemblyPigsLength = allCompletedAssemblyPigs.length;
-            const userAssembledPigs = GetUserAssembledPigs(userInfo);
-            console.log(`User assembled pigs = ${userAssembledPigs}`);
-
-            const possibleAssemblyPigs = await GetPossibleAssemblyPigs(chosenPigs, userAssembledPigs);
-            console.log(`Possible assembly pigs = ${possibleAssemblyPigs.map(x => x.ID)}`);
-
-            const completedAssemblyPigs = GetCompletedAssemblyPigs(possibleAssemblyPigs, userPigs);
-            console.log(`Completed assembly pigs = ${completedAssemblyPigs.map(x => x.ID)}`);
-
-            completedAssemblyPigs.forEach(assemblyPig => {
-                userInfo.AssembledPigs.push(assemblyPig.ID);
-            });
-            allCompletedAssemblyPigs.concat(completedAssemblyPigs);
-        }while(allCompletedAssemblyPigs.length !== oldAssemblyPigsLength);
-
-        const assemblyPigsFollowUps = GetAssemblyPigsFollowUps(allCompletedAssemblyPigs, interaction);
-
-        if (assemblyPigsFollowUps === undefined) {
-            LogError(`Couldn't create a follow up for this pack's assembly pigs`);
-
-            const errorEmbed = new EmbedBuilder()
-                .setTitle("⚠Error creating assembly pigs follow up⚠")
-                .setDescription("Message anna or thicco inmediatly!!")
-                .setColor(Colors.DarkRed);
-
-            await interaction.followUp({
-                embeds: [errorEmbed]
-            });
-
-            return;
-        }
-
-        await interaction.followUp(openPackFollowUp).then(message => {
-            let pigsToShow = [...chosenPigs];
-    
-            if(v.SpawnStocking){
-                const stockingPig = GetPig("306");
-                if(stockingPig === undefined){
-                    LogError(`Couldn't find stocking pig.`);
-                    const errorEmbed = MakeErrorEmbed(`Couldn't find stocking pig`);
-    
-                    interaction.followUp({
-                        embeds: [errorEmbed]
-                    });
-                    return;
-                }
-    
-                pigsToShow.push(stockingPig);
-            }
-
-            const newMsgInfo = new PigGalleryMessage(
-                message.id,
-                server.id,
-                0,
-                pigsToShow.map(pig => pig.ID),
-                newPigs,
-                [],
-                interaction.user.id
-            );
-            AddMessageInfoToCache(newMsgInfo, db);
-        });
-
-        assemblyPigsFollowUps.forEach(async assemblyPigsFollowUp => {
-            await interaction.followUp(assemblyPigsFollowUp);
-        });
-
-        v.SpawnStocking = false;
-
-        console.log("\n");
     }
 );

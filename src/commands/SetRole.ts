@@ -2,6 +2,7 @@ import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, Co
 import { doc, setDoc } from "firebase/firestore/lite";
 import { GetServerInfo, ServerInfo } from "../database/ServerInfo";
 import { Command } from "../Command";
+import { db } from "../Bot";
 
 export const SetBotRole = new Command(
     new SlashCommandBuilder()
@@ -11,9 +12,10 @@ export const SetBotRole = new Command(
                 .setDescription('role that will get pinged when the bot drops a pack')
                 .setRequired(true))
         .setDescription("Let's you choose what role the bot pings")
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+        .setDMPermission(false),
 
-    async (_, interaction, db) => {
+    async (interaction) => {
         const role = (interaction.options as CommandInteractionOptionResolver).getRole('role')
 
         if (role === null) {
@@ -25,7 +27,7 @@ export const SetBotRole = new Command(
                 .setTitle("There was an error fetching the server id.")
                 .setColor(Colors.Red);
 
-            await interaction.followUp({
+            await interaction.reply({
                 ephemeral: true,
                 embeds: [errorEmbed]
             });
@@ -33,14 +35,15 @@ export const SetBotRole = new Command(
             return;
         }
 
-        let serverInfo = await GetServerInfo(interaction.guildId, db);
+        let serverInfo = await GetServerInfo(interaction.guildId);
 
         if(serverInfo === undefined){
             serverInfo = new ServerInfo(
                 interaction.guildId,
                 undefined,
                 role.id,
-                false
+                false,
+                []
             );
         }else{
             serverInfo.Role = role.id;
@@ -60,7 +63,7 @@ export const SetBotRole = new Command(
             .setTitle(`Role succesfully set to @${role.name}`)
             .setColor(Colors.Green);
 
-        await interaction.followUp({
+        await interaction.reply({
             ephemeral: true,
             embeds: [successEmbed],
         });

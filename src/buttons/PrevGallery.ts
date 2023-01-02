@@ -9,7 +9,7 @@ import { LogError, PrintChannel, PrintServer } from "../Utils/Log";
 
 
 export const PrevGallery = new Button("GalleryPrevious",
-    async (_, interaction, db) => {
+    async (interaction) => {
         await interaction.deferUpdate();
 
         const server = interaction.guild;
@@ -27,7 +27,7 @@ export const PrevGallery = new Button("GalleryPrevious",
         }
 
         const message = interaction.message;
-        const msgInfo = await GetMessageInfo(server.id, message.id, db) as PigGalleryMessage;
+        const msgInfo = GetMessageInfo(server.id, message.id) as PigGalleryMessage;
 
         if(msgInfo === undefined || msgInfo.Type !== "PigGallery"){ return; }
 
@@ -82,12 +82,11 @@ export const PrevGallery = new Button("GalleryPrevious",
             return;
         }
 
-        const imgPath = AddPigRenderToEmbed(
-            editedEmbed,
-            pig,
-            msgInfo.NewPigs.includes(pig.ID),
-            !DoesPigIdHaveUniqueEvent(pigToLoad)
-        );
+        const imgPath = AddPigRenderToEmbed(editedEmbed, {
+            pig: pig,
+            new: msgInfo.NewPigs.includes(pig.ID),
+            showId: !DoesPigIdHaveUniqueEvent(pigToLoad)
+        });
         const row = new ActionRowBuilder<ButtonBuilder>()
         .addComponents(
             new ButtonBuilder()

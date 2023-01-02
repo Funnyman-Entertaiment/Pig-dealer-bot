@@ -254,7 +254,9 @@ export const Announcement = new Command(
                 .setDescription("Sends the embed announcement to every server the bot is in"))
         .setDescription("Manages everything about announcements"),
 
-    async (_client: Client, interaction: CommandInteraction) => {
+    async (interaction: CommandInteraction) => {
+        await interaction.deferReply();
+
         const subcommand = (interaction.options as CommandInteractionOptionResolver).getSubcommand();
 
         if(subcommand === undefined){

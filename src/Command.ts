@@ -1,12 +1,11 @@
-import { Client, CommandInteraction, SlashCommandBuilder } from "discord.js";
-import { Firestore } from "firebase/firestore/lite";
+import { CommandInteraction, SlashCommandBuilder } from "discord.js";
 
 export class Command{
     slashCommand;
     response;
 
     constructor(slashCommand: SlashCommandBuilder, 
-    response: (client: Client, interaction: CommandInteraction, db: Firestore) => void){
+    response: (interaction: CommandInteraction) => void){
         this.slashCommand = slashCommand;
         this.response = response
     }

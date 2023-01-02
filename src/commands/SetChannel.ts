@@ -2,6 +2,7 @@ import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, Ch
 import { doc, setDoc } from "firebase/firestore/lite";
 import { GetServerInfo, ServerInfo } from "../database/ServerInfo";
 import { Command } from "../Command";
+import { db } from "../Bot";
 
 export const SetBotChannel = new Command(
     new SlashCommandBuilder()
@@ -9,11 +10,13 @@ export const SetBotChannel = new Command(
         .addChannelOption(option =>
             option.setName('channel')
                 .setDescription('channel to send packs')
+                .addChannelTypes(ChannelType.GuildText)
                 .setRequired(true))
         .setDescription("Let's you choose what channel the bot sends packs to")
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+        .setDMPermission(false),
 
-    async (_, interaction, db) => {
+    async (interaction) => {
         const channel = (interaction.options as CommandInteractionOptionResolver).getChannel('channel')
 
         if (channel === null) {
@@ -25,7 +28,7 @@ export const SetBotChannel = new Command(
                 .setTitle("Channel must be a text channel.")
                 .setColor(Colors.Red);
 
-            await interaction.followUp({
+            await interaction.reply({
                 ephemeral: true,
                 embeds: [errorEmbed]
             });
@@ -38,7 +41,7 @@ export const SetBotChannel = new Command(
                 .setTitle("There was an error fetching the server id.")
                 .setColor(Colors.Red);
 
-            await interaction.followUp({
+            await interaction.reply({
                 ephemeral: true,
                 embeds: [errorEmbed]
             });
@@ -46,14 +49,15 @@ export const SetBotChannel = new Command(
             return;
         }
 
-        let serverInfo = await GetServerInfo(interaction.guildId, db);
+        let serverInfo = await GetServerInfo(interaction.guildId);
 
         if(serverInfo === undefined){
             serverInfo = new ServerInfo(
                 interaction.guildId,
                 channel.id,
                 undefined,
-                false
+                false,
+                []
             );
         }else{
             serverInfo.Channel = channel.id;
@@ -76,7 +80,7 @@ export const SetBotChannel = new Command(
             .setTitle(`Channel succesfully set to ${channel.name}`)
             .setColor(Colors.Green)
 
-        await interaction.followUp({
+        await interaction.reply({
             ephemeral: true,
             embeds: [successEmbed],
         });
