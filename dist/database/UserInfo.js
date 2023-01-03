@@ -16,19 +16,14 @@ class UserInfo extends DatabaseElement_1.DatabaseElement {
         this.LastTimeOpened = lastTimeOpened;
     }
     GetData() {
-        if (this.LastTimeOpened === undefined) {
-            return {
-                AssembledPigs: this.AssembledPigs,
-                Pigs: this.Pigs
-            };
+        const data = {
+            Pigs: this.Pigs,
+            AssembledPigs: this.AssembledPigs
+        };
+        if (this.LastTimeOpened !== undefined) {
+            data.LastTimeOpened = this.LastTimeOpened;
         }
-        else {
-            return {
-                LastTimeOpened: this.LastTimeOpened,
-                AssembledPigs: this.AssembledPigs,
-                Pigs: this.Pigs
-            };
-        }
+        return data;
     }
 }
 exports.UserInfo = UserInfo;

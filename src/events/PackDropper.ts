@@ -44,9 +44,6 @@ async function SpawnRandomPack() {
             pack = GetPack(PACK_12);
         }
 
-        if (packsUntil5Pack >= 0) { packsUntil5Pack--; }
-        if (packsUntil12Pack >= 0) { packsUntil12Pack--; }
-
         if (pack === undefined) { return; }
 
         const serverInfo = CreateServerInfoFromData(server.id, server.data());
@@ -64,6 +61,9 @@ async function SpawnRandomPack() {
             ping: true
         });
     });
+
+    if (packsUntil5Pack >= 0) { packsUntil5Pack--; }
+    if (packsUntil12Pack >= 0) { packsUntil12Pack--; }
 
     console.log("");
 
@@ -114,7 +114,7 @@ async function Set12PackSpawn() {
 export const PackDropper = function () {
     setTimeout(async () => {
         SpawnRandomPack();
-    }, 1000 * 60 * 7);
+    }, 1000 * 5);
 
     Set5PackSpawn();
 

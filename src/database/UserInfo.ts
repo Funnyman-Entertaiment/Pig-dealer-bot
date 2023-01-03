@@ -16,18 +16,16 @@ export class UserInfo extends DatabaseElement {
     }
 
     GetData(): object {
-        if (this.LastTimeOpened === undefined) {
-            return {
-                AssembledPigs: this.AssembledPigs,
-                Pigs: this.Pigs
-            };
-        } else {
-            return {
-                LastTimeOpened: this.LastTimeOpened,
-                AssembledPigs: this.AssembledPigs,
-                Pigs: this.Pigs
-            };
+        const data: {[key: string]: any} = {
+            Pigs: this.Pigs,
+            AssembledPigs: this.AssembledPigs
+        };
+
+        if (this.LastTimeOpened !== undefined) {
+            data.LastTimeOpened = this.LastTimeOpened;
         }
+
+        return data;
     }
 }
 

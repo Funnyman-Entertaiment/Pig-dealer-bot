@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, Colors, PermissionFlagsBits } from "discord.js";
 import { doc, setDoc } from "firebase/firestore/lite";
-import { GetServerInfo, ServerInfo } from "../database/ServerInfo";
+import { AddServerInfoToCache, GetServerInfo, SaveAllServerInfo, ServerInfo } from "../database/ServerInfo";
 import { Command } from "../Command";
 import { db } from "../Bot";
 
@@ -49,15 +49,9 @@ export const SetBotRole = new Command(
             serverInfo.Role = role.id;
         }
 
-        //We need to update the db because we later get these with a direct query
-        if(serverInfo.Channel === undefined){
-            await setDoc(doc(db, `serverInfo/${serverInfo.ID}`), {
-                Role: serverInfo.Role,
-                HasSpawnedGoldenPig: serverInfo.HasSpawnedGoldenPig
-            });
-        }else{
-            await setDoc(doc(db, `serverInfo/${serverInfo.ID}`), serverInfo.GetData());
-        }
+        await AddServerInfoToCache(serverInfo);
+
+        SaveAllServerInfo()
 
         const successEmbed = new EmbedBuilder()
             .setTitle(`Role succesfully set to @${role.name}`)

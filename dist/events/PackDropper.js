@@ -35,12 +35,6 @@ async function SpawnRandomPack() {
         if (packsUntil12Pack === 0) {
             pack = (0, Packs_1.GetPack)(SignificantPackIDs_1.PACK_12);
         }
-        if (packsUntil5Pack >= 0) {
-            packsUntil5Pack--;
-        }
-        if (packsUntil12Pack >= 0) {
-            packsUntil12Pack--;
-        }
         if (pack === undefined) {
             return;
         }
@@ -57,6 +51,12 @@ async function SpawnRandomPack() {
             ping: true
         });
     });
+    if (packsUntil5Pack >= 0) {
+        packsUntil5Pack--;
+    }
+    if (packsUntil12Pack >= 0) {
+        packsUntil12Pack--;
+    }
     console.log("");
     setTimeout(() => {
         SpawnRandomPack();
@@ -95,7 +95,7 @@ async function Set12PackSpawn() {
 const PackDropper = function () {
     setTimeout(async () => {
         SpawnRandomPack();
-    }, 1000 * 60 * 7);
+    }, 1000 * 5);
     Set5PackSpawn();
     Set12PackSpawn();
 };

@@ -18,11 +18,17 @@ class ServerInfo extends DatabaseElement_1.DatabaseElement {
         this.YearsSpawnedAllNewYearDeco = yearsSpawnedAllNewYearDeco;
     }
     GetData() {
-        return {
-            Channel: this.Channel,
-            Role: this.Role,
+        const data = {
             HasSpawnedGoldenPig: this.HasSpawnedGoldenPig,
+            YearsSpawnedAllNewYearDeco: this.YearsSpawnedAllNewYearDeco
         };
+        if (this.Channel !== undefined) {
+            data.Channel = this.Channel;
+        }
+        if (this.Role !== undefined) {
+            data.Role = this.Role;
+        }
+        return data;
     }
 }
 exports.ServerInfo = ServerInfo;

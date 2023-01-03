@@ -2,10 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SetBotRole = void 0;
 const discord_js_1 = require("discord.js");
-const lite_1 = require("firebase/firestore/lite");
 const ServerInfo_1 = require("../database/ServerInfo");
 const Command_1 = require("../Command");
-const Bot_1 = require("../Bot");
 exports.SetBotRole = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     .setName("setrole")
     .addRoleOption(option => option.setName('role')
@@ -35,15 +33,8 @@ exports.SetBotRole = new Command_1.Command(new discord_js_1.SlashCommandBuilder(
     else {
         serverInfo.Role = role.id;
     }
-    if (serverInfo.Channel === undefined) {
-        await (0, lite_1.setDoc)((0, lite_1.doc)(Bot_1.db, `serverInfo/${serverInfo.ID}`), {
-            Role: serverInfo.Role,
-            HasSpawnedGoldenPig: serverInfo.HasSpawnedGoldenPig
-        });
-    }
-    else {
-        await (0, lite_1.setDoc)((0, lite_1.doc)(Bot_1.db, `serverInfo/${serverInfo.ID}`), serverInfo.GetData());
-    }
+    await (0, ServerInfo_1.AddServerInfoToCache)(serverInfo);
+    (0, ServerInfo_1.SaveAllServerInfo)();
     const successEmbed = new discord_js_1.EmbedBuilder()
         .setTitle(`Role succesfully set to @${role.name}`)
         .setColor(discord_js_1.Colors.Green);

@@ -18,11 +18,20 @@ export class ServerInfo extends DatabaseElement {
     }
 
     GetData(): object {
-        return {
-            Channel: this.Channel,
-            Role: this.Role,
+        const data: {[key: string]: any} = {
             HasSpawnedGoldenPig: this.HasSpawnedGoldenPig,
+            YearsSpawnedAllNewYearDeco: this.YearsSpawnedAllNewYearDeco
         }
+
+        if(this.Channel !== undefined){
+            data.Channel = this.Channel;
+        }
+
+        if(this.Role !== undefined){
+            data.Role = this.Role;
+        }
+
+        return data;
     }
 }
 
