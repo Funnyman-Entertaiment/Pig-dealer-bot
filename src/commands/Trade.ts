@@ -6,7 +6,7 @@ import { AddMessageInfoToCache, GetTradeOfferForUser, IsUserInTrade, PigTradeMes
 import { AddUserInfosToCache, GetUserInfo, UserInfo } from "../database/UserInfo";
 import { client } from "../Bot";
 import { MakeErrorEmbed } from "../Utils/Errors";
-import { LogInfo, PrintUser } from "src/Utils/Log";
+import { LogInfo, PrintUser } from "../Utils/Log";
 
 function ParseTradePigsString(interaction: CommandInteraction, pigsString: string) {
     const pigTokens = pigsString.split(',');

@@ -9,7 +9,7 @@ const MessageInfo_1 = require("../database/MessageInfo");
 const UserInfo_1 = require("../database/UserInfo");
 const Bot_1 = require("../Bot");
 const Errors_1 = require("../Utils/Errors");
-const Log_1 = require("src/Utils/Log");
+const Log_1 = require("../Utils/Log");
 function ParseTradePigsString(interaction, pigsString) {
     const pigTokens = pigsString.split(',');
     const pigAmounts = {};
