@@ -20,6 +20,9 @@ const SearchPig_1 = require("./commands/SearchPig");
 const Trade_1 = require("./commands/Trade");
 const ChangeCooldowns_1 = require("./commands/ChangeCooldowns");
 const GreatWipe_1 = require("./commands/GreatWipe");
+const ClearCooldown_1 = require("./commands/ClearCooldown");
+const GetRole_1 = require("./commands/GetRole");
+const RemoveRole_1 = require("./commands/RemoveRole");
 exports.Commands = [
     Sex_1.Sex,
     SetChannel_1.SetBotChannel,
@@ -29,7 +32,9 @@ exports.Commands = [
     Report_1.Report,
     Catalogue_1.Catalogue,
     SearchPig_1.SearchPig,
-    Trade_1.Trade
+    Trade_1.Trade,
+    GetRole_1.GetRole,
+    RemoveRole_1.RemoveRole
 ];
 exports.DebugCommands = [
     TestPack_1.TestPack,
@@ -44,5 +49,6 @@ exports.DebugCommands = [
     ChangeCooldowns_1.ChangePackCooldown,
     ChangeCooldowns_1.Change5PackCooldown,
     ChangeCooldowns_1.Change12PackCooldown,
-    GreatWipe_1.GreatWipe
+    GreatWipe_1.GreatWipe,
+    ClearCooldown_1.ClearCooldown
 ];

@@ -17,6 +17,9 @@ import { SearchPig } from "./commands/SearchPig";
 import { Trade } from "./commands/Trade";
 import { Change12PackCooldown, Change5PackCooldown, ChangeOpeningCooldown, ChangePackCooldown } from "./commands/ChangeCooldowns";
 import { GreatWipe } from "./commands/GreatWipe";
+import { ClearCooldown } from "./commands/ClearCooldown";
+import { GetRole } from "./commands/GetRole";
+import { RemoveRole } from "./commands/RemoveRole";
 
 export const Commands = [
     Sex,
@@ -27,7 +30,9 @@ export const Commands = [
     Report,
     Catalogue,
     SearchPig,
-    Trade
+    Trade,
+    GetRole,
+    RemoveRole
 ];
 
 export const DebugCommands = [
@@ -43,5 +48,6 @@ export const DebugCommands = [
     ChangePackCooldown,
     Change5PackCooldown,
     Change12PackCooldown,
-    GreatWipe
+    GreatWipe,
+    ClearCooldown
 ];
