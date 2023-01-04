@@ -1,7 +1,7 @@
 import { Colors, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder, GuildTextBasedChannel, SlashCommandBuilder, SlashCommandStringOption } from "discord.js";
 import { Command } from "../Command";
 import { GetAuthor } from "../Utils/GetAuthor";
-import { client } from "../Bot";
+import { DevSpace } from "../Constants/Variables";
 
 export const Report = new Command(
     new SlashCommandBuilder()
@@ -13,9 +13,6 @@ export const Report = new Command(
     .setDescription("Sends a message to the devs to report bugs or telling them how awesome the bot is"),
 
     async (interaction: CommandInteraction) => {
-        const devServer = await client.guilds.fetch("1040735505127579718");
-        const reportChannel = (await devServer.channels.fetch("1056247295571665018")) as GuildTextBasedChannel;
-
         const options = interaction.options as CommandInteractionOptionResolver
         const content = options.getString("content");
 
@@ -25,7 +22,7 @@ export const Report = new Command(
             .setDescription(content)
             .setColor(Colors.Orange);
 
-        reportChannel.send({
+        DevSpace.ReportChannel.send({
             embeds: [reportEmbed]
         });
 

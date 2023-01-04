@@ -1,16 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrintUser = exports.PrintChannel = exports.PrintServer = exports.LogError = exports.LogWarn = exports.LogInfo = void 0;
+const Variables_1 = require("../Constants/Variables");
+function SendLogMessage(msg) {
+    console.log(msg);
+    Variables_1.DevSpace.LogChannel.send(msg);
+}
 function LogInfo(msg) {
-    console.log(`[INFO] ${msg}`);
+    SendLogMessage(`[INFO] ${msg}`);
 }
 exports.LogInfo = LogInfo;
 function LogWarn(msg) {
-    console.log(`[WARN] ${msg}`);
+    SendLogMessage(`[WARN] ${msg}`);
 }
 exports.LogWarn = LogWarn;
 function LogError(msg) {
-    console.log(`[ERROR] ${msg}`);
+    SendLogMessage(`[ERROR] ${msg}`);
 }
 exports.LogError = LogError;
 function PrintServer(server) {

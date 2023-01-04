@@ -9,6 +9,7 @@ const MessageInfo_1 = require("../database/MessageInfo");
 const UserInfo_1 = require("../database/UserInfo");
 const Bot_1 = require("../Bot");
 const Errors_1 = require("../Utils/Errors");
+const Log_1 = require("src/Utils/Log");
 function ParseTradePigsString(interaction, pigsString) {
     const pigTokens = pigsString.split(',');
     const pigAmounts = {};
@@ -82,16 +83,23 @@ function GetFieldDescriptionFromPigAmounts(pigAmounts) {
 }
 async function NewTrade(interaction, options) {
     const tradeStarter = interaction.user;
-    const tradeReceiver = options.getUser("user");
-    if (tradeReceiver === null) {
-        return;
-    }
+    const tradeReceiver = options.getUser("user", true);
     const server = interaction.guild;
     if (server === null) {
         return;
     }
     const channel = interaction.channel;
     if (channel === null) {
+        return;
+    }
+    if (tradeReceiver.bot) {
+        const errorEmbed = new discord_js_1.EmbedBuilder()
+            .setTitle("You can't trade with a bot")
+            .setColor(discord_js_1.Colors.Red);
+        interaction.reply({
+            ephemeral: true,
+            embeds: [errorEmbed]
+        });
         return;
     }
     if (tradeStarter.id === tradeReceiver.id) {
@@ -149,6 +157,7 @@ async function NewTrade(interaction, options) {
             return;
         }
     }
+    (0, Log_1.LogInfo)(`${(0, Log_1.PrintUser)(tradeStarter)} has started a trade with ${(0, Log_1.PrintUser)(tradeReceiver)} and is offering ${pigAmounts}`);
     await interaction.deferReply();
     const tradeEmbed = new discord_js_1.EmbedBuilder()
         .setTitle(`${tradeStarter.username} wants to trade with ${tradeReceiver.username}`)

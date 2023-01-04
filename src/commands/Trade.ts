@@ -6,6 +6,7 @@ import { AddMessageInfoToCache, GetTradeOfferForUser, IsUserInTrade, PigTradeMes
 import { AddUserInfosToCache, GetUserInfo, UserInfo } from "../database/UserInfo";
 import { client } from "../Bot";
 import { MakeErrorEmbed } from "../Utils/Errors";
+import { LogInfo, PrintUser } from "src/Utils/Log";
 
 function ParseTradePigsString(interaction: CommandInteraction, pigsString: string) {
     const pigTokens = pigsString.split(',');
@@ -96,12 +97,24 @@ function GetFieldDescriptionFromPigAmounts(pigAmounts: { [key: string]: number }
 
 async function NewTrade(interaction: CommandInteraction, options: CommandInteractionOptionResolver) {
     const tradeStarter = interaction.user;
-    const tradeReceiver = options.getUser("user");
-    if (tradeReceiver === null) { return; }
+    const tradeReceiver = options.getUser("user", true);
     const server = interaction.guild;
     if (server === null) { return; }
     const channel = interaction.channel;
     if (channel === null) { return; }
+
+    if(tradeReceiver.bot){
+        const errorEmbed = new EmbedBuilder()
+            .setTitle("You can't trade with a bot")
+            .setColor(Colors.Red);
+
+        interaction.reply({
+            ephemeral: true,
+            embeds: [errorEmbed]
+        });
+
+        return;
+    }
 
     if (tradeStarter.id === tradeReceiver.id) {
         const errorEmbed = new EmbedBuilder()
@@ -182,6 +195,8 @@ async function NewTrade(interaction: CommandInteraction, options: CommandInterac
             return;
         }
     }
+
+    LogInfo(`${PrintUser(tradeStarter)} has started a trade with ${PrintUser(tradeReceiver)} and is offering ${pigAmounts}`);
 
     await interaction.deferReply();
 

@@ -1,17 +1,23 @@
 import { Guild, GuildChannel, User } from "discord.js";
+import { DevSpace } from "../Constants/Variables";
+
+function SendLogMessage(msg: string){
+    console.log(msg);
+    DevSpace.LogChannel.send(msg);
+}
 
 export function LogInfo(msg: string){
-    console.log(`[INFO] ${msg}`);
+    SendLogMessage(`[INFO] ${msg}`);
 }
 
 
 export function LogWarn(msg:string){
-    console.log(`[WARN] ${msg}`);
+    SendLogMessage(`[WARN] ${msg}`);
 }
 
 
 export function LogError(msg:string){
-    console.log(`[ERROR] ${msg}`);
+    SendLogMessage(`[ERROR] ${msg}`);
 }
 
 
