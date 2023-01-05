@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, GuildChannel } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, EmbedBuilder, GuildChannel } from "discord.js";
 import { GetMessageInfo, PigGalleryMessage } from "../database/MessageInfo";
 import { GetPig } from "../database/Pigs";
 import { MakeErrorEmbed } from "../Utils/Errors";
@@ -9,7 +9,7 @@ import { LogError, PrintChannel, PrintServer } from "../Utils/Log";
 
 
 export const PrevGallery = new Button("GalleryPrevious",
-    async (_, interaction, db) => {
+    async (interaction) => {
         await interaction.deferUpdate();
 
         const server = interaction.guild;
@@ -27,7 +27,21 @@ export const PrevGallery = new Button("GalleryPrevious",
         }
 
         const message = interaction.message;
-        const msgInfo = await GetMessageInfo(server.id, message.id, db) as PigGalleryMessage;
+        const msgInfo = GetMessageInfo(server.id, message.id) as PigGalleryMessage;
+
+        if(msgInfo === undefined){
+            const errorEmbed = new EmbedBuilder()
+                .setTitle("This message has expired")
+                .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
+                .setColor(Colors.Red);
+            
+            interaction.reply({
+                embeds: [errorEmbed],
+                ephemeral: true
+            });
+    
+            return;
+        }
 
         if(msgInfo === undefined || msgInfo.Type !== "PigGallery"){ return; }
 
@@ -82,12 +96,12 @@ export const PrevGallery = new Button("GalleryPrevious",
             return;
         }
 
-        const imgPath = AddPigRenderToEmbed(
-            editedEmbed,
-            pig,
-            msgInfo.NewPigs.includes(pig.ID),
-            !DoesPigIdHaveUniqueEvent(pigToLoad)
-        );
+        const imgPath = AddPigRenderToEmbed(editedEmbed, {
+            pig: pig,
+            new: msgInfo.NewPigs.includes(pig.ID),
+            showId: !DoesPigIdHaveUniqueEvent(pigToLoad),
+            count: msgInfo.PigCounts[pig.ID]
+        });
         const row = new ActionRowBuilder<ButtonBuilder>()
         .addComponents(
             new ButtonBuilder()
@@ -99,7 +113,7 @@ export const PrevGallery = new Button("GalleryPrevious",
                 .setCustomId('GalleryNext')
                 .setLabel('Next')
                 .setStyle(ButtonStyle.Primary)
-                .setDisabled(false)
+                .setDisabled(msgInfo.Pigs.length === 1)
         );
 
         await message.edit({

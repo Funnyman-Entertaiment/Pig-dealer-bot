@@ -1,53 +1,35 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, EmbedBuilder, Guild, GuildTextBasedChannel, roleMention } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, roleMention } from "discord.js";
 import { db, client } from "../Bot";
 import { COLOR_PER_PACK_RARITY } from "../Constants/ColorPerPackRarity";
 import { Pack } from "../database/Packs";
-import { MakeErrorEmbed } from "./Errors";
 import { ServerInfo } from "../database/ServerInfo";
 import { RandomPackMessage, AddMessageInfoToCache } from "../database/MessageInfo";
 import { LogInfo, LogWarn, PrintServer } from "./Log";
-import { Timestamp } from "firebase/firestore/lite";
+import { TrySendAutoRemoveMessage, TrySendMessageToChannel } from "./SendMessage";
 
 
-function SendNotEnoughPermissionsMsg(channel: GuildTextBasedChannel, server: Guild) {
-    const channelName = channel.name;
-    const serverName = server.name;
-
-    const ownerId = server.ownerId;
-    const owner = client.users.cache.get(ownerId);
-
-    const errorEmbed = MakeErrorEmbed(
-        "Pig dealer is missing permissions",
-        "Pig dealer doesn't have enough permissions for",
-        `the ${channelName} channel in the ${serverName} server.`
-    );
-
-    if (owner === undefined) {
-        console.log(`No owner has been found`);
-    } else {
-        owner.send({
-            embeds: [errorEmbed]
-        });
-    }
+export interface PackDropOptions {
+    pack: Pack,
+    title: string,
+    userId?: string,
+    ping?: boolean,
+    ignoreCooldown?: boolean
 }
 
+export async function DropPack(serverInfo: ServerInfo, options: PackDropOptions) {
+    const server = await client.guilds.fetch(serverInfo.ID);
 
-function SendGhostPing(channel: GuildTextBasedChannel, roleId: string) {
-    try {
-        channel.send(roleMention(roleId)).then(message => message.delete());
-    } catch (error) {
-
+    if(serverInfo.Channel === undefined){ 
+        LogWarn(`Can't send pack to server ${PrintServer(server)} because it doesn't have a set channel`);
+        return;
     }
-}
 
-
-export async function DropPack(title: string, pack: Pack, channel: GuildTextBasedChannel, server: Guild, serverInfo: ServerInfo, userId?: string, ping = false) {
-    if (channel.type !== ChannelType.GuildText) { return; }
+    const pack = options.pack;
 
     let img = `${pack.ID}.png`;
 
     const packEmbed = new EmbedBuilder()
-        .setTitle(title)
+        .setTitle(options.title)
         .setImage(`attachment://${img}`)
         .setColor(COLOR_PER_PACK_RARITY[pack.Rarity]);
 
@@ -61,50 +43,32 @@ export async function DropPack(title: string, pack: Pack, channel: GuildTextBase
 
     LogInfo(`Sending ${pack.Name} to server with id: ${PrintServer(server)}`);
 
-    const permissions = server.members.me?.permissionsIn(channel);
-    const timeoutedDate = server.members.me?.communicationDisabledUntil;
-
-    if (timeoutedDate !== undefined && timeoutedDate !== null){
-        const currentDate = Timestamp.now().toDate();
-
-        if(currentDate < timeoutedDate){
-            LogWarn(`Bot is timeouted in ${PrintServer(server)}`);
-            return;
-        }
-    }
-
-    if (permissions === undefined) { return; }
-
-    if (!permissions.has("SendMessages") || !permissions.has("ViewChannel")) {
-        LogWarn(`Not enough permissions to send messages in ${PrintServer(server)}`);
-        SendNotEnoughPermissionsMsg(channel, server);
-        return;
-    }
-
-    if (serverInfo.Role !== undefined && ping) {
-        SendGhostPing(channel, serverInfo.Role);
-    }
-
-    try {
-        channel.send({
-            components: [row],
-            embeds: [packEmbed],
-            files: [`./img/packs/${img}`]
-        }).then(async message => {
-            const newMessage = new RandomPackMessage(
-                message.id,
-                server.id,
-                pack.Name,
-                pack.PigCount,
-                pack.Set,
-                pack.Tags,
-                false,
-                userId
-            );
-
-            AddMessageInfoToCache(newMessage, db);
+    if (serverInfo.Role !== undefined && (options.ping !== undefined && options.ping)) {
+        TrySendAutoRemoveMessage(serverInfo.ID, serverInfo.Channel, {
+            content: roleMention(serverInfo.Role)
         });
-    } catch (error) {
-
     }
+
+    const msgPromise = TrySendMessageToChannel(serverInfo.ID, serverInfo.Channel, {
+        embeds: [packEmbed],
+        components: [row],
+        files: [`./img/packs/${img}`]
+    });
+
+    if(msgPromise === undefined){ return; }
+
+    msgPromise.then(message => {
+        if(message === undefined){ return; }
+ 
+        const newMessage = new RandomPackMessage(
+            message.id,
+            server.id,
+            pack.ID,
+            false,
+            options.ignoreCooldown?? false,
+            options.userId
+        );
+
+        AddMessageInfoToCache(newMessage);
+    });
 }

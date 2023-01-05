@@ -1,5 +1,5 @@
 import { EmbedBuilder } from "@discordjs/builders";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, GuildChannel } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, GuildChannel } from "discord.js";
 import { GetMessageInfo, PigGalleryMessage } from "../database/MessageInfo";
 import { GetPig } from "../database/Pigs";
 import { MakeErrorEmbed } from "../Utils/Errors";
@@ -10,7 +10,7 @@ import { LogError, PrintChannel, PrintServer } from "../Utils/Log";
 
 
 export const NextGallery = new Button("GalleryNext",
-    async (_, interaction, db) => {
+    async (interaction) => {
         await interaction.deferUpdate();
 
         const server = interaction.guild;
@@ -28,9 +28,23 @@ export const NextGallery = new Button("GalleryNext",
         }
 
         const message = interaction.message;
-        const msgInfo = await GetMessageInfo(server.id, message.id, db) as PigGalleryMessage;
+        const msgInfo = GetMessageInfo(server.id, message.id) as PigGalleryMessage;
 
-        if(msgInfo === undefined || msgInfo.Type !== "PigGallery"){ return; }
+        if(msgInfo === undefined){
+            const errorEmbed = new EmbedBuilder()
+                .setTitle("This message has expired")
+                .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
+                .setColor(Colors.Red);
+            
+            interaction.reply({
+                embeds: [errorEmbed],
+                ephemeral: true
+            });
+    
+            return;
+        }
+
+        if(msgInfo.Type !== "PigGallery"){ return; }
 
         if(msgInfo.User === undefined){
             const errorEmbed = MakeErrorEmbed(
@@ -83,12 +97,12 @@ export const NextGallery = new Button("GalleryNext",
             return;
         }
 
-        const imgPath = AddPigRenderToEmbed(
-            editedEmbed,
-            pig,
-            msgInfo.NewPigs.includes(pig.ID),
-            !DoesPigIdHaveUniqueEvent(pigToLoad)
-        );
+        const imgPath = AddPigRenderToEmbed(editedEmbed, {
+            pig: pig,
+            new: msgInfo.NewPigs.includes(pig.ID),
+            showId: !DoesPigIdHaveUniqueEvent(pigToLoad),
+            count: msgInfo.PigCounts[pig.ID]
+        });
 
         const row = new ActionRowBuilder<ButtonBuilder>()
         .addComponents(
@@ -96,7 +110,7 @@ export const NextGallery = new Button("GalleryNext",
                 .setCustomId('GalleryPrevious')
                 .setLabel('Previous')
                 .setStyle(ButtonStyle.Primary)
-                .setDisabled(false),
+                .setDisabled(msgInfo.Pigs.length === 1),
             new ButtonBuilder()
                 .setCustomId('GalleryNext')
                 .setLabel('Next')

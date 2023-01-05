@@ -4,6 +4,7 @@ import { getFirestore } from "firebase/firestore/lite"
 import * as DotEnv from "dotenv";
 import ready from "./listeners/Ready";
 import interactionCreate from "./listeners/InteractionCreate";
+import unhandledException from "./listeners/UnhandledException";
 
 DotEnv.config();
 
@@ -34,8 +35,9 @@ export const client = new Client({
     partials: [Partials.Channel, Partials.Reaction, Partials.Message],
 });
 
-ready(client, db);
-interactionCreate(client, db);
+ready();
+interactionCreate();
+unhandledException();
 
 client.login(token);
 

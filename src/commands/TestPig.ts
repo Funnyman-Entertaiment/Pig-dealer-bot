@@ -13,7 +13,7 @@ export const TestPig = new Command(
 			.setRequired(true))
     .setDescription("pig"),
 
-    async (_, interaction, db) => {
+    async (interaction) => {
         const rawId = (interaction.options as CommandInteractionOptionResolver).getString('id')
         let id: string = "0"
         if(rawId !== null){
@@ -38,10 +38,9 @@ export const TestPig = new Command(
         const pigEmbed = new EmbedBuilder()
             .setTitle("Here's your pig");
 
-        const img = AddPigRenderToEmbed(pigEmbed, pig, false, true);
+        const img = AddPigRenderToEmbed(pigEmbed, {pig: pig});
 
-        await interaction.followUp({
-            ephemeral: true,
+        await interaction.reply({
             embeds: [pigEmbed],
             files: [img]
         });

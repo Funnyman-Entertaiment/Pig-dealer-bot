@@ -1,6 +1,7 @@
-import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, Colors } from "discord.js";
-import { doc, getDoc } from "firebase/firestore/lite";
+import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver } from "discord.js";
 import { Command } from "../Command";
+import { GetPack } from "../database/Packs";
+import { COLOR_PER_PACK_RARITY } from "../Constants/ColorPerPackRarity";
 
 
 export const TestPack = new Command(
@@ -12,29 +13,28 @@ export const TestPack = new Command(
 			.setRequired(true))
     .setDescription("pack"),
 
-    async (_, interaction, db) => {
+    async (interaction) => {
         const rawId = (interaction.options as CommandInteractionOptionResolver).getInteger('id')
         let id: string = "0"
         if(rawId !== null){
             id = rawId.toString();
         }
-        const docRef = doc(db, "packs", id);
-        const packSnap = await getDoc(docRef);
-        const packData = packSnap.data();
+        
+        const pack = GetPack(id);
 
-        if(packData === undefined){
+        if(pack === undefined){
             return;
         }
 
         let img = `${id}.png`;
 
         const packEmbed = new EmbedBuilder()
-            .setTitle(packData.Name)
-            .setDescription(packData.Rarity)
-            .setImage(`attachment://${img}`);
+            .setTitle(pack.Name)
+            .setDescription(pack.Rarity)
+            .setImage(`attachment://${img}`)
+            .setColor(COLOR_PER_PACK_RARITY[pack.Rarity]);
 
-        await interaction.followUp({
-            ephemeral: true,
+        await interaction.reply({
             embeds: [packEmbed],
             files: [`./img/packs/${img}`]
         });

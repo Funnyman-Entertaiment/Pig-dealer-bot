@@ -1,10 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AddPigRenderToEmbed = void 0;
+exports.AddPigListRenderToEmbed = exports.AddPigRenderToEmbed = void 0;
 const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const ColorPerPigRarity_1 = require("../Constants/ColorPerPigRarity");
-function AddPigRenderToEmbed(embed, pig, isNew, showId) {
+function AddPigRenderToEmbed(embed, options) {
+    const pig = options.pig;
     let img = `${pig.ID}.png`;
     if (pig.Tags.includes("gif")) {
         img = `${pig.ID}.gif`;
@@ -13,17 +14,25 @@ function AddPigRenderToEmbed(embed, pig, isNew, showId) {
         img = `none.png`;
     }
     const embedDescriptionLines = [];
-    if (isNew) {
+    if (options.new !== undefined && options.new) {
         embedDescriptionLines.push("***NEW***");
     }
-    embedDescriptionLines.push(`_${pig.Rarity}_`);
+    const rarityTag = pig.Tags.find(tag => tag.startsWith("[RARITY]"));
+    if (rarityTag === undefined) {
+        embedDescriptionLines.push(`_${pig.Rarity}_`);
+    }
+    else {
+        const showRarity = rarityTag.replace("[RARITY]", "").trim();
+        embedDescriptionLines.push(`_${showRarity}_`);
+    }
     embedDescriptionLines.push(pig.Description.length > 0 ? pig.Description : "...");
-    if (showId) {
+    if (options.showId === undefined || options.showId) {
         embedDescriptionLines.push(`#${pig.ID.padStart(3, "0")}`);
     }
     const embedDescription = embedDescriptionLines.join("\n");
+    const count = options.count ?? 1;
     embed.setFields({
-        name: pig.Name,
+        name: `${pig.Name} ${count === 1 ? "" : `(${count})`}`,
         value: embedDescription
     })
         .setImage(`attachment://${img}`)
@@ -31,3 +40,19 @@ function AddPigRenderToEmbed(embed, pig, isNew, showId) {
     return `./img/pigs/${img}`;
 }
 exports.AddPigRenderToEmbed = AddPigRenderToEmbed;
+function AddPigListRenderToEmbed(embed, options) {
+    embed.setFields([]);
+    embed.addFields(options.pigs.map(pig => {
+        const count = options.pigCounts[pig.ID] ?? 1;
+        let number = "";
+        if (count !== 1) {
+            number = ` (${count})`;
+        }
+        return {
+            name: `${pig.Name} #${pig.ID.padStart(3, "0")}${number}`,
+            value: `_${pig.Rarity}_\n${pig.Description}`,
+            inline: true
+        };
+    }));
+}
+exports.AddPigListRenderToEmbed = AddPigListRenderToEmbed;

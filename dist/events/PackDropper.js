@@ -6,57 +6,97 @@ const Packs_1 = require("../database/Packs");
 const DropPack_1 = require("../Utils/DropPack");
 const ServerInfo_1 = require("../database/ServerInfo");
 const Log_1 = require("../Utils/Log");
-async function SpawnRandomPack(client, db) {
-    const q = (0, lite_1.query)((0, lite_1.collection)(db, "serverInfo"));
+const Bot_1 = require("../Bot");
+const Variables_1 = require("../Constants/Variables");
+const SignificantPackIDs_1 = require("../Constants/SignificantPackIDs");
+let packsUntil5Pack = -1;
+let packsUntil12Pack = -1;
+function GetRandomNumber(max, exception) {
+    if (exception === undefined) {
+        return Math.floor(Math.random() * max);
+    }
+    let chosen = GetRandomNumber(max - 1);
+    if (chosen >= exception) {
+        return chosen + 1;
+    }
+    else {
+        return chosen;
+    }
+}
+async function SpawnRandomPack() {
+    const q = (0, lite_1.query)((0, lite_1.collection)(Bot_1.db, "serverInfo"));
     const servers = await (0, lite_1.getDocs)(q);
     (0, Log_1.LogInfo)("Sending random packs.");
     servers.forEach(async (server) => {
-        if (server.data().Channel === undefined) {
+        let pack = (0, Packs_1.GetPack)(SignificantPackIDs_1.PACK_2);
+        if (packsUntil5Pack === 0) {
+            pack = (0, Packs_1.GetPack)(SignificantPackIDs_1.PACK_5);
+        }
+        if (packsUntil12Pack === 0) {
+            pack = (0, Packs_1.GetPack)(SignificantPackIDs_1.PACK_12);
+        }
+        if (pack === undefined) {
             return;
         }
-        try {
-            await client.channels.fetch(server.data().Channel).then(async (channel) => {
-                if (channel === null) {
-                    return;
-                }
-                const guild = await client.guilds.fetch(server.id);
-                let chosenRarity = "Default";
-                if (Math.random() <= 0.08) {
-                    const packChance = Math.random();
-                    if (packChance <= 0.7) {
-                        chosenRarity = "Common";
-                    }
-                    else if (packChance <= 0.9) {
-                        chosenRarity = "Rare";
-                    }
-                    else {
-                        chosenRarity = "Super Rare";
-                    }
-                }
-                const possiblePacks = (0, Packs_1.GetPacksByRarity)(chosenRarity);
-                var pack = possiblePacks[Math.floor(Math.random() * possiblePacks.length)];
-                const serverInfo = (0, ServerInfo_1.CreateServerInfoFromData)(server.id, server.data());
-                let embedTitle = `A ${pack.Name} HAS APPEARED!`;
-                let vowelRegex = '^[aieouAIEOU].*';
-                let matched = pack.Name.match(vowelRegex);
-                if (matched) {
-                    embedTitle = `AN ${pack.Name} HAS APPEARED!`;
-                }
-                (0, DropPack_1.DropPack)(embedTitle, pack, channel, guild, serverInfo, undefined, true);
-            });
+        const serverInfo = (0, ServerInfo_1.CreateServerInfoFromData)(server.id, server.data());
+        let embedTitle = `A ${pack.Name} HAS APPEARED!`;
+        let vowelRegex = '^[aieouAIEOU].*';
+        let matched = pack.Name.match(vowelRegex);
+        if (matched) {
+            embedTitle = `AN ${pack.Name} HAS APPEARED!`;
         }
-        catch (error) {
-            (0, Log_1.LogError)(`Bot doesn't have access to server ${server.id}`);
-        }
+        (0, DropPack_1.DropPack)(serverInfo, {
+            pack: pack,
+            title: embedTitle,
+            ping: true
+        });
     });
-    console.log("\n");
+    if (packsUntil5Pack >= 0) {
+        packsUntil5Pack--;
+    }
+    if (packsUntil12Pack >= 0) {
+        packsUntil12Pack--;
+    }
+    console.log("");
+    setTimeout(() => {
+        SpawnRandomPack();
+    }, 1000 * 60 * Variables_1.Cooldowns.MINUTES_BETWEEN_PACKS);
 }
-const PackDropper = function (client, db) {
+async function Set5PackSpawn() {
+    const maxPackNum = Math.floor(Variables_1.Cooldowns.MINUTES_BETWEEN_5_PACKS / Variables_1.Cooldowns.MINUTES_BETWEEN_PACKS);
+    if (maxPackNum <= 0) {
+        return;
+    }
+    if (packsUntil12Pack >= 0 && packsUntil12Pack <= maxPackNum) {
+        packsUntil5Pack = GetRandomNumber(maxPackNum, packsUntil12Pack);
+    }
+    else {
+        packsUntil5Pack = GetRandomNumber(maxPackNum);
+    }
+    setTimeout(() => {
+        Set5PackSpawn();
+    }, 1000 * 60 * Variables_1.Cooldowns.MINUTES_BETWEEN_5_PACKS);
+}
+async function Set12PackSpawn() {
+    const maxPackNum = Math.floor(Variables_1.Cooldowns.MINUTES_BETWEEN_12_PACKS / Variables_1.Cooldowns.MINUTES_BETWEEN_PACKS);
+    if (maxPackNum <= 0) {
+        return;
+    }
+    if (packsUntil5Pack >= 0 && packsUntil5Pack <= maxPackNum) {
+        packsUntil12Pack = GetRandomNumber(maxPackNum, packsUntil5Pack);
+    }
+    else {
+        packsUntil12Pack = GetRandomNumber(maxPackNum, packsUntil5Pack);
+    }
+    setTimeout(() => {
+        Set5PackSpawn();
+    }, 1000 * 60 * Variables_1.Cooldowns.MINUTES_BETWEEN_12_PACKS);
+}
+const PackDropper = function () {
     setTimeout(async () => {
-        SpawnRandomPack(client, db);
+        SpawnRandomPack();
     }, 1000 * 5);
-    setInterval(async () => {
-        await SpawnRandomPack(client, db);
-    }, 1000 * 60 * 20);
+    Set5PackSpawn();
+    Set12PackSpawn();
 };
 exports.PackDropper = PackDropper;

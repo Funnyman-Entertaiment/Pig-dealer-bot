@@ -9,7 +9,7 @@ const Button_1 = require("../Button");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const UniquePigEvents_1 = require("../uniquePigEvents/UniquePigEvents");
 const Log_1 = require("../Utils/Log");
-exports.PrevGallery = new Button_1.Button("GalleryPrevious", async (_, interaction, db) => {
+exports.PrevGallery = new Button_1.Button("GalleryPrevious", async (interaction) => {
     await interaction.deferUpdate();
     const server = interaction.guild;
     if (server === null) {
@@ -20,7 +20,18 @@ exports.PrevGallery = new Button_1.Button("GalleryPrevious", async (_, interacti
         return;
     }
     const message = interaction.message;
-    const msgInfo = await (0, MessageInfo_1.GetMessageInfo)(server.id, message.id, db);
+    const msgInfo = (0, MessageInfo_1.GetMessageInfo)(server.id, message.id);
+    if (msgInfo === undefined) {
+        const errorEmbed = new discord_js_1.EmbedBuilder()
+            .setTitle("This message has expired")
+            .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
+            .setColor(discord_js_1.Colors.Red);
+        interaction.reply({
+            embeds: [errorEmbed],
+            ephemeral: true
+        });
+        return;
+    }
     if (msgInfo === undefined || msgInfo.Type !== "PigGallery") {
         return;
     }
@@ -57,7 +68,12 @@ exports.PrevGallery = new Button_1.Button("GalleryPrevious", async (_, interacti
         });
         return;
     }
-    const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(editedEmbed, pig, msgInfo.NewPigs.includes(pig.ID), !(0, UniquePigEvents_1.DoesPigIdHaveUniqueEvent)(pigToLoad));
+    const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(editedEmbed, {
+        pig: pig,
+        new: msgInfo.NewPigs.includes(pig.ID),
+        showId: !(0, UniquePigEvents_1.DoesPigIdHaveUniqueEvent)(pigToLoad),
+        count: msgInfo.PigCounts[pig.ID]
+    });
     const row = new discord_js_1.ActionRowBuilder()
         .addComponents(new discord_js_1.ButtonBuilder()
         .setCustomId('GalleryPrevious')
@@ -67,7 +83,7 @@ exports.PrevGallery = new Button_1.Button("GalleryPrevious", async (_, interacti
         .setCustomId('GalleryNext')
         .setLabel('Next')
         .setStyle(discord_js_1.ButtonStyle.Primary)
-        .setDisabled(false));
+        .setDisabled(msgInfo.Pigs.length === 1));
     await message.edit({
         embeds: [editedEmbed],
         files: [imgPath],

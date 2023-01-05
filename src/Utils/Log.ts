@@ -1,17 +1,26 @@
 import { Guild, GuildChannel, User } from "discord.js";
+import { DevSpace } from "../Constants/Variables";
+import { client } from "../Bot";
+
+function SendLogMessage(msg: string){
+    console.log(msg);
+    if(client.user !== null && client.user.id !== "1048616940194767009"){
+        DevSpace.LogChannel.send(msg);
+    }
+}
 
 export function LogInfo(msg: string){
-    console.log(`[INFO] ${msg}`);
+    SendLogMessage(`[INFO] ${msg}`);
 }
 
 
 export function LogWarn(msg:string){
-    console.log(`[WARN] ${msg}`);
+    SendLogMessage(`[WARN] ${msg}`);
 }
 
 
 export function LogError(msg:string){
-    console.log(`[ERROR] ${msg}`);
+    SendLogMessage(`[ERROR] ${msg}`);
 }
 
 

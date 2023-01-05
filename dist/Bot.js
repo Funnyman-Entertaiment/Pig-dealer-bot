@@ -8,6 +8,7 @@ const lite_1 = require("firebase/firestore/lite");
 const DotEnv = tslib_1.__importStar(require("dotenv"));
 const Ready_1 = tslib_1.__importDefault(require("./listeners/Ready"));
 const InteractionCreate_1 = tslib_1.__importDefault(require("./listeners/InteractionCreate"));
+const UnhandledException_1 = tslib_1.__importDefault(require("./listeners/UnhandledException"));
 DotEnv.config();
 const firebaseConfig = {
     apiKey: process.env.FIREBASE_KEY,
@@ -29,8 +30,9 @@ exports.client = new discord_js_1.Client({
     ],
     partials: [discord_js_1.Partials.Channel, discord_js_1.Partials.Reaction, discord_js_1.Partials.Message],
 });
-(0, Ready_1.default)(exports.client, exports.db);
-(0, InteractionCreate_1.default)(exports.client, exports.db);
+(0, Ready_1.default)();
+(0, InteractionCreate_1.default)();
+(0, UnhandledException_1.default)();
 exports.client.login(token);
 function GetClient() {
     return exports.client;

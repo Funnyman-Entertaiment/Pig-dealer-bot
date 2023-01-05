@@ -1,58 +1,49 @@
-import { doc, DocumentData, Firestore, getDoc } from "firebase/firestore/lite";
-import { DatabaseElementList } from "./DatabaseCacheList";
+import { Timestamp } from "firebase/firestore/lite";
 import { DatabaseElement } from "./DatabaseElement";
 
-type MessageType = "RandomPack" | "PigGallery"
+export type MessageType = "RandomPack" | "PigGallery" | "PigList" | "PigTrade"
 
 export class MessageInfo extends DatabaseElement {
     ServerId: string;
     Type: MessageType;
     User: string | undefined;
+    TimeSent: Timestamp;
 
-    constructor(id: string, serverId: string, type: MessageType, user?: string) {
+    constructor(id: string, serverId: string, type: MessageType, user?: string, timeSent?: Timestamp) {
         super(id);
         this.ServerId = serverId;
         this.Type = type;
         this.User = user;
+        this.TimeSent = timeSent ?? Timestamp.now();
     }
 }
 
 
 export class RandomPackMessage extends MessageInfo {
-    Name: string;
-    PigCount: number;
-    Set: string;
-    Tags: string[];
+    Pack: string;
     Opened: boolean;
+    IgnoreCooldown: boolean;
 
-    constructor(id: string, serverId: string, name: string, pigCount: number, set: string, tags: string[], opened: boolean, user?: string){
-        super(id, serverId, "RandomPack", user);
-        this.Name = name;
-        this.PigCount = pigCount,
-        this.Set = set;
-        this.Tags = tags;
+    constructor(id: string, serverId: string, pack: string, opened: boolean, ignoreCooldown: boolean, user?: string, timeSent?: Timestamp) {
+        super(id, serverId, "RandomPack", user, timeSent);
+        this.Pack = pack;
         this.Opened = opened;
+        this.IgnoreCooldown = ignoreCooldown;
     }
 
     GetData(): object {
-        if(this.User === undefined){
+        if (this.User === undefined) {
             return {
                 Type: this.Type,
-                Name: this.Name,
-                PigCount: this.PigCount,
-                Set: this.Set,
-                Tags: this.Tags,
-                Opened: this.Opened
+                Opened: this.Opened,
+                Pack: this.Pack
             };
-        }else{
+        } else {
             return {
                 Type: this.Type,
                 User: this.User,
-                Name: this.Name,
-                PigCount: this.PigCount,
-                Set: this.Set,
-                Tags: this.Tags,
-                Opened: this.Opened
+                Opened: this.Opened,
+                Pack: this.Pack
             };
         }
     }
@@ -61,27 +52,29 @@ export class RandomPackMessage extends MessageInfo {
 
 export class PigGalleryMessage extends MessageInfo {
     CurrentPig: number;
+    PigCounts: {[key: string]: number};
     Pigs: string[];
     NewPigs: string[];
     SeenPigs: number[];
 
-    constructor(id: string, serverId: string, currentPig: number, pigs: string[], newPigs: string[], seenPigs: number[], user?: string) {
-        super(id, serverId, "PigGallery", user);
+    constructor(id: string, serverId: string, currentPig: number, pigCounts: {[key: string]: number}, pigs: string[], newPigs: string[], seenPigs: number[], user?: string, timeSent?: Timestamp) {
+        super(id, serverId, "PigGallery", user, timeSent);
         this.CurrentPig = currentPig;
+        this.PigCounts = pigCounts;
         this.Pigs = pigs;
         this.NewPigs = newPigs;
         this.SeenPigs = seenPigs;
     }
 
     GetData(): object {
-        if(this.User === undefined){
+        if (this.User === undefined) {
             return {
                 Type: this.Type,
                 CurrentPig: this.CurrentPig,
                 Pigs: this.Pigs,
                 NewPigs: this.NewPigs
             };
-        }else{
+        } else {
             return {
                 Type: this.Type,
                 User: this.User,
@@ -94,45 +87,51 @@ export class PigGalleryMessage extends MessageInfo {
 }
 
 
-const CachedMessageInfosPerServer: { [key: string]: DatabaseElementList<MessageInfo> } = {};
+export class PigListMessage extends MessageInfo {
+    PigCounts: {[key: string]: number};
+    PigsBySet: { [key: string]: string[] };
+    CurrentSet: string;
+    CurrentPage: number;
 
-
-export function CreateMessageInfoFromData(id: string, serverId: string, msgInfoData: DocumentData): MessageInfo{
-    const msgType = msgInfoData.Type as MessageType;
-
-    if(msgType == "RandomPack"){
-        const newRandomPackMsg = new RandomPackMessage(
-            id,
-            serverId,
-            msgInfoData.Name,
-            msgInfoData.PigCount,
-            msgInfoData.Set,
-            msgInfoData.Tags,
-            msgInfoData.Opened,
-            msgInfoData.User
-        );
-
-        return newRandomPackMsg;
-    }else{
-        const newPigGalleryMsg = new PigGalleryMessage(
-            id,
-            serverId,
-            msgInfoData.CurrentPig,
-            msgInfoData.Pigs,
-            msgInfoData.NewPigs,
-            msgInfoData.User
-        );
-
-        return newPigGalleryMsg;
+    constructor(id: string, serverId: string, pigCounts: {[key: string]: number}, pigsBySet: { [key: string]: string[] }, currentSet: string, currentPage: number, user?: string, timeSent?: Timestamp) {
+        super(id, serverId, "PigList", user, timeSent);
+        this.PigCounts = pigCounts;
+        this.PigsBySet = pigsBySet;
+        this.CurrentSet = currentSet;
+        this.CurrentPage = currentPage;
     }
 }
 
 
-export function GetMsgInfoCacheForServer(serverId: string): DatabaseElementList<MessageInfo>{
+export class PigTradeMessage extends MessageInfo {
+    TradeStarterID: string;
+    TradeReceiverID: string;
+
+    TradeStarterOffer: { [key: string]: number };
+    TradeReceiverOffer: { [key: string]: number };
+
+    ChannelSentID: string;
+
+    constructor(id: string, serverId: string, tradeStarterId: string, tradeReceiverId: string, tradeStarterOffer: { [key: string]: number }, tradeReceiverOffer: { [key: string]: number }, channelSentID: string) {
+        super(id, serverId, "PigTrade", tradeReceiverId);
+        this.TradeStarterID = tradeStarterId;
+        this.TradeReceiverID = tradeReceiverId;
+
+        this.TradeStarterOffer = tradeStarterOffer;
+        this.TradeReceiverOffer = tradeReceiverOffer;
+        this.ChannelSentID = channelSentID;
+    }
+}
+
+
+export const CachedMessageInfosPerServer: { [key: string]: MessageInfo[] } = {};
+
+
+export function GetMsgInfoCacheForServer(serverId: string): MessageInfo[] {
     let msgInfoCacheForServer = CachedMessageInfosPerServer[serverId];
 
-    if(msgInfoCacheForServer === undefined){
-        CachedMessageInfosPerServer[serverId] = new DatabaseElementList<MessageInfo>();
+    if (msgInfoCacheForServer === undefined) {
+        CachedMessageInfosPerServer[serverId] = [];
         msgInfoCacheForServer = CachedMessageInfosPerServer[serverId];
     }
 
@@ -140,45 +139,72 @@ export function GetMsgInfoCacheForServer(serverId: string): DatabaseElementList<
 }
 
 
-export function GetMessageInfoFromCache(serverId: string, msgId: string): MessageInfo | undefined{
+export function GetMessageInfoFromCache(serverId: string, msgId: string): MessageInfo | undefined {
     let cachedMessageInfos = GetMsgInfoCacheForServer(serverId);
-    const found = cachedMessageInfos.Get(msgId);
+    const found = cachedMessageInfos.find(msg => msg.ID === msgId);
 
     return found;
 }
 
 
-export async function AddMessageInfoToCache(msgInfo: MessageInfo, db: Firestore){
+export function AddMessageInfoToCache(msgInfo: MessageInfo) {
     let cachedMessageInfos = GetMsgInfoCacheForServer(msgInfo.ServerId);
-    await cachedMessageInfos.Add(msgInfo, db);
+    cachedMessageInfos.push(msgInfo);
 }
 
 
-export async function AddMessageInfosToCache(packs: MessageInfo[], db: Firestore){
+export function AddMessageInfosToCache(packs: MessageInfo[]) {
     for (let i = 0; i < packs.length; i++) {
         const pack = packs[i];
-        await AddMessageInfoToCache(pack, db);
+        AddMessageInfoToCache(pack);
     }
 }
 
 
-export async function GetMessageInfo(serverId: string, msgId: string, db: Firestore){
+export function GetMessageInfo(serverId: string, msgId: string) {
     const cachedMsgInfo = GetMessageInfoFromCache(serverId, msgId);
 
-    if(cachedMsgInfo === undefined){
-        const msgInfoDocument = doc(db, `serverInfo/${serverId}/messages/${msgId}`);
-        const foundMsgInfo = await getDoc(msgInfoDocument);
+    return cachedMsgInfo;
+}
 
-        if(foundMsgInfo.exists()){
-            const serverInfoData = foundMsgInfo.data();
-            const newServerInfo = CreateMessageInfoFromData(msgId, serverId, serverInfoData);
-            AddMessageInfoToCache(newServerInfo, db);
 
-            return newServerInfo;
-        }else{
-            return undefined;
-        }
-    }else{
-        return cachedMsgInfo;
+export function IsUserInTrade(userId: string) {
+    for (const serverID in CachedMessageInfosPerServer) {
+        const cachedMessages = CachedMessageInfosPerServer[serverID];
+
+        const isInTrade = cachedMessages.some(m => {
+            const message = m as PigTradeMessage;
+
+            return message.Type === "PigTrade" &&
+                (message.TradeStarterID === userId || message.TradeReceiverID === userId);
+        });
+
+        if (isInTrade) { return true; }
     }
+
+    return false;
+}
+
+
+export function RemoveMessageInfoFromCache(msgInfo: MessageInfo) {
+    const msgInfoCache = GetMsgInfoCacheForServer(msgInfo.ServerId);
+    const index = msgInfoCache.indexOf(msgInfo);
+    msgInfoCache.splice(index, 1);
+}
+
+
+export function GetTradeOfferForUser(userID: string) {
+    for (const serverID in CachedMessageInfosPerServer) {
+        const messagesCache = CachedMessageInfosPerServer[serverID];
+
+        const foundTrade = messagesCache.find(m => {
+            const message = m as PigTradeMessage;
+
+            return message.Type === "PigTrade" && message.TradeReceiverID === userID;
+        });
+
+        if (foundTrade !== undefined) { return foundTrade as PigTradeMessage; }
+    }
+
+    return undefined;
 }

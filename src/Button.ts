@@ -1,12 +1,11 @@
-import { ButtonInteraction, Client } from "discord.js";
-import { Firestore } from "firebase/firestore/lite";
+import { ButtonInteraction } from "discord.js";
 
 export class Button{
     id;
     response;
 
     constructor(id: string, 
-    response: (client: Client, interaction: ButtonInteraction, db: Firestore) => void){
+    response: (interaction: ButtonInteraction) => void){
         this.id = id;
         this.response = response
     }

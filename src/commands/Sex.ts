@@ -1,5 +1,4 @@
-import { Client, CommandInteraction, SlashCommandBuilder } from "discord.js";
-import { GetMsgInfoCacheForServer } from "../database/MessageInfo";
+import { CommandInteraction, SlashCommandBuilder } from "discord.js";
 import { Command } from "../Command";
 
 export const Sex = new Command(
@@ -7,15 +6,10 @@ export const Sex = new Command(
     .setName("sex2")
     .setDescription("sex"),
 
-    async (_client: Client, interaction: CommandInteraction) => {
+    async (interaction: CommandInteraction) => {
         const content = `I'm not having sex with you right now ${interaction.user.username}.`;
 
-        const server = interaction.guild;
-        if(server !== null){
-            console.log(GetMsgInfoCacheForServer(server.id).Elements);
-        }
-
-        await interaction.followUp({
+        await interaction.reply({
             ephemeral: true,
             content
         });

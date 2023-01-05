@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetPackByName = exports.GetPacksByRarity = exports.GetPack = exports.CreatePackFromData = exports.AddPack = exports.Pack = void 0;
+exports.GetPackByName = exports.GetPacksByRarity = exports.GetPack = exports.CreatePackFromData = exports.ClearPacks = exports.AddPack = exports.Pack = void 0;
 const DatabaseElement_1 = require("./DatabaseElement");
 class Pack extends DatabaseElement_1.DatabaseElement {
     Name;
@@ -32,6 +32,10 @@ function AddPack(pack) {
     Packs.push(pack);
 }
 exports.AddPack = AddPack;
+function ClearPacks() {
+    Packs = [];
+}
+exports.ClearPacks = ClearPacks;
 function CreatePackFromData(id, packData) {
     const newPack = new Pack(id, packData.Name, packData.Rarity, packData.PigCount, packData.Set, packData.Tags);
     return newPack;

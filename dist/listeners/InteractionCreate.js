@@ -2,17 +2,18 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const Buttons_1 = require("../Buttons");
 const Commands_1 = require("../Commands");
-exports.default = (client, db) => {
-    client.on("interactionCreate", async (interaction) => {
+const Bot_1 = require("../Bot");
+exports.default = () => {
+    Bot_1.client.on("interactionCreate", async (interaction) => {
         if (interaction.isCommand() || interaction.isContextMenuCommand()) {
-            await handleSlashCommand(client, interaction, db);
+            await handleSlashCommand(interaction);
         }
         else if (interaction.isButton()) {
-            await handleButtonCommand(client, interaction, db);
+            await handleButtonCommand(interaction);
         }
     });
 };
-const handleSlashCommand = async (client, interaction, db) => {
+const handleSlashCommand = async (interaction) => {
     let slashCommand = Commands_1.Commands.find(c => c.slashCommand.name === interaction.commandName);
     if (slashCommand === undefined) {
         slashCommand = Commands_1.DebugCommands.find(c => c.slashCommand.name === interaction.commandName);
@@ -21,14 +22,13 @@ const handleSlashCommand = async (client, interaction, db) => {
         await interaction.reply({ content: "An error has occurred" });
         return;
     }
-    await interaction.deferReply();
-    slashCommand.response(client, interaction, db);
+    slashCommand.response(interaction);
 };
-const handleButtonCommand = async (client, interaction, db) => {
-    const button = Buttons_1.Buttons.find(c => c.id === interaction.customId);
+const handleButtonCommand = async (interaction) => {
+    const button = Buttons_1.Buttons.find(b => b.id === interaction.customId);
     if (!button) {
         await interaction.reply({ content: "An error has occurred" });
         return;
     }
-    button.response(client, interaction, db);
+    button.response(interaction);
 };

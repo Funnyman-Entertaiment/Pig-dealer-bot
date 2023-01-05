@@ -2,26 +2,30 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ShowBinder = void 0;
 const discord_js_1 = require("discord.js");
-const lite_1 = require("firebase/firestore/lite");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const Command_1 = require("../Command");
 const Pigs_1 = require("../database/Pigs");
 const MessageInfo_1 = require("../database/MessageInfo");
 const Log_1 = require("../Utils/Log");
-function GetAuthor(interaction) {
-    if (interaction.user === null) {
-        return null;
+const UserInfo_1 = require("../database/UserInfo");
+const GetAuthor_1 = require("../Utils/GetAuthor");
+function GetUserPigs(userInfo) {
+    if (userInfo === undefined) {
+        return [];
     }
-    const user = interaction.user;
-    const username = user.username;
-    const avatar = user.avatarURL();
-    return { name: username, iconURL: avatar === null ? "" : avatar };
+    const userPigs = [];
+    for (const pigId in userInfo.Pigs) {
+        userPigs.push(pigId);
+    }
+    return userPigs;
 }
 exports.ShowBinder = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     .setName("binder")
     .addUserOption(option => option.setName('user')
     .setDescription('user to check the binder of'))
-    .setDescription("Let's you check your own or someone else's pig binder"), async (_, interaction, db) => {
+    .setDescription("Let's you check your own or someone else's pig binder")
+    .setDMPermission(false), async (interaction) => {
+    await interaction.deferReply();
     const server = interaction.guild;
     if (server === null) {
         return;
@@ -31,7 +35,7 @@ exports.ShowBinder = new Command_1.Command(new discord_js_1.SlashCommandBuilder(
     let author;
     if (user === null) {
         (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} is checking its own binder`);
-        author = GetAuthor(interaction);
+        author = (0, GetAuthor_1.GetAuthor)(interaction);
         if (author === null) {
             return;
         }
@@ -44,9 +48,9 @@ exports.ShowBinder = new Command_1.Command(new discord_js_1.SlashCommandBuilder(
         const avatar = user.avatarURL();
         author = { name: username, iconURL: avatar === null ? "" : avatar };
     }
-    const pigsQuery = (0, lite_1.query)((0, lite_1.collection)(db, `serverInfo/${server.id}/users/${userId}/pigs`));
-    const pigs = await (0, lite_1.getDocs)(pigsQuery);
-    if (pigs.empty) {
+    const userInfo = await (0, UserInfo_1.GetUserInfo)(userId);
+    const pigs = GetUserPigs(userInfo);
+    if (pigs.length === 0) {
         const emptyEmbed = new discord_js_1.EmbedBuilder()
             .setAuthor(author)
             .setColor(discord_js_1.Colors.DarkRed)
@@ -57,16 +61,17 @@ exports.ShowBinder = new Command_1.Command(new discord_js_1.SlashCommandBuilder(
         });
         return;
     }
-    const pigsSet = [];
-    pigs.forEach(pig => {
-        if (!pigsSet.includes(pig.data().PigId)) {
-            pigsSet.push(pig.data().PigId);
+    pigs.sort((a, b) => {
+        try {
+            const numA = parseInt(a);
+            const numB = parseInt(b);
+            return numA - numB;
+        }
+        catch {
+            return a.localeCompare(b);
         }
     });
-    pigsSet.sort((a, b) => {
-        return parseInt(a) - parseInt(b);
-    });
-    const firstPigId = pigsSet[0];
+    const firstPigId = pigs[0];
     const firstPig = (0, Pigs_1.GetPig)(firstPigId);
     if (firstPig === undefined) {
         (0, Log_1.LogError)(`Couldn't find the first pig in the binder (${firstPigId})`);
@@ -74,24 +79,29 @@ exports.ShowBinder = new Command_1.Command(new discord_js_1.SlashCommandBuilder(
     }
     const openedPackEmbed = new discord_js_1.EmbedBuilder()
         .setTitle(`${author.name}'s pig bind`)
-        .setDescription(`1/${pigsSet.length}`)
+        .setDescription(`1/${pigs.length}`)
         .setAuthor(author);
-    const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(openedPackEmbed, firstPig, false, true);
+    const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(openedPackEmbed, {
+        pig: firstPig,
+        count: userInfo?.Pigs[firstPig.ID] ?? 1
+    });
     const row = new discord_js_1.ActionRowBuilder()
         .addComponents(new discord_js_1.ButtonBuilder()
         .setCustomId('GalleryPrevious')
         .setLabel('Previous')
-        .setStyle(discord_js_1.ButtonStyle.Primary), new discord_js_1.ButtonBuilder()
+        .setStyle(discord_js_1.ButtonStyle.Primary)
+        .setDisabled(true), new discord_js_1.ButtonBuilder()
         .setCustomId('GalleryNext')
         .setLabel('Next')
-        .setStyle(discord_js_1.ButtonStyle.Primary));
+        .setStyle(discord_js_1.ButtonStyle.Primary)
+        .setDisabled(pigs.length === 1));
     await interaction.followUp({
         embeds: [openedPackEmbed],
         components: [row],
         files: [imgPath]
     }).then(message => {
-        const newMessage = new MessageInfo_1.PigGalleryMessage(message.id, server.id, 0, pigsSet, [], [], interaction.user.id);
-        (0, MessageInfo_1.AddMessageInfoToCache)(newMessage, db);
+        const newMessage = new MessageInfo_1.PigGalleryMessage(message.id, server.id, 0, userInfo === undefined ? {} : userInfo.Pigs, pigs, [], [], interaction.user.id);
+        (0, MessageInfo_1.AddMessageInfoToCache)(newMessage);
     });
     console.log("\n");
 });

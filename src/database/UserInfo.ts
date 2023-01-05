@@ -1,42 +1,48 @@
-import { doc, DocumentData, Firestore, getDoc, Timestamp } from "firebase/firestore/lite";
+import { doc, DocumentData, getDoc, Timestamp } from "firebase/firestore/lite";
 import { DatabaseElementList } from "./DatabaseCacheList";
 import { DatabaseElement } from "./DatabaseElement";
+import { db } from "../Bot";
 
 export class UserInfo extends DatabaseElement {
-    ServerId: string;
     LastTimeOpened: Timestamp | undefined;
     AssembledPigs: string[];
+    Pigs: {[key: string]: number};
 
-    constructor(id: string, serverId: string, assembledPigs: string[], lastTimeOpened?: Timestamp) {
+    constructor(id: string, assembledPigs: string[], pigs: {[key: string]: number}, lastTimeOpened?: Timestamp) {
         super(id);
-        this.ServerId = serverId;
         this.AssembledPigs = assembledPigs;
+        this.Pigs = pigs;
         this.LastTimeOpened = lastTimeOpened;
     }
 
     GetData(): object {
-        if (this.LastTimeOpened === undefined) {
-            return {
-                AssembledPigs: this.AssembledPigs
-            };
-        } else {
-            return {
-                LastTimeOpened: this.LastTimeOpened,
-                AssembledPigs: this.AssembledPigs
-            };
+        const data: {[key: string]: any} = {
+            Pigs: this.Pigs,
+            AssembledPigs: this.AssembledPigs
+        };
+
+        if (this.LastTimeOpened !== undefined) {
+            data.LastTimeOpened = this.LastTimeOpened;
         }
+
+        return data;
     }
 }
 
 
-const CachedUserInfosPerServer: { [key: string]: DatabaseElementList<UserInfo> } = {};
+let CachedUserInfos: DatabaseElementList<UserInfo> | undefined;
 
 
-function CreateUserInfoFromData(id: string, serverId: string, userInfoData: DocumentData): UserInfo{
+export async function SaveAllUserInfo(){
+    await CachedUserInfos?.SaveAll();
+}
+
+
+function CreateUserInfoFromData(id: string, userInfoData: DocumentData): UserInfo{
     const newUserInfo = new UserInfo(
         id,
-        serverId,
-        userInfoData.AssembledPigs,
+        userInfoData.AssembledPigs?? [],
+        userInfoData.Pigs?? {},
         userInfoData.LastTimeOpened
     );
 
@@ -44,55 +50,45 @@ function CreateUserInfoFromData(id: string, serverId: string, userInfoData: Docu
 }
 
 
-function GetUserInfoCacheForServer(serverId: string): DatabaseElementList<UserInfo>{
-    let userInfoCacheForServer = CachedUserInfosPerServer[serverId];
-
-    if(userInfoCacheForServer === undefined){
-        CachedUserInfosPerServer[serverId] = new DatabaseElementList<UserInfo>();
-        userInfoCacheForServer = CachedUserInfosPerServer[serverId];
+function GetCachedUserInfos(){
+    if(CachedUserInfos === undefined){
+        CachedUserInfos = new DatabaseElementList<UserInfo>();
     }
 
-    return userInfoCacheForServer;
+    return CachedUserInfos;
 }
 
 
-function GetUserInfoFromCache(serverId: string, userId: string): UserInfo | undefined{
-    let cachedUserInfos = GetUserInfoCacheForServer(serverId);
-    return cachedUserInfos.Get(userId);
+export async function AddUserInfoToCache(userInfo: UserInfo){
+    await GetCachedUserInfos().Add(userInfo);
 }
 
 
-export async function AddUserInfoToCache(msgInfo: UserInfo, db: Firestore){
-    let cachedMessageInfos = GetUserInfoCacheForServer(msgInfo.ServerId);
-    await cachedMessageInfos.Add(msgInfo, db);
-}
-
-
-export async function AddUserInfosToCache(packs: UserInfo[], db: Firestore){
+export async function AddUserInfosToCache(packs: UserInfo[]){
     for (let i = 0; i < packs.length; i++) {
         const pack = packs[i];
-        await AddUserInfoToCache(pack, db);
+        await AddUserInfoToCache(pack);
     }
 }
 
 
-export async function GetUserInfo(serverId: string, userId: string, db: Firestore){
-    const cachedServerInfo = GetUserInfoFromCache(serverId, userId);
+export async function GetUserInfo(userId: string){
+    const cachedUserInfo = GetCachedUserInfos().Get(userId);
 
-    if(cachedServerInfo === undefined){
-        const userInfoDocument = doc(db, `serverInfo/${serverId}/users/${userId}`);
+    if(cachedUserInfo === undefined){
+        const userInfoDocument = doc(db, `users/${userId}`);
         const foundUserInfo = await getDoc(userInfoDocument);
 
         if(foundUserInfo.exists()){
             const userInfoData = foundUserInfo.data();
-            const newuserInfo = CreateUserInfoFromData(userId, serverId, userInfoData);
-            AddUserInfoToCache(newuserInfo, db);
+            const newuserInfo = CreateUserInfoFromData(userId, userInfoData);
+            AddUserInfoToCache(newuserInfo);
 
             return newuserInfo;
         }else{
             return undefined;
         }
     }else{
-        return cachedServerInfo;
+        return cachedUserInfo;
     }
 }

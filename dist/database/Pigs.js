@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetPigsByRarity = exports.GetPigsWithTag = exports.GetPigsBySet = exports.GetAllPigs = exports.GetPig = exports.CreatePigFromData = exports.AddPig = exports.Pig = void 0;
+exports.GetPigsByRarity = exports.GetPigsWithTag = exports.GetPigsBySet = exports.GetAllPigs = exports.GetPig = exports.CreatePigFromData = exports.ClearPigs = exports.AddPig = exports.Pig = void 0;
 const DatabaseElement_1 = require("./DatabaseElement");
 class Pig extends DatabaseElement_1.DatabaseElement {
     Name;
@@ -35,6 +35,10 @@ function AddPig(pig) {
     Pigs.push(pig);
 }
 exports.AddPig = AddPig;
+function ClearPigs() {
+    Pigs = [];
+}
+exports.ClearPigs = ClearPigs;
 function CreatePigFromData(id, pigData) {
     const newPig = new Pig(id, pigData.Name, pigData.Description, pigData.Rarity, pigData.Set, pigData.Tags, pigData.RequiredPigs);
     return newPig;

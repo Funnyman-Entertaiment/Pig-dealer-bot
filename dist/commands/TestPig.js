@@ -10,7 +10,7 @@ exports.TestPig = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     .addStringOption(option => option.setName('id')
     .setDescription('Pig id')
     .setRequired(true))
-    .setDescription("pig"), async (_, interaction, db) => {
+    .setDescription("pig"), async (interaction) => {
     const rawId = interaction.options.getString('id');
     let id = "0";
     if (rawId !== null) {
@@ -29,9 +29,8 @@ exports.TestPig = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     }
     const pigEmbed = new discord_js_1.EmbedBuilder()
         .setTitle("Here's your pig");
-    const img = (0, PigRenderer_1.AddPigRenderToEmbed)(pigEmbed, pig, false, true);
-    await interaction.followUp({
-        ephemeral: true,
+    const img = (0, PigRenderer_1.AddPigRenderToEmbed)(pigEmbed, { pig: pig });
+    await interaction.reply({
         embeds: [pigEmbed],
         files: [img]
     });

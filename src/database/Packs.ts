@@ -41,6 +41,11 @@ export function AddPack(pack: Pack){
 }
 
 
+export function ClearPacks(){
+    Packs = [];
+}
+
+
 export function CreatePackFromData(id: string, packData: DocumentData): Pack{
     const newPack = new Pack(
         id,

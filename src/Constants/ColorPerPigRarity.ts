@@ -10,5 +10,6 @@ export const COLOR_PER_PIG_RARITY: { readonly [key: string]: number } = {
     Christmas: Colors.DarkGreen,
     Postcard: Colors.DarkRed,
     ["Postcard (Animated)"]: Colors.DarkRed,
-    ["Christmas Bundle"]: Colors.DarkGreen
+    ["Christmas Bundle"]: Colors.DarkGreen,
+    ["Apology Present"]: Colors.White
 }
