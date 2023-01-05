@@ -23,6 +23,8 @@ const GreatWipe_1 = require("./commands/GreatWipe");
 const ClearCooldown_1 = require("./commands/ClearCooldown");
 const GetRole_1 = require("./commands/GetRole");
 const RemoveRole_1 = require("./commands/RemoveRole");
+const Invite_1 = require("./commands/Invite");
+const Info_1 = require("./commands/Info");
 exports.Commands = [
     Sex_1.Sex,
     SetChannel_1.SetBotChannel,
@@ -34,7 +36,9 @@ exports.Commands = [
     SearchPig_1.SearchPig,
     Trade_1.Trade,
     GetRole_1.GetRole,
-    RemoveRole_1.RemoveRole
+    RemoveRole_1.RemoveRole,
+    Invite_1.Invite,
+    Info_1.Information
 ];
 exports.DebugCommands = [
     TestPack_1.TestPack,

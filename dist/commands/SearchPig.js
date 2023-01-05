@@ -39,20 +39,33 @@ exports.SearchPig = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     await (0, UserInfo_1.SaveAllUserInfo)();
     const q = (0, lite_1.query)((0, lite_1.collection)(Bot_1.db, `users`));
     const userInfoDocs = await (0, lite_1.getDocs)(q);
-    const foundUsersWithPig = [];
+    const userIDsWithPig = [];
+    const foundUsersWithPig = {};
     for (let i = 0; i < userInfoDocs.docs.length; i++) {
         const userInfoDoc = userInfoDocs.docs[i];
-        if (!server.members.cache.has(userInfoDoc.id)) {
+        if (userInfoDoc.id === user.id) {
             continue;
         }
-        const userInServer = await server.members.fetch(userInfoDoc.id);
-        if (userInfoDoc.data().Pigs[pigID] !== undefined &&
-            userInfoDoc.id !== user.id &&
-            userInServer !== undefined) {
-            foundUsersWithPig.push(userInfoDoc.id);
+        const amountOfPigs = userInfoDoc.data().Pigs[pigID];
+        if (amountOfPigs === undefined || amountOfPigs <= 0) {
+            continue;
+        }
+        try {
+            if (server.members.cache.has(userInfoDoc.id)) {
+                userIDsWithPig.push(userInfoDoc.id);
+                foundUsersWithPig[userInfoDoc.id] = amountOfPigs;
+                continue;
+            }
+            const userInServer = await server.members.fetch(userInfoDoc.id);
+            if (userInServer !== undefined) {
+                userIDsWithPig.push(userInfoDoc.id);
+                foundUsersWithPig[userInfoDoc.id] = amountOfPigs;
+            }
+        }
+        catch {
         }
     }
-    if (foundUsersWithPig.length === 0) {
+    if (userIDsWithPig.length === 0) {
         const noUsersFoundEmbed = new discord_js_1.EmbedBuilder()
             .setTitle("No users have been found that have that pig")
             .setColor(discord_js_1.Colors.Red)
@@ -63,17 +76,18 @@ exports.SearchPig = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
         return;
     }
     const descriptionLines = [];
-    for (let i = 0; i < foundUsersWithPig.length; i++) {
-        const foundUserID = foundUsersWithPig[i];
+    for (let i = 0; i < userIDsWithPig.length; i++) {
+        const foundUserID = userIDsWithPig[i];
         if (!server.members.cache.has(foundUserID)) {
             continue;
         }
         const foundMember = await server.members.fetch(foundUserID);
+        const pigNum = foundUsersWithPig[foundUserID];
         if (foundMember.nickname === null) {
-            descriptionLines.push(`-${foundMember.user.username}`);
+            descriptionLines.push(`-${foundMember.user.username} -> ${pigNum} pig${pigNum > 1 ? "s" : ""}`);
         }
         else {
-            descriptionLines.push(`-${foundMember.nickname} (${foundMember.user.username})`);
+            descriptionLines.push(`-${foundMember.nickname} (${foundMember.user.username}) -> ${pigNum} pig${pigNum > 1 ? "s" : ""}`);
         }
     }
     const foundUsersEmbed = new discord_js_1.EmbedBuilder()

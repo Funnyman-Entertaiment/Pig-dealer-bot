@@ -48,23 +48,39 @@ export const SearchPig = new Command(
         const q = query(collection(db, `users`));
         const userInfoDocs = await getDocs(q);
 
-        const foundUsersWithPig: string[] = [];
+        const userIDsWithPig: string[] = [];
+        const foundUsersWithPig: { [key: string]: number } = {};
 
         for (let i = 0; i < userInfoDocs.docs.length; i++) {
             const userInfoDoc = userInfoDocs.docs[i];
-            if(!server.members.cache.has(userInfoDoc.id)){ continue; }
-            const userInServer = await server.members.fetch(userInfoDoc.id);
+            if (userInfoDoc.id === user.id) {
+                continue;
+            }
 
-            if (
-                userInfoDoc.data().Pigs[pigID] !== undefined &&
-                userInfoDoc.id !== user.id &&
-                userInServer !== undefined
-            ) {
-                foundUsersWithPig.push(userInfoDoc.id);
+            const amountOfPigs = userInfoDoc.data().Pigs[pigID]
+
+            if (amountOfPigs === undefined || amountOfPigs <= 0) {
+                continue;
+            }
+
+            try {
+                if (server.members.cache.has(userInfoDoc.id)) {
+                    userIDsWithPig.push(userInfoDoc.id);
+                    foundUsersWithPig[userInfoDoc.id] = amountOfPigs;
+                    continue;
+                }
+
+                const userInServer = await server.members.fetch(userInfoDoc.id);
+
+                if (userInServer !== undefined) {
+                    userIDsWithPig.push(userInfoDoc.id)
+                    foundUsersWithPig[userInfoDoc.id] = amountOfPigs;
+                }
+            } catch {
             }
         }
 
-        if (foundUsersWithPig.length === 0) {
+        if (userIDsWithPig.length === 0) {
             const noUsersFoundEmbed = new EmbedBuilder()
                 .setTitle("No users have been found that have that pig")
                 .setColor(Colors.Red)
@@ -79,17 +95,18 @@ export const SearchPig = new Command(
 
         const descriptionLines: string[] = [];
 
-        for (let i = 0; i < foundUsersWithPig.length; i++) {
-            const foundUserID = foundUsersWithPig[i];
+        for (let i = 0; i < userIDsWithPig.length; i++) {
+            const foundUserID = userIDsWithPig[i];
 
-            if(!server.members.cache.has(foundUserID)){ continue; }
+            if (!server.members.cache.has(foundUserID)) { continue; }
             const foundMember = await server.members.fetch(foundUserID);
+            const pigNum = foundUsersWithPig[foundUserID];
 
             if (foundMember.nickname === null) {
-                descriptionLines.push(`-${foundMember.user.username}`);
+                descriptionLines.push(`-${foundMember.user.username} -> ${pigNum} pig${pigNum > 1 ? "s" : ""}`);
             } else {
-                descriptionLines.push(`-${foundMember.nickname} (${foundMember.user.username})`);
-            }  
+                descriptionLines.push(`-${foundMember.nickname} (${foundMember.user.username}) -> ${pigNum} pig${pigNum > 1 ? "s" : ""}`);
+            }
         }
 
         const foundUsersEmbed = new EmbedBuilder()

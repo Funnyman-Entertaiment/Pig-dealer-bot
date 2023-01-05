@@ -1,9 +1,12 @@
 import { Guild, GuildChannel, User } from "discord.js";
 import { DevSpace } from "../Constants/Variables";
+import { client } from "../Bot";
 
 function SendLogMessage(msg: string){
     console.log(msg);
-    DevSpace.LogChannel.send(msg);
+    if(client.user !== null && client.user.id !== "1048616940194767009"){
+        DevSpace.LogChannel.send(msg);
+    }
 }
 
 export function LogInfo(msg: string){

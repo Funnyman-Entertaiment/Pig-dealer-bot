@@ -20,6 +20,8 @@ import { GreatWipe } from "./commands/GreatWipe";
 import { ClearCooldown } from "./commands/ClearCooldown";
 import { GetRole } from "./commands/GetRole";
 import { RemoveRole } from "./commands/RemoveRole";
+import { Invite } from "./commands/Invite";
+import { Information } from "./commands/Info";
 
 export const Commands = [
     Sex,
@@ -32,7 +34,9 @@ export const Commands = [
     SearchPig,
     Trade,
     GetRole,
-    RemoveRole
+    RemoveRole,
+    Invite,
+    Information
 ];
 
 export const DebugCommands = [

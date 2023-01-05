@@ -2,9 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrintUser = exports.PrintChannel = exports.PrintServer = exports.LogError = exports.LogWarn = exports.LogInfo = void 0;
 const Variables_1 = require("../Constants/Variables");
+const Bot_1 = require("../Bot");
 function SendLogMessage(msg) {
     console.log(msg);
-    Variables_1.DevSpace.LogChannel.send(msg);
+    if (Bot_1.client.user !== null && Bot_1.client.user.id !== "1048616940194767009") {
+        Variables_1.DevSpace.LogChannel.send(msg);
+    }
 }
 function LogInfo(msg) {
     SendLogMessage(`[INFO] ${msg}`);
