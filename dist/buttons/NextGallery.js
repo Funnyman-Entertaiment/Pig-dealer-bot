@@ -22,7 +22,18 @@ exports.NextGallery = new Button_1.Button("GalleryNext", async (interaction) => 
     }
     const message = interaction.message;
     const msgInfo = (0, MessageInfo_1.GetMessageInfo)(server.id, message.id);
-    if (msgInfo === undefined || msgInfo.Type !== "PigGallery") {
+    if (msgInfo === undefined) {
+        const errorEmbed = new builders_1.EmbedBuilder()
+            .setTitle("This message has expired")
+            .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
+            .setColor(discord_js_1.Colors.Red);
+        interaction.reply({
+            embeds: [errorEmbed],
+            ephemeral: true
+        });
+        return;
+    }
+    if (msgInfo.Type !== "PigGallery") {
         return;
     }
     if (msgInfo.User === undefined) {

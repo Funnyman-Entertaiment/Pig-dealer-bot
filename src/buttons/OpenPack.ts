@@ -349,7 +349,21 @@ export const OpenPack = new Button("OpenPack",
             {}
         );
         AddUserInfoToCache(userInfo);
-        const msgInfo = GetMessageInfo(serverID, msgID) as any as RandomPackMessage;
+        const msgInfo = GetMessageInfo(serverID, msgID) as RandomPackMessage | undefined;
+
+        if(msgInfo === undefined){
+            const errorEmbed = new EmbedBuilder()
+                .setTitle("This message has expired")
+                .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
+                .setColor(Colors.Red);
+            
+            interaction.reply({
+                embeds: [errorEmbed],
+                ephemeral: true
+            });
+    
+            return;
+        }
 
         const pack = GetPack(msgInfo.Pack);
 

@@ -45,7 +45,18 @@ exports.AcceptTrade = new Button_1.Button("AcceptTrade", async (interaction) => 
     const message = interaction.message;
     const user = interaction.user;
     const msgInfo = (0, MessageInfo_1.GetMessageInfo)(server.id, message.id);
-    if (msgInfo === undefined || msgInfo.Type !== "PigTrade") {
+    if (msgInfo === undefined) {
+        const errorEmbed = new builders_1.EmbedBuilder()
+            .setTitle("This message has expired")
+            .setDescription("Trade messages expire after ~15 minutes of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
+            .setColor(discord_js_1.Colors.Red);
+        interaction.reply({
+            embeds: [errorEmbed],
+            ephemeral: true
+        });
+        return;
+    }
+    if (msgInfo.Type !== "PigTrade") {
         return;
     }
     if (msgInfo.User !== user.id) {

@@ -13,7 +13,21 @@ export const DenyTrade = new Button("CancelTrade",
 
         const msgInfo = GetMessageInfo(server.id, message.id) as PigTradeMessage | undefined;
 
-        if(msgInfo === undefined || msgInfo.Type !== "PigTrade"){ return; }
+        if(msgInfo === undefined){
+            const errorEmbed = new EmbedBuilder()
+                .setTitle("This message has expired")
+                .setDescription("Trade messages expire after ~15 minutes of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
+                .setColor(Colors.Red);
+            
+            interaction.reply({
+                embeds: [errorEmbed],
+                ephemeral: true
+            });
+    
+            return;
+        }
+
+        if(msgInfo.Type !== "PigTrade"){ return; }
         if(msgInfo.User !== user.id){ return; }
 
         interaction.deferUpdate();

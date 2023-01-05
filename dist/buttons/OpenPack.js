@@ -282,6 +282,17 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (interaction) => {
     const userInfo = await (0, UserInfo_1.GetUserInfo)(userID) ?? new UserInfo_1.UserInfo(userID, [], {});
     (0, UserInfo_1.AddUserInfoToCache)(userInfo);
     const msgInfo = (0, MessageInfo_1.GetMessageInfo)(serverID, msgID);
+    if (msgInfo === undefined) {
+        const errorEmbed = new builders_1.EmbedBuilder()
+            .setTitle("This message has expired")
+            .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
+            .setColor(discord_js_1.Colors.Red);
+        interaction.reply({
+            embeds: [errorEmbed],
+            ephemeral: true
+        });
+        return;
+    }
     const pack = (0, Packs_1.GetPack)(msgInfo.Pack);
     if (pack === undefined) {
         const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Could't find pack for this message", `Pack Id: ${msgInfo.Pack}`);
