@@ -1,0 +1,11 @@
+body{
+    background-image:  url("../img/bg.png");
+    background-repeat: repeat;
+
+    background-position-x: 0%;
+    background-position-y: 0%;
+}
+
+h1{
+    color: white;
+}
