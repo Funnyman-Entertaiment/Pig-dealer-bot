@@ -74,12 +74,14 @@ export const AcceptTrade = new Button("AcceptTrade",
         const starterInfo = await GetUserInfo(msgInfo.TradeStarterID) ?? new UserInfo(
             msgInfo.TradeStarterID,
             [],
-            {}
+            {},
+            false
         );
         const receiverInfo = await GetUserInfo(msgInfo.TradeReceiverID) ?? new UserInfo(
             msgInfo.TradeReceiverID,
             [],
-            {}
+            {},
+            false
         );
         await AddUserInfosToCache([starterInfo, receiverInfo]);
 

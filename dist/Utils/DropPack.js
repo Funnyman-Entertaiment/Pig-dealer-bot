@@ -4,11 +4,27 @@ exports.DropPack = void 0;
 const discord_js_1 = require("discord.js");
 const Bot_1 = require("../Bot");
 const ColorPerPackRarity_1 = require("../Constants/ColorPerPackRarity");
+const ServerInfo_1 = require("../database/ServerInfo");
 const MessageInfo_1 = require("../database/MessageInfo");
 const Log_1 = require("./Log");
 const SendMessage_1 = require("./SendMessage");
 async function DropPack(serverInfo, options) {
-    const server = await Bot_1.client.guilds.fetch(serverInfo.ID);
+    if (!serverInfo.Enabled) {
+        return;
+    }
+    let server = undefined;
+    try {
+        server = await Bot_1.client.guilds.fetch(serverInfo.ID);
+    }
+    catch {
+        (0, Log_1.LogWarn)(`Missing access to server ${serverInfo.ID}. Disabling server.`);
+        serverInfo.Enabled = false;
+        (0, ServerInfo_1.AddServerInfoToCache)(serverInfo);
+        (0, ServerInfo_1.SaveAllServerInfo)();
+    }
+    if (server === undefined) {
+        return;
+    }
     if (serverInfo.Channel === undefined) {
         (0, Log_1.LogWarn)(`Can't send pack to server ${(0, Log_1.PrintServer)(server)} because it doesn't have a set channel`);
         return;
@@ -40,6 +56,9 @@ async function DropPack(serverInfo, options) {
     }
     msgPromise.then(message => {
         if (message === undefined) {
+            return;
+        }
+        if (server === undefined) {
             return;
         }
         const newMessage = new MessageInfo_1.RandomPackMessage(message.id, server.id, pack.ID, false, options.ignoreCooldown ?? false, options.userId);

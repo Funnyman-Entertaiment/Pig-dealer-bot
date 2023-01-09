@@ -43,7 +43,8 @@ export const SetBotRole = new Command(
                 undefined,
                 role.id,
                 false,
-                []
+                [],
+                true
             );
         }else{
             serverInfo.Role = role.id;

@@ -7,10 +7,20 @@ const CacheSaver_1 = require("../events/CacheSaver");
 const RemoveOldMessages_1 = require("../events/RemoveOldMessages");
 const Bot_1 = require("../Bot");
 const Variables_1 = require("../Constants/Variables");
+const lite_1 = require("firebase/firestore/lite");
 exports.default = () => {
     Bot_1.client.on("ready", async () => {
         if (!Bot_1.client.user || !Bot_1.client.application) {
             return;
+        }
+        const q = (0, lite_1.query)((0, lite_1.collection)(Bot_1.db, "serverInfo"));
+        const servers = await (0, lite_1.getDocs)(q);
+        for (let i = 0; i < servers.size; i++) {
+            const element = servers.docs[i];
+            const serverDoc = (0, lite_1.doc)(Bot_1.db, `serverInfo/${element.id}`);
+            await (0, lite_1.updateDoc)(serverDoc, {
+                Enabled: true
+            });
         }
         (0, ReadInitialDatabase_1.ReadPigsAndPacks)();
         const guild = await Bot_1.client.guilds.fetch("1040735505127579718");

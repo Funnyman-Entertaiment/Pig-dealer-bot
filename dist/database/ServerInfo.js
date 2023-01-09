@@ -10,17 +10,20 @@ class ServerInfo extends DatabaseElement_1.DatabaseElement {
     Role;
     HasSpawnedGoldenPig;
     YearsSpawnedAllNewYearDeco;
-    constructor(id, channel, role, hasSpawnedGoldenPig, yearsSpawnedAllNewYearDeco) {
+    Enabled;
+    constructor(id, channel, role, hasSpawnedGoldenPig, yearsSpawnedAllNewYearDeco, enabled) {
         super(id);
         this.Channel = channel;
         this.Role = role;
         this.HasSpawnedGoldenPig = hasSpawnedGoldenPig;
         this.YearsSpawnedAllNewYearDeco = yearsSpawnedAllNewYearDeco;
+        this.Enabled = enabled;
     }
     GetData() {
         const data = {
             HasSpawnedGoldenPig: this.HasSpawnedGoldenPig,
-            YearsSpawnedAllNewYearDeco: this.YearsSpawnedAllNewYearDeco
+            YearsSpawnedAllNewYearDeco: this.YearsSpawnedAllNewYearDeco,
+            Enabled: this.Enabled
         };
         if (this.Channel !== undefined) {
             data.Channel = this.Channel;
@@ -44,7 +47,7 @@ function SaveAllServerInfo() {
 }
 exports.SaveAllServerInfo = SaveAllServerInfo;
 function CreateServerInfoFromData(id, serverInfoData) {
-    const newPack = new ServerInfo(id, serverInfoData.Channel, serverInfoData.Role, serverInfoData.HasSpawnedGoldenPig ?? false, serverInfoData.YearsSpawnedAllNewYearDeco ?? []);
+    const newPack = new ServerInfo(id, serverInfoData.Channel, serverInfoData.Role, serverInfoData.HasSpawnedGoldenPig ?? false, serverInfoData.YearsSpawnedAllNewYearDeco ?? [], serverInfoData.Enabled ?? true);
     return newPack;
 }
 exports.CreateServerInfoFromData = CreateServerInfoFromData;

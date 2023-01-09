@@ -7,18 +7,21 @@ export class UserInfo extends DatabaseElement {
     LastTimeOpened: Timestamp | undefined;
     AssembledPigs: string[];
     Pigs: {[key: string]: number};
+    WarnedAboutCooldown: boolean;
 
-    constructor(id: string, assembledPigs: string[], pigs: {[key: string]: number}, lastTimeOpened?: Timestamp) {
+    constructor(id: string, assembledPigs: string[], pigs: {[key: string]: number}, warnedAboutCooldown: boolean, lastTimeOpened?: Timestamp) {
         super(id);
         this.AssembledPigs = assembledPigs;
         this.Pigs = pigs;
         this.LastTimeOpened = lastTimeOpened;
+        this.WarnedAboutCooldown = warnedAboutCooldown;
     }
 
     GetData(): object {
         const data: {[key: string]: any} = {
             Pigs: this.Pigs,
-            AssembledPigs: this.AssembledPigs
+            AssembledPigs: this.AssembledPigs,
+            WarnedAboutCooldown: this.WarnedAboutCooldown
         };
 
         if (this.LastTimeOpened !== undefined) {
@@ -43,7 +46,8 @@ function CreateUserInfoFromData(id: string, userInfoData: DocumentData): UserInf
         id,
         userInfoData.AssembledPigs?? [],
         userInfoData.Pigs?? {},
-        userInfoData.LastTimeOpened
+        userInfoData.WarnedAboutCooldown?? false,
+        userInfoData.LastTimeOpened,
     );
 
     return newUserInfo;

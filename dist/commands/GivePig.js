@@ -117,7 +117,7 @@ exports.GivePig = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     if (userInfo === undefined) {
         userInfo = new UserInfo_1.UserInfo(userID, [], {
             [pig.ID]: 1
-        });
+        }, false);
         (0, UserInfo_1.AddUserInfoToCache)(userInfo);
     }
     else {

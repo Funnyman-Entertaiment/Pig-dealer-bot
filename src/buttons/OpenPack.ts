@@ -1,5 +1,5 @@
 import { EmbedBuilder } from "@discordjs/builders";
-import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, CommandInteraction, Embed, GuildChannel, Interaction, Message } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, CommandInteraction, Embed, Guild, GuildChannel, Interaction, Message } from "discord.js";
 import { Timestamp } from "firebase/firestore/lite";
 import { Button } from "../Button";
 import { SPECIAL_RARITIES_PER_PACK } from "../Constants/SpecialRaritiesPerPack";
@@ -91,6 +91,29 @@ function CanUserOpenPack(interaction: ButtonInteraction, userInfo: UserInfo, msg
     }
 
     return true;
+}
+
+function SetUserCooldown(msgInfo: RandomPackMessage, userInfo: UserInfo, server: Guild, interaction: ButtonInteraction) {
+    if (msgInfo.IgnoreCooldown) { return; }
+
+    userInfo.LastTimeOpened = Timestamp.now();
+
+    if (server.memberCount > 5) { return; }
+
+    const warningEmbed = new EmbedBuilder()
+        .setTitle("This server is too small")
+        .setDescription(`To avoid cheating, the bot will give you an extended cooldown. ${userInfo.WarnedAboutCooldown ? "" : "\nSince this is your first time, you won't be penalized."}`)
+        .setColor(Colors.DarkOrange);
+
+    interaction.followUp({
+        embeds: [warningEmbed],
+    });
+
+    if (userInfo.WarnedAboutCooldown) {
+        userInfo.LastTimeOpened = Timestamp.fromMillis(userInfo.LastTimeOpened.toMillis() + 1000 * 60 * 60 * 96);
+    }
+
+    userInfo.WarnedAboutCooldown = true;
 }
 
 function EditEmbedWithOpenedPack(message: Message, pack: Pack, embed: Embed) {
@@ -346,22 +369,23 @@ export const OpenPack = new Button("OpenPack",
         const userInfo = await GetUserInfo(userID) ?? new UserInfo(
             userID,
             [],
-            {}
+            {},
+            false
         );
         AddUserInfoToCache(userInfo);
         const msgInfo = GetMessageInfo(serverID, msgID) as RandomPackMessage | undefined;
 
-        if(msgInfo === undefined){
+        if (msgInfo === undefined) {
             const errorEmbed = new EmbedBuilder()
                 .setTitle("This message has expired")
                 .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
                 .setColor(Colors.Red);
-            
+
             interaction.reply({
                 embeds: [errorEmbed],
                 ephemeral: true
             });
-    
+
             return;
         }
 
@@ -385,12 +409,7 @@ export const OpenPack = new Button("OpenPack",
         await interaction.deferReply();
 
         msgInfo.Opened = true;
-        if (!msgInfo.IgnoreCooldown) {
-            userInfo.LastTimeOpened = Timestamp.now();
-            if (server.memberCount <= 5) {
-                userInfo.LastTimeOpened = Timestamp.fromMillis(userInfo.LastTimeOpened.toMillis() + 1000 * 60 * 60 * 96);
-            }
-        }
+        SetUserCooldown(msgInfo, userInfo, server, interaction);
 
         const embed = message.embeds[0];
 

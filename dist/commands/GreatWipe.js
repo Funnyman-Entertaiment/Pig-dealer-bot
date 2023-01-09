@@ -123,7 +123,7 @@ exports.GreatWipe = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
         if (pigCount >= 1) {
             pigsToAdd.push("403");
         }
-        const userInfo = await (0, UserInfo_1.GetUserInfo)(userID) ?? new UserInfo_1.UserInfo(userID, [], {});
+        const userInfo = await (0, UserInfo_1.GetUserInfo)(userID) ?? new UserInfo_1.UserInfo(userID, [], {}, false);
         (0, UserInfo_1.AddUserInfoToCache)(userInfo);
         pigsToAdd.forEach(pigToAdd => {
             userInfo.Pigs[pigToAdd] = 1;

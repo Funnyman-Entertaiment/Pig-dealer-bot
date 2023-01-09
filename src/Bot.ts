@@ -5,6 +5,8 @@ import * as DotEnv from "dotenv";
 import ready from "./listeners/Ready";
 import interactionCreate from "./listeners/InteractionCreate";
 import unhandledException from "./listeners/UnhandledException";
+import guildJoin from "./listeners/GuildJoin";
+import guildLeave from "./listeners/GuildLeave";
 
 DotEnv.config();
 
@@ -38,6 +40,8 @@ export const client = new Client({
 ready();
 interactionCreate();
 unhandledException();
+guildJoin();
+guildLeave();
 
 client.login(token);
 

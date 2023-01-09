@@ -39,7 +39,7 @@ exports.SetBotChannel = new Command_1.Command(new discord_js_1.SlashCommandBuild
     }
     let serverInfo = await (0, ServerInfo_1.GetServerInfo)(interaction.guildId);
     if (serverInfo === undefined) {
-        serverInfo = new ServerInfo_1.ServerInfo(interaction.guildId, channel.id, undefined, false, []);
+        serverInfo = new ServerInfo_1.ServerInfo(interaction.guildId, channel.id, undefined, false, [], true);
     }
     else {
         serverInfo.Channel = channel.id;

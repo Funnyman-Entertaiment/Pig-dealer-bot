@@ -9,6 +9,8 @@ const DotEnv = tslib_1.__importStar(require("dotenv"));
 const Ready_1 = tslib_1.__importDefault(require("./listeners/Ready"));
 const InteractionCreate_1 = tslib_1.__importDefault(require("./listeners/InteractionCreate"));
 const UnhandledException_1 = tslib_1.__importDefault(require("./listeners/UnhandledException"));
+const GuildJoin_1 = tslib_1.__importDefault(require("./listeners/GuildJoin"));
+const GuildLeave_1 = tslib_1.__importDefault(require("./listeners/GuildLeave"));
 DotEnv.config();
 const firebaseConfig = {
     apiKey: process.env.FIREBASE_KEY,
@@ -33,6 +35,8 @@ exports.client = new discord_js_1.Client({
 (0, Ready_1.default)();
 (0, InteractionCreate_1.default)();
 (0, UnhandledException_1.default)();
+(0, GuildJoin_1.default)();
+(0, GuildLeave_1.default)();
 exports.client.login(token);
 function GetClient() {
     return exports.client;

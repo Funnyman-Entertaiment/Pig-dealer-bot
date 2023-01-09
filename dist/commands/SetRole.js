@@ -28,7 +28,7 @@ exports.SetBotRole = new Command_1.Command(new discord_js_1.SlashCommandBuilder(
     }
     let serverInfo = await (0, ServerInfo_1.GetServerInfo)(interaction.guildId);
     if (serverInfo === undefined) {
-        serverInfo = new ServerInfo_1.ServerInfo(interaction.guildId, undefined, role.id, false, []);
+        serverInfo = new ServerInfo_1.ServerInfo(interaction.guildId, undefined, role.id, false, [], true);
     }
     else {
         serverInfo.Role = role.id;

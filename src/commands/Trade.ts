@@ -160,12 +160,14 @@ async function NewTrade(interaction: CommandInteraction, options: CommandInterac
     const starterInfo = await GetUserInfo(tradeStarter.id) ?? new UserInfo(
         tradeStarter.id,
         [],
-        {}
+        {},
+        false
     );
     const receiverInfo = await GetUserInfo(tradeReceiver.id) ?? new UserInfo(
         tradeReceiver.id,
         [],
-        {}
+        {},
+        false
     );
     await AddUserInfosToCache([starterInfo, receiverInfo]);
 
@@ -202,7 +204,7 @@ async function NewTrade(interaction: CommandInteraction, options: CommandInterac
 
     const tradeEmbed = new EmbedBuilder()
         .setTitle(`${tradeStarter.username} wants to trade with ${tradeReceiver.username}`)
-        .setDescription(`${tradeReceiver.username} can now click deny to cancel the trade or use the \`trade offer\` command to give a counter offer.`)
+        .setDescription(`${tradeReceiver.username} can now click deny to cancel the trade or use the \`trade offer\` command to give your offer.`)
         .setAuthor(GetAuthor(interaction))
         .setColor(Colors.DarkVividPink)
         .addFields([
@@ -252,7 +254,7 @@ async function CounterOfferTrade(interaction: CommandInteraction, options: Comma
     if (msgInfo === undefined) {
         const errorEmbed = new EmbedBuilder()
             .setTitle("You don't have a trade offer pending!")
-            .setDescription("You can only use this command if you make a counter offer to an existing trade")
+            .setDescription("You can only use this command to you make an offer to an existing trade")
             .setColor(Colors.Red);
 
         interaction.reply({
@@ -265,12 +267,14 @@ async function CounterOfferTrade(interaction: CommandInteraction, options: Comma
     const starterInfo = await GetUserInfo(msgInfo.TradeStarterID) ?? new UserInfo(
         msgInfo.TradeStarterID,
         [],
-        {}
+        {},
+        false
     );
     const receiverInfo = await GetUserInfo(msgInfo.TradeReceiverID) ?? new UserInfo(
         msgInfo.TradeReceiverID,
         [],
-        {}
+        {},
+        false
     );
     await AddUserInfosToCache([starterInfo, receiverInfo]);
 
@@ -385,7 +389,7 @@ async function CounterOfferTrade(interaction: CommandInteraction, options: Comma
     }
 
     const editedEmbed = new EmbedBuilder(originalEmbed.data)
-        .setDescription(`${tradeStarter.user.username} can now either accept or decline the counter offer.`)
+        .setDescription(`${tradeStarter.user.username} can now either accept or decline the offer.`)
         .setFields([
             {
                 name: originalEmbed.fields[0].name,
@@ -419,7 +423,7 @@ async function CounterOfferTrade(interaction: CommandInteraction, options: Comma
     });
 
     const successEmbed = new EmbedBuilder()
-        .setTitle("Counter offer succesfully sent!")
+        .setTitle("Offer succesfully sent!")
         .setColor(Colors.Green)
         .setAuthor(GetAuthor(interaction));
 
@@ -447,7 +451,7 @@ export const Trade = new Command(
             .addStringOption(new SlashCommandStringOption()
                 .setName("pigs")
                 .setDescription("Pigs that you offer."))
-            .setDescription("Make a counter offer to an existing trade."))
+            .setDescription("Make an offer to an existing trade."))
         .setDMPermission(false)
         .setDescription("Trade pigs with other users."),
 

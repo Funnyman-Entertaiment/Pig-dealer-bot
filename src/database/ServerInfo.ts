@@ -8,19 +8,22 @@ export class ServerInfo extends DatabaseElement {
     Role: string | undefined
     HasSpawnedGoldenPig: boolean;
     YearsSpawnedAllNewYearDeco: number[];
+    Enabled: boolean;
 
-    constructor(id: string, channel: string | undefined, role: string | undefined, hasSpawnedGoldenPig: boolean, yearsSpawnedAllNewYearDeco: number[]) {
+    constructor(id: string, channel: string | undefined, role: string | undefined, hasSpawnedGoldenPig: boolean, yearsSpawnedAllNewYearDeco: number[], enabled: boolean) {
         super(id);
         this.Channel = channel;
         this.Role = role;
         this.HasSpawnedGoldenPig = hasSpawnedGoldenPig;
         this.YearsSpawnedAllNewYearDeco = yearsSpawnedAllNewYearDeco;
+        this.Enabled = enabled;
     }
 
     GetData(): object {
         const data: {[key: string]: any} = {
             HasSpawnedGoldenPig: this.HasSpawnedGoldenPig,
-            YearsSpawnedAllNewYearDeco: this.YearsSpawnedAllNewYearDeco
+            YearsSpawnedAllNewYearDeco: this.YearsSpawnedAllNewYearDeco,
+            Enabled: this.Enabled
         }
 
         if(this.Channel !== undefined){
@@ -59,7 +62,8 @@ export function CreateServerInfoFromData(id: string, serverInfoData: DocumentDat
         serverInfoData.Channel,
         serverInfoData.Role,
         serverInfoData.HasSpawnedGoldenPig ?? false,
-        serverInfoData.YearsSpawnedAllNewYearDeco ?? []
+        serverInfoData.YearsSpawnedAllNewYearDeco ?? [],
+        serverInfoData.Enabled ?? true
     )
 
     return newPack;

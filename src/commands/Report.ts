@@ -2,6 +2,7 @@ import { Colors, CommandInteraction, CommandInteractionOptionResolver, EmbedBuil
 import { Command } from "../Command";
 import { GetAuthor } from "../Utils/GetAuthor";
 import { DevSpace } from "../Constants/Variables";
+import { PrintUser } from "../Utils/Log";
 
 export const Report = new Command(
     new SlashCommandBuilder()
@@ -18,7 +19,7 @@ export const Report = new Command(
 
         const reportEmbed = new EmbedBuilder()
             .setAuthor(GetAuthor(interaction))
-            .setTitle(`New report from ${interaction.user.username}`)
+            .setTitle(`New report from ${PrintUser(interaction.user)}`)
             .setDescription(content)
             .setColor(Colors.Orange);
 

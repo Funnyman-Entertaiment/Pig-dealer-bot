@@ -9,16 +9,19 @@ class UserInfo extends DatabaseElement_1.DatabaseElement {
     LastTimeOpened;
     AssembledPigs;
     Pigs;
-    constructor(id, assembledPigs, pigs, lastTimeOpened) {
+    WarnedAboutCooldown;
+    constructor(id, assembledPigs, pigs, warnedAboutCooldown, lastTimeOpened) {
         super(id);
         this.AssembledPigs = assembledPigs;
         this.Pigs = pigs;
         this.LastTimeOpened = lastTimeOpened;
+        this.WarnedAboutCooldown = warnedAboutCooldown;
     }
     GetData() {
         const data = {
             Pigs: this.Pigs,
-            AssembledPigs: this.AssembledPigs
+            AssembledPigs: this.AssembledPigs,
+            WarnedAboutCooldown: this.WarnedAboutCooldown
         };
         if (this.LastTimeOpened !== undefined) {
             data.LastTimeOpened = this.LastTimeOpened;
@@ -33,7 +36,7 @@ async function SaveAllUserInfo() {
 }
 exports.SaveAllUserInfo = SaveAllUserInfo;
 function CreateUserInfoFromData(id, userInfoData) {
-    const newUserInfo = new UserInfo(id, userInfoData.AssembledPigs ?? [], userInfoData.Pigs ?? {}, userInfoData.LastTimeOpened);
+    const newUserInfo = new UserInfo(id, userInfoData.AssembledPigs ?? [], userInfoData.Pigs ?? {}, userInfoData.WarnedAboutCooldown ?? false, userInfoData.LastTimeOpened);
     return newUserInfo;
 }
 function GetCachedUserInfos() {

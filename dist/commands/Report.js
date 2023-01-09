@@ -5,6 +5,7 @@ const discord_js_1 = require("discord.js");
 const Command_1 = require("../Command");
 const GetAuthor_1 = require("../Utils/GetAuthor");
 const Variables_1 = require("../Constants/Variables");
+const Log_1 = require("../Utils/Log");
 exports.Report = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     .setName("report")
     .addStringOption(new discord_js_1.SlashCommandStringOption()
@@ -16,7 +17,7 @@ exports.Report = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     const content = options.getString("content");
     const reportEmbed = new discord_js_1.EmbedBuilder()
         .setAuthor((0, GetAuthor_1.GetAuthor)(interaction))
-        .setTitle(`New report from ${interaction.user.username}`)
+        .setTitle(`New report from ${(0, Log_1.PrintUser)(interaction.user)}`)
         .setDescription(content)
         .setColor(discord_js_1.Colors.Orange);
     Variables_1.DevSpace.ReportChannel.send({

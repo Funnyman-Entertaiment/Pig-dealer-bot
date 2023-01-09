@@ -78,6 +78,26 @@ function CanUserOpenPack(interaction, userInfo, msgInfo) {
     }
     return true;
 }
+function SetUserCooldown(msgInfo, userInfo, server, interaction) {
+    if (msgInfo.IgnoreCooldown) {
+        return;
+    }
+    userInfo.LastTimeOpened = lite_1.Timestamp.now();
+    if (server.memberCount > 5) {
+        return;
+    }
+    const warningEmbed = new builders_1.EmbedBuilder()
+        .setTitle("This server is too small")
+        .setDescription(`To avoid cheating, the bot will give you an extended cooldown. ${userInfo.WarnedAboutCooldown ? "" : "\nSince this is your first time, you won't be penalized."}`)
+        .setColor(discord_js_1.Colors.DarkOrange);
+    interaction.followUp({
+        embeds: [warningEmbed],
+    });
+    if (userInfo.WarnedAboutCooldown) {
+        userInfo.LastTimeOpened = lite_1.Timestamp.fromMillis(userInfo.LastTimeOpened.toMillis() + 1000 * 60 * 60 * 96);
+    }
+    userInfo.WarnedAboutCooldown = true;
+}
 function EditEmbedWithOpenedPack(message, pack, embed) {
     const editedEmbed = new builders_1.EmbedBuilder(embed.data);
     const openedImg = GetEditedEmbed(editedEmbed, pack);
@@ -279,7 +299,7 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (interaction) => {
     const userID = user.id;
     const msgID = message.id;
     const serverInfo = await (0, ServerInfo_1.GetServerInfo)(serverID);
-    const userInfo = await (0, UserInfo_1.GetUserInfo)(userID) ?? new UserInfo_1.UserInfo(userID, [], {});
+    const userInfo = await (0, UserInfo_1.GetUserInfo)(userID) ?? new UserInfo_1.UserInfo(userID, [], {}, false);
     (0, UserInfo_1.AddUserInfoToCache)(userInfo);
     const msgInfo = (0, MessageInfo_1.GetMessageInfo)(serverID, msgID);
     if (msgInfo === undefined) {
@@ -307,12 +327,7 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (interaction) => {
     }
     await interaction.deferReply();
     msgInfo.Opened = true;
-    if (!msgInfo.IgnoreCooldown) {
-        userInfo.LastTimeOpened = lite_1.Timestamp.now();
-        if (server.memberCount <= 5) {
-            userInfo.LastTimeOpened = lite_1.Timestamp.fromMillis(userInfo.LastTimeOpened.toMillis() + 1000 * 60 * 60 * 96);
-        }
-    }
+    SetUserCooldown(msgInfo, userInfo, server, interaction);
     const embed = message.embeds[0];
     if (embed === undefined) {
         (0, Log_1.LogError)(`Couldn't get embed from message in channel ${(0, Log_1.PrintChannel)(interaction.channel)} in server ${(0, Log_1.PrintServer)(server)}`);

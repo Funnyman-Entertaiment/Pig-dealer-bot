@@ -57,7 +57,8 @@ export const SetBotChannel = new Command(
                 channel.id,
                 undefined,
                 false,
-                []
+                [],
+                true
             );
         }else{
             serverInfo.Channel = channel.id;

@@ -153,7 +153,8 @@ export const GreatWipe = new Command(
             const userInfo = await GetUserInfo(userID)?? new UserInfo(
                 userID,
                 [],
-                {}
+                {},
+                false
             );
             AddUserInfoToCache(userInfo);
 

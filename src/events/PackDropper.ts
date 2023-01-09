@@ -6,6 +6,7 @@ import { LogInfo } from "../Utils/Log";
 import { db } from "../Bot";
 import { Cooldowns } from "../Constants/Variables";
 import { PACK_12, PACK_2, PACK_5 } from "../Constants/SignificantPackIDs";
+import { DiscordAPIError } from "discord.js";
 
 
 let packsUntil5Pack = -1;
@@ -47,6 +48,8 @@ async function SpawnRandomPack() {
         if (pack === undefined) { return; }
 
         const serverInfo = CreateServerInfoFromData(server.id, server.data());
+
+        if(!serverInfo.Enabled){ return; }
 
         let embedTitle = `A ${pack.Name} HAS APPEARED!`;
         let vowelRegex = '^[aieouAIEOU].*';
@@ -106,7 +109,7 @@ async function Set12PackSpawn() {
     }
 
     setTimeout(() => {
-        Set5PackSpawn();
+        Set12PackSpawn();
     }, 1000 * 60 * Cooldowns.MINUTES_BETWEEN_12_PACKS);
 }
 

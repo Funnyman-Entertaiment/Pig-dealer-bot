@@ -8,6 +8,6 @@ function GetAuthor(interaction) {
     const user = interaction.user;
     const username = user.username;
     const avatar = user.avatarURL();
-    return { name: username, iconURL: avatar === null ? "" : avatar };
+    return { name: username, iconURL: avatar ?? user.defaultAvatarURL };
 }
 exports.GetAuthor = GetAuthor;

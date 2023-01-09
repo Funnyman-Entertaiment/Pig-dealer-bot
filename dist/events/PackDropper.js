@@ -39,6 +39,9 @@ async function SpawnRandomPack() {
             return;
         }
         const serverInfo = (0, ServerInfo_1.CreateServerInfoFromData)(server.id, server.data());
+        if (!serverInfo.Enabled) {
+            return;
+        }
         let embedTitle = `A ${pack.Name} HAS APPEARED!`;
         let vowelRegex = '^[aieouAIEOU].*';
         let matched = pack.Name.match(vowelRegex);
@@ -89,7 +92,7 @@ async function Set12PackSpawn() {
         packsUntil12Pack = GetRandomNumber(maxPackNum, packsUntil5Pack);
     }
     setTimeout(() => {
-        Set5PackSpawn();
+        Set12PackSpawn();
     }, 1000 * 60 * Variables_1.Cooldowns.MINUTES_BETWEEN_12_PACKS);
 }
 const PackDropper = function () {

@@ -134,8 +134,8 @@ async function NewTrade(interaction, options) {
         });
         return;
     }
-    const starterInfo = await (0, UserInfo_1.GetUserInfo)(tradeStarter.id) ?? new UserInfo_1.UserInfo(tradeStarter.id, [], {});
-    const receiverInfo = await (0, UserInfo_1.GetUserInfo)(tradeReceiver.id) ?? new UserInfo_1.UserInfo(tradeReceiver.id, [], {});
+    const starterInfo = await (0, UserInfo_1.GetUserInfo)(tradeStarter.id) ?? new UserInfo_1.UserInfo(tradeStarter.id, [], {}, false);
+    const receiverInfo = await (0, UserInfo_1.GetUserInfo)(tradeReceiver.id) ?? new UserInfo_1.UserInfo(tradeReceiver.id, [], {}, false);
     await (0, UserInfo_1.AddUserInfosToCache)([starterInfo, receiverInfo]);
     const pigsString = options.getString("pigs") ?? "";
     const pigAmounts = ParseTradePigsString(interaction, pigsString);
@@ -161,7 +161,7 @@ async function NewTrade(interaction, options) {
     await interaction.deferReply();
     const tradeEmbed = new discord_js_1.EmbedBuilder()
         .setTitle(`${tradeStarter.username} wants to trade with ${tradeReceiver.username}`)
-        .setDescription(`${tradeReceiver.username} can now click deny to cancel the trade or use the \`trade offer\` command to give a counter offer.`)
+        .setDescription(`${tradeReceiver.username} can now click deny to cancel the trade or use the \`trade offer\` command to give your offer.`)
         .setAuthor((0, GetAuthor_1.GetAuthor)(interaction))
         .setColor(discord_js_1.Colors.DarkVividPink)
         .addFields([
@@ -195,7 +195,7 @@ async function CounterOfferTrade(interaction, options) {
     if (msgInfo === undefined) {
         const errorEmbed = new discord_js_1.EmbedBuilder()
             .setTitle("You don't have a trade offer pending!")
-            .setDescription("You can only use this command if you make a counter offer to an existing trade")
+            .setDescription("You can only use this command to you make an offer to an existing trade")
             .setColor(discord_js_1.Colors.Red);
         interaction.reply({
             embeds: [errorEmbed],
@@ -203,8 +203,8 @@ async function CounterOfferTrade(interaction, options) {
         });
         return;
     }
-    const starterInfo = await (0, UserInfo_1.GetUserInfo)(msgInfo.TradeStarterID) ?? new UserInfo_1.UserInfo(msgInfo.TradeStarterID, [], {});
-    const receiverInfo = await (0, UserInfo_1.GetUserInfo)(msgInfo.TradeReceiverID) ?? new UserInfo_1.UserInfo(msgInfo.TradeReceiverID, [], {});
+    const starterInfo = await (0, UserInfo_1.GetUserInfo)(msgInfo.TradeStarterID) ?? new UserInfo_1.UserInfo(msgInfo.TradeStarterID, [], {}, false);
+    const receiverInfo = await (0, UserInfo_1.GetUserInfo)(msgInfo.TradeReceiverID) ?? new UserInfo_1.UserInfo(msgInfo.TradeReceiverID, [], {}, false);
     await (0, UserInfo_1.AddUserInfosToCache)([starterInfo, receiverInfo]);
     const pigsString = options.getString("pigs") ?? "";
     const pigAmounts = ParseTradePigsString(interaction, pigsString);
@@ -269,7 +269,7 @@ async function CounterOfferTrade(interaction, options) {
         return;
     }
     const editedEmbed = new discord_js_1.EmbedBuilder(originalEmbed.data)
-        .setDescription(`${tradeStarter.user.username} can now either accept or decline the counter offer.`)
+        .setDescription(`${tradeStarter.user.username} can now either accept or decline the offer.`)
         .setFields([
         {
             name: originalEmbed.fields[0].name,
@@ -297,7 +297,7 @@ async function CounterOfferTrade(interaction, options) {
         msgInfo.User = msgInfo.TradeStarterID;
     });
     const successEmbed = new discord_js_1.EmbedBuilder()
-        .setTitle("Counter offer succesfully sent!")
+        .setTitle("Offer succesfully sent!")
         .setColor(discord_js_1.Colors.Green)
         .setAuthor((0, GetAuthor_1.GetAuthor)(interaction));
     interaction.reply({
@@ -322,7 +322,7 @@ exports.Trade = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     .addStringOption(new discord_js_1.SlashCommandStringOption()
     .setName("pigs")
     .setDescription("Pigs that you offer."))
-    .setDescription("Make a counter offer to an existing trade."))
+    .setDescription("Make an offer to an existing trade."))
     .setDMPermission(false)
     .setDescription("Trade pigs with other users."), async (interaction) => {
     const options = interaction.options;

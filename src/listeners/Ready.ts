@@ -3,14 +3,27 @@ import { Commands, DebugCommands } from "../Commands";
 import { ReadPigsAndPacks } from "../database/ReadInitialDatabase";
 import { SaveCachePeriodically } from "../events/CacheSaver";
 import { RemoveOldMessagesFromCache } from "../events/RemoveOldMessages";
-import { client } from "../Bot";
+import { client, db } from "../Bot";
 import { GuildTextBasedChannel } from "discord.js";
 import { DevSpace } from "../Constants/Variables";
+import { query, collection, getDocs, doc, updateDoc } from "firebase/firestore/lite";
 
 export default () => {
     client.on("ready", async () => {
         if (!client.user || !client.application) {
             return;
+        }
+
+        const q = query(collection(db, "serverInfo"));
+        const servers = await getDocs(q);
+
+        for (let i = 0; i < servers.size; i++) {
+            const element = servers.docs[i];
+            
+            const serverDoc = doc(db, `serverInfo/${element.id}`);
+            await updateDoc(serverDoc, {
+                Enabled: true
+            });
         }
 
         ReadPigsAndPacks();
