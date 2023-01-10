@@ -41,7 +41,7 @@ export const SPECIAL_RARITIES_PER_PACK: { readonly [key: string]: { readonly [ke
 		{ "Common": 1, "Rare": 0.1 },
 		{ "Common": 1, "Rare": 0.2 },
 		{ "Rare": 1, "Epic": 0.08 },
-		{ "Rare": 1, "Epic": 0.1, "Legendary": 0.01 }
+		{ "Rare": 1, "Epic": 0.3, "Legendary": 0.01 }
 	],
 	["12 Pack"]: [
 		{ "Common": 1 },
@@ -55,6 +55,6 @@ export const SPECIAL_RARITIES_PER_PACK: { readonly [key: string]: { readonly [ke
 		{ "Rare": 1 },
 		{ "Rare": 1, "Epic": 0.5 },
 		{ "Epic": 1 },
-		{ "Epic": 1, "Legendary": 0.8 }
+		{ "Epic": 1, "Legendary": 0.5 }
 	]
 }
