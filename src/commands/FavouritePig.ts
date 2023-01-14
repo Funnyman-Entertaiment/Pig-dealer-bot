@@ -51,7 +51,7 @@ export const FavouritePigCmd = new Command(
 
         if (userInfo.FavouritePigs.includes(pigID)) {
             const index = userInfo.FavouritePigs.indexOf(pigID);
-            userInfo.FavouritePigs.slice(index, 1);
+            userInfo.FavouritePigs.splice(index, 1);
 
             const successEmbed = new EmbedBuilder()
                 .setTitle(`Pig #${pigID.padStart(3, '0')} succesfully unfavourited!`)

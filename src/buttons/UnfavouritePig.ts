@@ -82,7 +82,7 @@ export const UnfavouritePig = new Button("UnfavouritePig",
             const index = msgInfo.FavouritePigs.indexOf(currentPigID);
             msgInfo.FavouritePigs.splice(index, 1);
         }
-        if(!userInfo.FavouritePigs.includes(currentPigID)){
+        if(userInfo.FavouritePigs.includes(currentPigID)){
             const index = userInfo.FavouritePigs.indexOf(currentPigID);
             userInfo.FavouritePigs.splice(index, 1);
         }

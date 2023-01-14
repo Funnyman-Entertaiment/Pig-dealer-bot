@@ -38,7 +38,7 @@ exports.FavouritePigCmd = new Command_1.Command(new discord_js_1.SlashCommandBui
     }
     if (userInfo.FavouritePigs.includes(pigID)) {
         const index = userInfo.FavouritePigs.indexOf(pigID);
-        userInfo.FavouritePigs.slice(index, 1);
+        userInfo.FavouritePigs.splice(index, 1);
         const successEmbed = new discord_js_1.EmbedBuilder()
             .setTitle(`Pig #${pigID.padStart(3, '0')} succesfully unfavourited!`)
             .setColor(discord_js_1.Colors.Green)
