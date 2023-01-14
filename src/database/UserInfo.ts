@@ -2,19 +2,24 @@ import { doc, DocumentData, getDoc, Timestamp } from "firebase/firestore/lite";
 import { DatabaseElementList } from "./DatabaseCacheList";
 import { DatabaseElement } from "./DatabaseElement";
 import { db } from "../Bot";
+import { GetPig, Pig } from "./Pigs";
 
 export class UserInfo extends DatabaseElement {
     LastTimeOpened: Timestamp | undefined;
     AssembledPigs: string[];
     Pigs: {[key: string]: number};
     WarnedAboutCooldown: boolean;
+    FavouritePigs: string[];
+    BulletinMsgId: string | undefined;
 
-    constructor(id: string, assembledPigs: string[], pigs: {[key: string]: number}, warnedAboutCooldown: boolean, lastTimeOpened?: Timestamp) {
+    constructor(id: string, assembledPigs: string[], pigs: {[key: string]: number}, warnedAboutCooldown: boolean, favouritePigs: string[], bulletinMsgId?: string, lastTimeOpened?: Timestamp) {
         super(id);
         this.AssembledPigs = assembledPigs;
         this.Pigs = pigs;
         this.LastTimeOpened = lastTimeOpened;
         this.WarnedAboutCooldown = warnedAboutCooldown;
+        this.FavouritePigs = favouritePigs;
+        this.BulletinMsgId = bulletinMsgId;
     }
 
     GetData(): object {
@@ -26,6 +31,10 @@ export class UserInfo extends DatabaseElement {
 
         if (this.LastTimeOpened !== undefined) {
             data.LastTimeOpened = this.LastTimeOpened;
+        }
+
+        if(this.BulletinMsgId !== undefined){
+            data.BulletinMsgId = this.BulletinMsgId;
         }
 
         return data;
@@ -47,6 +56,8 @@ function CreateUserInfoFromData(id: string, userInfoData: DocumentData): UserInf
         userInfoData.AssembledPigs?? [],
         userInfoData.Pigs?? {},
         userInfoData.WarnedAboutCooldown?? false,
+        userInfoData.FavouritePigs?? [],
+        userInfoData.BulletinMsgId,
         userInfoData.LastTimeOpened,
     );
 
@@ -95,4 +106,19 @@ export async function GetUserInfo(userId: string){
     }else{
         return cachedUserInfo;
     }
+}
+
+
+export function GetUserPigIDs(userInfo?: UserInfo): string[]{
+    if(userInfo === undefined){ return []; }
+    const userPigs: string[] = [];
+    for (const pigId in userInfo.Pigs) {
+        userPigs.push(pigId);
+    }
+    return userPigs;
+}
+
+
+export function GetUserPigs(userInfo?: UserInfo): Pig[]{
+    return GetUserPigIDs(userInfo).map(pigID => GetPig(pigID)) as any as Pig[];
 }

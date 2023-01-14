@@ -97,6 +97,8 @@ export const Catalogue = new Command(
                 serverId,
                 {},
                 pigsBySet,
+                [],
+                [],
                 firstSet,
                 0,
                 interaction.user.id

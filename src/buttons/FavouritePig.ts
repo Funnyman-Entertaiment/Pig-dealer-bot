@@ -1,15 +1,15 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, EmbedBuilder, GuildChannel } from "discord.js";
-import { GetMessageInfo, PigGalleryMessage } from "../database/MessageInfo";
-import { GetPig } from "../database/Pigs";
-import { MakeErrorEmbed } from "../Utils/Errors";
+import { EmbedBuilder, Colors, GuildChannel, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import { Button } from "../Button";
-import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
-import { DoesPigIdHaveUniqueEvent, TriggerUniquePigEvent } from "../uniquePigEvents/UniquePigEvents";
+import { MakeErrorEmbed } from "../Utils/Errors";
+import { GetMessageInfo, PigGalleryMessage } from "../database/MessageInfo";
+import { GetUserInfo } from "../database/UserInfo";
 import { LogError, PrintChannel, PrintServer } from "../Utils/Log";
+import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
+import { GetPig } from "../database/Pigs";
+import { DoesPigIdHaveUniqueEvent } from "../uniquePigEvents/UniquePigEvents";
 
-
-export const PrevGallery = new Button("GalleryPrevious",
-    async (interaction) => {
+export const FavouritePig = new Button("FavouritePig",
+    async function(interaction){
         await interaction.deferUpdate();
 
         const server = interaction.guild;
@@ -61,11 +61,29 @@ export const PrevGallery = new Button("GalleryPrevious",
 
         if(interaction.user.id !== msgInfo.User){ return; }
 
-        if(msgInfo.CurrentPig === 0){ return; }
+        const userInfo = await GetUserInfo(interaction.user.id);
 
-        const pigToLoad = msgInfo.Pigs[msgInfo.CurrentPig-1];
+        if(userInfo === undefined){
+            const errorEmbed = MakeErrorEmbed(
+                "This user has no information stored",
+                `User: ${userInfo}`
+            );
 
-        msgInfo.CurrentPig--;
+            await interaction.followUp({
+                embeds: [errorEmbed]
+            });
+
+            return;
+        }
+        
+        const currentPigID = msgInfo.Pigs[msgInfo.CurrentPig];
+
+        if(!msgInfo.FavouritePigs.includes(currentPigID)){
+            msgInfo.FavouritePigs.push(currentPigID);
+        }
+        if(!userInfo.FavouritePigs.includes(currentPigID)){
+            userInfo.FavouritePigs.push(currentPigID);
+        }
 
         if(message.embeds[0] === undefined){
             LogError(`Couldn't get embed from message in channel ${PrintChannel(interaction.channel as any as GuildChannel)} in server ${PrintServer(server)}`)
@@ -76,17 +94,16 @@ export const PrevGallery = new Button("GalleryPrevious",
             return;
         }
 
-        const editedEmbed = new EmbedBuilder(message.embeds[0].data)
-            .setDescription(`${msgInfo.CurrentPig+1}/${msgInfo.Pigs.length}`);
+        const editedEmbed = new EmbedBuilder(message.embeds[0].data);
 
-        const pig = GetPig(pigToLoad);
+        const pig = GetPig(currentPigID);
 
         if(pig === undefined){
             const errorEmbed = MakeErrorEmbed(
                 "Couldn't fetch pig",
                 `Server: ${server.id}`,
                 `Message: ${message.id}`,
-                `Pig to Load: ${pigToLoad}`
+                `Pig to Load: ${currentPigID}`
             )
 
             await interaction.followUp({
@@ -99,7 +116,7 @@ export const PrevGallery = new Button("GalleryPrevious",
         const imgPath = AddPigRenderToEmbed(editedEmbed, {
             pig: pig,
             new: msgInfo.NewPigs.includes(pig.ID),
-            showId: !DoesPigIdHaveUniqueEvent(pigToLoad),
+            showId: !DoesPigIdHaveUniqueEvent(currentPigID),
             count: msgInfo.PigCounts[pig.ID],
             favourite: msgInfo.FavouritePigs.includes(pig.ID),
             shared: msgInfo.SharedPigs.includes(pig.ID)
@@ -115,7 +132,7 @@ export const PrevGallery = new Button("GalleryPrevious",
                 .setCustomId('GalleryNext')
                 .setLabel('Next')
                 .setStyle(ButtonStyle.Primary)
-                .setDisabled(msgInfo.Pigs.length === 1)
+                .setDisabled(msgInfo.CurrentPig === msgInfo.Pigs.length - 1)
         );
 
         if(msgInfo.ShowFavouriteButton){
@@ -141,10 +158,5 @@ export const PrevGallery = new Button("GalleryPrevious",
             files: [imgPath],
             components: [row]
         });
-
-        if(!msgInfo.SeenPigs.includes(msgInfo.CurrentPig)){
-            msgInfo.SeenPigs.push(msgInfo.CurrentPig);
-            TriggerUniquePigEvent(pigToLoad, interaction);
-        }
     }
 );

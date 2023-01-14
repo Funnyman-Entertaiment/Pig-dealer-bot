@@ -47,7 +47,11 @@ export const Information = new Command(
             new ButtonBuilder()
                 .setLabel("Invite the bot!")
                 .setStyle(ButtonStyle.Link)
-                .setURL("https://discord.com/api/oauth2/authorize?client_id=1040735137228406884&permissions=268470272&scope=bot%20applications.commands")
+                .setURL("https://discord.com/api/oauth2/authorize?client_id=1040735137228406884&permissions=268470272&scope=bot%20applications.commands"),
+            new ButtonBuilder()
+                .setLabel("Join the server!")
+                .setStyle(ButtonStyle.Link)
+                .setURL("https://discord.gg/wnAnhRyKjM")
         );
 
         interaction.reply({

@@ -1,24 +1,38 @@
-import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, Colors, PermissionFlagsBits } from "discord.js";
+import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, ChannelType, Colors, PermissionFlagsBits } from "discord.js";
 import { doc, setDoc } from "firebase/firestore/lite";
 import { AddServerInfoToCache, GetServerInfo, SaveAllServerInfo, ServerInfo } from "../database/ServerInfo";
 import { Command } from "../Command";
 import { db } from "../Bot";
 
-export const SetBotRole = new Command(
+export const SetAnnouncementChannel = new Command(
     new SlashCommandBuilder()
-        .setName("setrole")
-        .addRoleOption(option =>
-            option.setName('role')
-                .setDescription('role that will get pinged when the bot drops a pack')
+        .setName("setannouncementchannel")
+        .addChannelOption(option =>
+            option.setName('channel')
+                .setDescription('channel to send announcements')
+                .addChannelTypes(ChannelType.GuildText)
                 .setRequired(true))
-        .setDescription("Let's you choose what role the bot pings")
+        .setDescription("Let's you choose what channel the bot sends announcements to")
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .setDMPermission(false),
 
     async (interaction) => {
-        const role = (interaction.options as CommandInteractionOptionResolver).getRole('role')
+        const channel = (interaction.options as CommandInteractionOptionResolver).getChannel('channel')
 
-        if (role === null) {
+        if (channel === null) {
+            return;
+        }
+
+        if (channel.type !== ChannelType.GuildText) {
+            const errorEmbed = new EmbedBuilder()
+                .setTitle("Channel must be a text channel.")
+                .setColor(Colors.Red);
+
+            await interaction.reply({
+                ephemeral: true,
+                embeds: [errorEmbed]
+            });
+
             return;
         }
 
@@ -41,22 +55,22 @@ export const SetBotRole = new Command(
             serverInfo = new ServerInfo(
                 interaction.guildId,
                 undefined,
-                role.id,
                 undefined,
+                channel.id,
                 false,
                 [],
                 true
             );
         }else{
-            serverInfo.Role = role.id;
+            serverInfo.AnnouncementChannel = channel.id;
         }
 
         await AddServerInfoToCache(serverInfo);
 
-        SaveAllServerInfo()
+        SaveAllServerInfo();
 
         const successEmbed = new EmbedBuilder()
-            .setTitle(`Role succesfully set to @${role.name}`)
+            .setTitle(`Announcements channel succesfully set to ${channel.name}`)
             .setColor(Colors.Green);
 
         await interaction.reply({

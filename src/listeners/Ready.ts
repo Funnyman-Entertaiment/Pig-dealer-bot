@@ -1,11 +1,11 @@
 import { PackDropper } from "../events/PackDropper";
-import { Commands, DebugCommands } from "../Commands";
+import { Commands, DebugCommands, TradeServerCommands } from "../Commands";
 import { ReadPigsAndPacks } from "../database/ReadInitialDatabase";
 import { SaveCachePeriodically } from "../events/CacheSaver";
 import { RemoveOldMessagesFromCache } from "../events/RemoveOldMessages";
 import { client, db } from "../Bot";
 import { GuildTextBasedChannel } from "discord.js";
-import { DevSpace } from "../Constants/Variables";
+import { DevSpace, TradeServerSpace } from "../Constants/Variables";
 import { query, collection, getDocs, doc, updateDoc } from "firebase/firestore/lite";
 
 export default () => {
@@ -28,14 +28,6 @@ export default () => {
 
         ReadPigsAndPacks();
 
-        const guild = await client.guilds.fetch("1040735505127579718");
-
-        if(guild !== undefined){
-            guild.commands.set(DebugCommands.map(c => c.slashCommand));
-        }
-
-        await client.application.commands.set(Commands.map(c => c.slashCommand));
-
         console.log(`${client.user.username} is online`);
 
         const devServer = await client.guilds.fetch("1040735505127579718");
@@ -45,6 +37,16 @@ export default () => {
         DevSpace.Server = devServer;
         DevSpace.ReportChannel = reportChannel;
         DevSpace.LogChannel = LogChannel;
+
+        const tradeServer = await client.guilds.fetch(process.env.TRADE_SERVER_ID?? "");
+        const tradeBulletinChannel = (await tradeServer.channels.fetch(process.env.TRADE_BULLETIN_CHANNEL_ID?? "")) as GuildTextBasedChannel;
+
+        TradeServerSpace.Server = tradeServer;
+        TradeServerSpace.TradeBulletinChannel = tradeBulletinChannel;
+
+        await client.application.commands.set(Commands.map(c => c.slashCommand));
+        await DevSpace.Server.commands.set(DebugCommands.map(c => c.slashCommand));
+        await TradeServerSpace.Server.commands.set(TradeServerCommands.map(c => c.slashCommand));
 
         PackDropper();
         SaveCachePeriodically();

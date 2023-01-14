@@ -93,7 +93,9 @@ export const PreviousSet = new Button("SetPrevious",
         const firstPigsPage = msgInfo.PigsBySet[newSet].slice(0, Math.min(msgInfo.PigsBySet[newSet].length, 9));
         AddPigListRenderToEmbed(editedEmbed, {
             pigs: firstPigsPage.map(id => GetPig(id)).filter(pig => pig !== undefined) as any as Pig[],
-            pigCounts: msgInfo.PigCounts
+            pigCounts: msgInfo.PigCounts,
+            sharedPigs: msgInfo.SharedPigs,
+            favouritePigs: msgInfo.FavouritePigs
         });
 
         const originalRow = message.components[0];

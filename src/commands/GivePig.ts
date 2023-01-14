@@ -128,7 +128,8 @@ export const GivePig = new Command(
                 {
                     [pig.ID]: 1
                 },
-                false
+                false,
+                []
             );
             AddUserInfoToCache(userInfo);
         }else{

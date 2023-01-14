@@ -8,6 +8,7 @@ export default () => {
             server.id,
             undefined,
             undefined,
+            undefined,
             false,
             [],
             true

@@ -1,8 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, ChannelType, Colors, PermissionFlagsBits } from "discord.js";
-import { doc, setDoc } from "firebase/firestore/lite";
 import { AddServerInfoToCache, GetServerInfo, SaveAllServerInfo, ServerInfo } from "../database/ServerInfo";
 import { Command } from "../Command";
-import { db } from "../Bot";
 
 export const SetBotChannel = new Command(
     new SlashCommandBuilder()
@@ -56,6 +54,7 @@ export const SetBotChannel = new Command(
                 interaction.guildId,
                 channel.id,
                 undefined,
+                channel.id,
                 false,
                 [],
                 true

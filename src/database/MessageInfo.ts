@@ -56,14 +56,20 @@ export class PigGalleryMessage extends MessageInfo {
     Pigs: string[];
     NewPigs: string[];
     SeenPigs: number[];
+    FavouritePigs: string[];
+    SharedPigs: string[];
+    ShowFavouriteButton: boolean;
 
-    constructor(id: string, serverId: string, currentPig: number, pigCounts: {[key: string]: number}, pigs: string[], newPigs: string[], seenPigs: number[], user?: string, timeSent?: Timestamp) {
+    constructor(id: string, serverId: string, currentPig: number, pigCounts: {[key: string]: number}, pigs: string[], newPigs: string[], seenPigs: number[], favouritePigs: string[], sharedPigs: string[], showFavouriteButton: boolean, user?: string, timeSent?: Timestamp) {
         super(id, serverId, "PigGallery", user, timeSent);
         this.CurrentPig = currentPig;
         this.PigCounts = pigCounts;
         this.Pigs = pigs;
         this.NewPigs = newPigs;
         this.SeenPigs = seenPigs;
+        this.FavouritePigs = favouritePigs;
+        this.SharedPigs = sharedPigs;
+        this.ShowFavouriteButton = showFavouriteButton;
     }
 
     GetData(): object {
@@ -90,13 +96,17 @@ export class PigGalleryMessage extends MessageInfo {
 export class PigListMessage extends MessageInfo {
     PigCounts: {[key: string]: number};
     PigsBySet: { [key: string]: string[] };
+    FavouritePigs: string[];
+    SharedPigs: string[];
     CurrentSet: string;
     CurrentPage: number;
 
-    constructor(id: string, serverId: string, pigCounts: {[key: string]: number}, pigsBySet: { [key: string]: string[] }, currentSet: string, currentPage: number, user?: string, timeSent?: Timestamp) {
+    constructor(id: string, serverId: string, pigCounts: {[key: string]: number}, pigsBySet: { [key: string]: string[] }, favouritePigs: string[], sharedPigs: string[], currentSet: string, currentPage: number, user?: string, timeSent?: Timestamp) {
         super(id, serverId, "PigList", user, timeSent);
         this.PigCounts = pigCounts;
         this.PigsBySet = pigsBySet;
+        this.FavouritePigs = favouritePigs;
+        this.SharedPigs = sharedPigs;
         this.CurrentSet = currentSet;
         this.CurrentPage = currentPage;
     }

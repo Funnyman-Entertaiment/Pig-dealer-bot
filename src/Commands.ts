@@ -22,11 +22,16 @@ import { GetRole } from "./commands/GetRole";
 import { RemoveRole } from "./commands/RemoveRole";
 import { Invite } from "./commands/Invite";
 import { Information } from "./commands/Info";
+import { CheckPig } from "./commands/CheckPig";
+import { FavouritePigCmd } from "./commands/FavouritePig";
+import { SetAnnouncementChannel } from "./commands/SetAnnouncementChannel";
+import { TradeBulletin } from "./commands/TradeBulletin";
 
 export const Commands = [
     Sex,
     SetBotChannel,
     SetBotRole,
+    SetAnnouncementChannel,
     ShowBinder,
     ShowBinderList,
     Report,
@@ -36,8 +41,14 @@ export const Commands = [
     GetRole,
     RemoveRole,
     Invite,
-    Information
+    Information,
+    CheckPig,
+    FavouritePigCmd
 ];
+
+export const TradeServerCommands = [
+    TradeBulletin
+]
 
 export const DebugCommands = [
     TestPack,

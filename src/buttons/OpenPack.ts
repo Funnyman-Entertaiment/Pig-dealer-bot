@@ -8,7 +8,7 @@ import { RARITIES_PER_PIG_COUNT } from "../Constants/RaritiesPerPigCount";
 import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
 import { GOLDEN_PIG_CHANCE_PER_RARITY } from "../Constants/GoldenPigChancePerRarity";
 import { MakeErrorEmbed } from "../Utils/Errors";
-import { AddUserInfoToCache, GetUserInfo, UserInfo } from "../database/UserInfo";
+import { AddUserInfoToCache, GetUserInfo, GetUserPigIDs, UserInfo } from "../database/UserInfo";
 import { AddMessageInfoToCache, GetMessageInfo, PigGalleryMessage, RandomPackMessage } from "../database/MessageInfo";
 import { GetAllPigs, GetPig, GetPigsByRarity, GetPigsBySet, GetPigsWithTag, Pig } from "../database/Pigs";
 import { GetServerInfo, ServerInfo } from "../database/ServerInfo";
@@ -98,6 +98,7 @@ function SetUserCooldown(msgInfo: RandomPackMessage, userInfo: UserInfo, server:
 
     userInfo.LastTimeOpened = Timestamp.now();
 
+    LogInfo(`${PrintServer(server)} has ${server.memberCount} members`);
     if (server.memberCount > 5) { return; }
 
     const warningEmbed = new EmbedBuilder()
@@ -140,14 +141,6 @@ function EditEmbedWithOpenedPack(message: Message, pack: Pack, embed: Embed) {
             files: [openedImg],
         });
     }
-}
-
-function GetUserPigs(userInfo: UserInfo) {
-    const userPigs: string[] = [];
-    for (const pigId in userInfo.Pigs) {
-        userPigs.push(pigId);
-    }
-    return userPigs;
 }
 
 function GetAvailablePigsFromPack(pack: Pack) {
@@ -273,7 +266,7 @@ function NewYearEvent(chosenPigs: Pig[], serverInfo: ServerInfo) {
     }
 }
 
-function GetOpenPackFollowUp(packName: string, chosenPigs: Pig[], newPigs: string[], interaction: Interaction) {
+function GetOpenPackFollowUp(packName: string, chosenPigs: Pig[], newPigs: string[], interaction: Interaction, userInfo: UserInfo) {
     const openedPackEmbed = new EmbedBuilder()
         .setTitle(`You've opened a ${packName}`)
         .setDescription(`1/${chosenPigs.length}`);
@@ -281,7 +274,8 @@ function GetOpenPackFollowUp(packName: string, chosenPigs: Pig[], newPigs: strin
     const imgPath = AddPigRenderToEmbed(openedPackEmbed, {
         pig: chosenPigs[0],
         new: newPigs.includes(chosenPigs[0].ID),
-        count: 1
+        count: 1,
+        favourite: userInfo.FavouritePigs.includes(chosenPigs[0].ID)
     });
 
     if (imgPath === undefined) { return; }
@@ -299,6 +293,22 @@ function GetOpenPackFollowUp(packName: string, chosenPigs: Pig[], newPigs: strin
                 .setStyle(ButtonStyle.Primary)
         );
 
+        if(userInfo.FavouritePigs.includes(chosenPigs[0].ID)){
+            row.addComponents(
+                new ButtonBuilder()
+                    .setCustomId('FavouritePig')
+                    .setLabel('Favourite ⭐')
+                    .setStyle(ButtonStyle.Secondary)
+            );
+        }else{
+            row.addComponents(
+                new ButtonBuilder()
+                    .setCustomId('UnfavouritePig')
+                    .setLabel('Unfavourite ⭐')
+                    .setStyle(ButtonStyle.Secondary)
+            );
+        }
+
     const author = GetAuthor(interaction as any as CommandInteraction);
     if (author !== null) {
         openedPackEmbed.setAuthor(author);
@@ -312,11 +322,11 @@ function GetOpenPackFollowUp(packName: string, chosenPigs: Pig[], newPigs: strin
 }
 
 function SendOpenPackFollowUp(userInfo: UserInfo, chosenPigs: Pig[], pigsToShowInPack: Pig[], pack: Pack, serverId: string, interaction: ButtonInteraction) {
-    const userPigs = GetUserPigs(userInfo);
+    const userPigs = GetUserPigIDs(userInfo);
 
     const newPigs = chosenPigs.filter(pig => !userPigs.includes(pig.ID)).map(pig => pig.ID);
 
-    const packFollowUp = GetOpenPackFollowUp(pack.Name, pigsToShowInPack, newPigs, interaction);
+    const packFollowUp = GetOpenPackFollowUp(pack.Name, pigsToShowInPack, newPigs, interaction, userInfo);
 
     if (packFollowUp === undefined) {
         return;
@@ -333,6 +343,9 @@ function SendOpenPackFollowUp(userInfo: UserInfo, chosenPigs: Pig[], pigsToShowI
             pigsToShowInPack.map(pig => pig.ID),
             newPigs,
             [],
+            userInfo.FavouritePigs,
+            [],
+            true,
             interaction.user.id
         );
         AddMessageInfoToCache(newMsgInfo);
@@ -370,7 +383,8 @@ export const OpenPack = new Button("OpenPack",
             userID,
             [],
             {},
-            false
+            false,
+            []
         );
         AddUserInfoToCache(userInfo);
         const msgInfo = GetMessageInfo(serverID, msgID) as RandomPackMessage | undefined;

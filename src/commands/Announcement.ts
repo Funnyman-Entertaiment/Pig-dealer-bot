@@ -158,10 +158,12 @@ async function SendAnnouncement(interaction: CommandInteraction){
     const servers = await getDocs(q);
 
     servers.forEach(async server => {
-        if (server.data().Channel === undefined) { return; }
+        if (server.data().Channel === undefined || server.data().AnnouncementChannel === undefined) { return; }
 
         try{
-            await client.channels.fetch(server.data().Channel).then(async channel => {
+            const channelID = server.data().AnnouncementChannel?? server.data().Channel
+
+            await client.channels.fetch(channelID).then(async channel => {
                 if (channel === null) { return; }
 
                 const guild = await client.guilds.fetch(server.id);
