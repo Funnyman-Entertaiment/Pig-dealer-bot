@@ -59,6 +59,19 @@ export const ShowBinder = new Command(
         const userInfo = await GetUserInfo(userId);
         let pigs = GetUserPigIDs(userInfo);
 
+        if (userInfo === undefined) {
+            const emptyEmbed = new EmbedBuilder()
+                .setAuthor(author)
+                .setColor(Colors.DarkRed)
+                .setTitle("This user has no pigs!")
+                .setDescription("Open some packs, loser");
+
+            await interaction.followUp({
+                embeds: [emptyEmbed]
+            });
+            return;
+        }
+
         if (raritiesToFilter.length > 0) {
             pigs = pigs.filter(pigID => {
                 const pig = GetPig(pigID);
@@ -67,6 +80,13 @@ export const ShowBinder = new Command(
 
                 return raritiesToFilter.includes(pig.Rarity.toLowerCase())
             });
+        }
+
+        const favouritePigs = userInfo.FavouritePigs;
+
+        const onlyFavourites = options.getBoolean('favourites')?? false;
+        if(onlyFavourites){
+            pigs = pigs.filter(pig => favouritePigs.includes(pig));
         }
 
         if (userInfo === undefined || pigs.length === 0) {
@@ -99,13 +119,6 @@ export const ShowBinder = new Command(
         if (firstPig === undefined) {
             LogError(`Couldn't find the first pig in the binder (${firstPigId})`);
             return;
-        }
-
-        const favouritePigs = userInfo.FavouritePigs;
-
-        const onlyFavourites = options.getBoolean('favourites')?? false;
-        if(onlyFavourites){
-            pigs = pigs.filter(pig => favouritePigs.includes(pig));
         }
 
         const openedPackEmbed = new EmbedBuilder()

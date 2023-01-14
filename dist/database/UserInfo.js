@@ -26,7 +26,8 @@ class UserInfo extends DatabaseElement_1.DatabaseElement {
         const data = {
             Pigs: this.Pigs,
             AssembledPigs: this.AssembledPigs,
-            WarnedAboutCooldown: this.WarnedAboutCooldown
+            WarnedAboutCooldown: this.WarnedAboutCooldown,
+            FavouritePigs: this.FavouritePigs
         };
         if (this.LastTimeOpened !== undefined) {
             data.LastTimeOpened = this.LastTimeOpened;

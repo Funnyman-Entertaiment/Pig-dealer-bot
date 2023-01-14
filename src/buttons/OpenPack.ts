@@ -293,7 +293,7 @@ function GetOpenPackFollowUp(packName: string, chosenPigs: Pig[], newPigs: strin
                 .setStyle(ButtonStyle.Primary)
         );
 
-        if(userInfo.FavouritePigs.includes(chosenPigs[0].ID)){
+        if(!userInfo.FavouritePigs.includes(chosenPigs[0].ID)){
             row.addComponents(
                 new ButtonBuilder()
                     .setCustomId('FavouritePig')

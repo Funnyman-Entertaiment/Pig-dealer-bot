@@ -52,10 +52,25 @@ exports.ShowBinderList = new Command_1.Command(new discord_js_1.SlashCommandBuil
     }
     const userInfo = await (0, UserInfo_1.GetUserInfo)(userId);
     let pigs = (0, UserInfo_1.GetUserPigs)(userInfo);
+    if (userInfo === undefined) {
+        const emptyEmbed = new discord_js_1.EmbedBuilder()
+            .setAuthor(author)
+            .setColor(discord_js_1.Colors.DarkRed)
+            .setTitle("This user has no pigs!")
+            .setDescription("Open some packs, loser");
+        await interaction.followUp({
+            embeds: [emptyEmbed]
+        });
+        return;
+    }
     if (raritiesToFilter.length > 0) {
         pigs = pigs.filter(pig => {
             return raritiesToFilter.includes(pig.Rarity.toLowerCase());
         });
+    }
+    const onlyFavourites = options.getBoolean('favourites') ?? false;
+    if (onlyFavourites) {
+        pigs = pigs.filter(pig => userInfo.FavouritePigs.includes(pig.ID));
     }
     if (userInfo === undefined || pigs.length === 0) {
         const emptyEmbed = new discord_js_1.EmbedBuilder()
@@ -106,10 +121,6 @@ exports.ShowBinderList = new Command_1.Command(new discord_js_1.SlashCommandBuil
         .setAuthor(author);
     const interactionUserInfo = await (0, UserInfo_1.GetUserInfo)(interaction.user.id);
     const sharedPigs = (0, UserInfo_1.GetUserPigIDs)(interactionUserInfo);
-    const onlyFavourites = options.getBoolean('favourites') ?? false;
-    if (onlyFavourites) {
-        pigs = pigs.filter(pig => userInfo.FavouritePigs.includes(pig.ID));
-    }
     const firstPigsPage = pigsBySet[firstSet].slice(0, Math.min(pigsBySet[firstSet].length, 9));
     (0, PigRenderer_1.AddPigListRenderToEmbed)(catalogueEmbed, {
         pigs: firstPigsPage.map(id => (0, Pigs_1.GetPig)(id)).filter(pig => pig !== undefined),

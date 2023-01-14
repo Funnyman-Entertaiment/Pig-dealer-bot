@@ -26,7 +26,8 @@ export class UserInfo extends DatabaseElement {
         const data: {[key: string]: any} = {
             Pigs: this.Pigs,
             AssembledPigs: this.AssembledPigs,
-            WarnedAboutCooldown: this.WarnedAboutCooldown
+            WarnedAboutCooldown: this.WarnedAboutCooldown,
+            FavouritePigs: this.FavouritePigs
         };
 
         if (this.LastTimeOpened !== undefined) {

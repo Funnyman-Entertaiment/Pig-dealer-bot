@@ -63,10 +63,28 @@ export const ShowBinderList = new Command(
         const userInfo = await GetUserInfo(userId);
         let pigs = GetUserPigs(userInfo);
 
+        if (userInfo === undefined) {
+            const emptyEmbed = new EmbedBuilder()
+                .setAuthor(author)
+                .setColor(Colors.DarkRed)
+                .setTitle("This user has no pigs!")
+                .setDescription("Open some packs, loser");
+
+            await interaction.followUp({
+                embeds: [emptyEmbed]
+            });
+            return;
+        }
+
         if (raritiesToFilter.length > 0) {
             pigs = pigs.filter(pig => {
                 return raritiesToFilter.includes(pig.Rarity.toLowerCase())
             });
+        }
+
+        const onlyFavourites = options.getBoolean('favourites') ?? false;
+        if (onlyFavourites) {
+            pigs = pigs.filter(pig => userInfo.FavouritePigs.includes(pig.ID));
         }
 
         if (userInfo === undefined || pigs.length === 0) {
@@ -127,11 +145,6 @@ export const ShowBinderList = new Command(
 
         const interactionUserInfo = await GetUserInfo(interaction.user.id);
         const sharedPigs = GetUserPigIDs(interactionUserInfo);
-
-        const onlyFavourites = options.getBoolean('favourites') ?? false;
-        if (onlyFavourites) {
-            pigs = pigs.filter(pig => userInfo.FavouritePigs.includes(pig.ID));
-        }
 
         const firstPigsPage = pigsBySet[firstSet].slice(0, Math.min(pigsBySet[firstSet].length, 9));
         AddPigListRenderToEmbed(catalogueEmbed, {
