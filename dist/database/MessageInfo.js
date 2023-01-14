@@ -52,13 +52,19 @@ class PigGalleryMessage extends MessageInfo {
     Pigs;
     NewPigs;
     SeenPigs;
-    constructor(id, serverId, currentPig, pigCounts, pigs, newPigs, seenPigs, user, timeSent) {
+    FavouritePigs;
+    SharedPigs;
+    ShowFavouriteButton;
+    constructor(id, serverId, currentPig, pigCounts, pigs, newPigs, seenPigs, favouritePigs, sharedPigs, showFavouriteButton, user, timeSent) {
         super(id, serverId, "PigGallery", user, timeSent);
         this.CurrentPig = currentPig;
         this.PigCounts = pigCounts;
         this.Pigs = pigs;
         this.NewPigs = newPigs;
         this.SeenPigs = seenPigs;
+        this.FavouritePigs = favouritePigs;
+        this.SharedPigs = sharedPigs;
+        this.ShowFavouriteButton = showFavouriteButton;
     }
     GetData() {
         if (this.User === undefined) {
@@ -84,12 +90,16 @@ exports.PigGalleryMessage = PigGalleryMessage;
 class PigListMessage extends MessageInfo {
     PigCounts;
     PigsBySet;
+    FavouritePigs;
+    SharedPigs;
     CurrentSet;
     CurrentPage;
-    constructor(id, serverId, pigCounts, pigsBySet, currentSet, currentPage, user, timeSent) {
+    constructor(id, serverId, pigCounts, pigsBySet, favouritePigs, sharedPigs, currentSet, currentPage, user, timeSent) {
         super(id, serverId, "PigList", user, timeSent);
         this.PigCounts = pigCounts;
         this.PigsBySet = pigsBySet;
+        this.FavouritePigs = favouritePigs;
+        this.SharedPigs = sharedPigs;
         this.CurrentSet = currentSet;
         this.CurrentPage = currentPage;
     }

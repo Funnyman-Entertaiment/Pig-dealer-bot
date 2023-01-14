@@ -116,11 +116,12 @@ async function SendAnnouncement(interaction) {
     const q = (0, lite_1.query)((0, lite_1.collection)(Bot_1.db, "serverInfo"));
     const servers = await (0, lite_1.getDocs)(q);
     servers.forEach(async (server) => {
-        if (server.data().Channel === undefined) {
+        if (server.data().Channel === undefined || server.data().AnnouncementChannel === undefined) {
             return;
         }
         try {
-            await Bot_1.client.channels.fetch(server.data().Channel).then(async (channel) => {
+            const channelID = server.data().AnnouncementChannel ?? server.data().Channel;
+            await Bot_1.client.channels.fetch(channelID).then(async (channel) => {
                 if (channel === null) {
                     return;
                 }

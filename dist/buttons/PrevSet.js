@@ -72,7 +72,9 @@ exports.PreviousSet = new Button_1.Button("SetPrevious", async (interaction) => 
     const firstPigsPage = msgInfo.PigsBySet[newSet].slice(0, Math.min(msgInfo.PigsBySet[newSet].length, 9));
     (0, PigRenderer_1.AddPigListRenderToEmbed)(editedEmbed, {
         pigs: firstPigsPage.map(id => (0, Pigs_1.GetPig)(id)).filter(pig => pig !== undefined),
-        pigCounts: msgInfo.PigCounts
+        pigCounts: msgInfo.PigCounts,
+        sharedPigs: msgInfo.SharedPigs,
+        favouritePigs: msgInfo.FavouritePigs
     });
     const originalRow = message.components[0];
     const newRow = new discord_js_1.ActionRowBuilder(message.components[0].data);

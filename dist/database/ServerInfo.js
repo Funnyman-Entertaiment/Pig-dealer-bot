@@ -7,14 +7,16 @@ const DatabaseElement_1 = require("./DatabaseElement");
 const Bot_1 = require("../Bot");
 class ServerInfo extends DatabaseElement_1.DatabaseElement {
     Channel;
+    AnnouncementChannel;
     Role;
     HasSpawnedGoldenPig;
     YearsSpawnedAllNewYearDeco;
     Enabled;
-    constructor(id, channel, role, hasSpawnedGoldenPig, yearsSpawnedAllNewYearDeco, enabled) {
+    constructor(id, channel, role, announcementChannel, hasSpawnedGoldenPig, yearsSpawnedAllNewYearDeco, enabled) {
         super(id);
         this.Channel = channel;
         this.Role = role;
+        this.AnnouncementChannel = announcementChannel;
         this.HasSpawnedGoldenPig = hasSpawnedGoldenPig;
         this.YearsSpawnedAllNewYearDeco = yearsSpawnedAllNewYearDeco;
         this.Enabled = enabled;
@@ -30,6 +32,9 @@ class ServerInfo extends DatabaseElement_1.DatabaseElement {
         }
         if (this.Role !== undefined) {
             data.Role = this.Role;
+        }
+        if (this.AnnouncementChannel !== undefined) {
+            data.AnnouncementChannel = this.AnnouncementChannel;
         }
         return data;
     }
@@ -47,7 +52,7 @@ function SaveAllServerInfo() {
 }
 exports.SaveAllServerInfo = SaveAllServerInfo;
 function CreateServerInfoFromData(id, serverInfoData) {
-    const newPack = new ServerInfo(id, serverInfoData.Channel, serverInfoData.Role, serverInfoData.HasSpawnedGoldenPig ?? false, serverInfoData.YearsSpawnedAllNewYearDeco ?? [], serverInfoData.Enabled ?? true);
+    const newPack = new ServerInfo(id, serverInfoData.Channel, serverInfoData.Role, serverInfoData.AnnouncementChannel ?? serverInfoData.Channel, serverInfoData.HasSpawnedGoldenPig ?? false, serverInfoData.YearsSpawnedAllNewYearDeco ?? [], serverInfoData.Enabled ?? true);
     return newPack;
 }
 exports.CreateServerInfoFromData = CreateServerInfoFromData;

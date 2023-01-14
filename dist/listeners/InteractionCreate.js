@@ -16,6 +16,9 @@ exports.default = () => {
 const handleSlashCommand = async (interaction) => {
     let slashCommand = Commands_1.Commands.find(c => c.slashCommand.name === interaction.commandName);
     if (slashCommand === undefined) {
+        slashCommand = Commands_1.TradeServerCommands.find(c => c.slashCommand.name === interaction.commandName);
+    }
+    if (slashCommand === undefined) {
         slashCommand = Commands_1.DebugCommands.find(c => c.slashCommand.name === interaction.commandName);
     }
     if (slashCommand === undefined) {

@@ -72,7 +72,7 @@ exports.Catalogue = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
         embeds: [catalogueEmbed],
         components: [row]
     }).then(message => {
-        const messageInfo = new MessageInfo_1.PigListMessage(message.id, serverId, {}, pigsBySet, firstSet, 0, interaction.user.id);
+        const messageInfo = new MessageInfo_1.PigListMessage(message.id, serverId, {}, pigsBySet, [], [], firstSet, 0, interaction.user.id);
         (0, MessageInfo_1.AddMessageInfoToCache)(messageInfo);
     });
 });

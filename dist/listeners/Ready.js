@@ -23,11 +23,6 @@ exports.default = () => {
             });
         }
         (0, ReadInitialDatabase_1.ReadPigsAndPacks)();
-        const guild = await Bot_1.client.guilds.fetch("1040735505127579718");
-        if (guild !== undefined) {
-            guild.commands.set(Commands_1.DebugCommands.map(c => c.slashCommand));
-        }
-        await Bot_1.client.application.commands.set(Commands_1.Commands.map(c => c.slashCommand));
         console.log(`${Bot_1.client.user.username} is online`);
         const devServer = await Bot_1.client.guilds.fetch("1040735505127579718");
         const reportChannel = (await devServer.channels.fetch("1056247295571665018"));
@@ -35,6 +30,13 @@ exports.default = () => {
         Variables_1.DevSpace.Server = devServer;
         Variables_1.DevSpace.ReportChannel = reportChannel;
         Variables_1.DevSpace.LogChannel = LogChannel;
+        const tradeServer = await Bot_1.client.guilds.fetch(process.env.TRADE_SERVER_ID ?? "");
+        const tradeBulletinChannel = (await tradeServer.channels.fetch(process.env.TRADE_BULLETIN_CHANNEL_ID ?? ""));
+        Variables_1.TradeServerSpace.Server = tradeServer;
+        Variables_1.TradeServerSpace.TradeBulletinChannel = tradeBulletinChannel;
+        await Bot_1.client.application.commands.set(Commands_1.Commands.map(c => c.slashCommand));
+        await Variables_1.DevSpace.Server.commands.set(Commands_1.DebugCommands.map(c => c.slashCommand));
+        await Variables_1.TradeServerSpace.Server.commands.set(Commands_1.TradeServerCommands.map(c => c.slashCommand));
         (0, PackDropper_1.PackDropper)();
         (0, CacheSaver_1.SaveCachePeriodically)();
         (0, RemoveOldMessages_1.RemoveOldMessagesFromCache)();

@@ -27,7 +27,7 @@ function AddPigRenderToEmbed(embed, options) {
     }
     embedDescriptionLines.push(pig.Description.length > 0 ? pig.Description : "...");
     if (options.showId === undefined || options.showId) {
-        embedDescriptionLines.push(`#${pig.ID.padStart(3, "0")}`);
+        embedDescriptionLines.push(`#${pig.ID.padStart(3, "0")}${options.favourite ? " ⭐" : ""}${options.shared ? " ✅" : ""}`);
     }
     const embedDescription = embedDescriptionLines.join("\n");
     const count = options.count ?? 1;
@@ -41,6 +41,8 @@ function AddPigRenderToEmbed(embed, options) {
 }
 exports.AddPigRenderToEmbed = AddPigRenderToEmbed;
 function AddPigListRenderToEmbed(embed, options) {
+    const favouritePigs = options.favouritePigs ?? [];
+    const sharedPigs = options.sharedPigs ?? [];
     embed.setFields([]);
     embed.addFields(options.pigs.map(pig => {
         const count = options.pigCounts[pig.ID] ?? 1;
@@ -48,9 +50,12 @@ function AddPigListRenderToEmbed(embed, options) {
         if (count !== 1) {
             number = ` (${count})`;
         }
+        const isFavourite = favouritePigs.includes(pig.ID);
+        const isShared = sharedPigs.includes(pig.ID);
+        const stickers = `${isFavourite ? "⭐" : ""} ${isShared ? "✅" : ""}`.trim();
         return {
             name: `${pig.Name} #${pig.ID.padStart(3, "0")}${number}`,
-            value: `_${pig.Rarity}_\n${pig.Description}`,
+            value: `${stickers}${stickers.length > 0 ? "\n" : ""}_${pig.Rarity}_\n${pig.Description}`,
             inline: true
         };
     }));

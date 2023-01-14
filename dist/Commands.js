@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DebugCommands = exports.Commands = void 0;
+exports.DebugCommands = exports.TradeServerCommands = exports.Commands = void 0;
 const Sex_1 = require("./commands/Sex");
 const TestPig_1 = require("./commands/TestPig");
 const TestPack_1 = require("./commands/TestPack");
@@ -25,10 +25,15 @@ const GetRole_1 = require("./commands/GetRole");
 const RemoveRole_1 = require("./commands/RemoveRole");
 const Invite_1 = require("./commands/Invite");
 const Info_1 = require("./commands/Info");
+const CheckPig_1 = require("./commands/CheckPig");
+const FavouritePig_1 = require("./commands/FavouritePig");
+const SetAnnouncementChannel_1 = require("./commands/SetAnnouncementChannel");
+const TradeBulletin_1 = require("./commands/TradeBulletin");
 exports.Commands = [
     Sex_1.Sex,
     SetChannel_1.SetBotChannel,
     SetRole_1.SetBotRole,
+    SetAnnouncementChannel_1.SetAnnouncementChannel,
     Bind_1.ShowBinder,
     BindList_1.ShowBinderList,
     Report_1.Report,
@@ -38,7 +43,12 @@ exports.Commands = [
     GetRole_1.GetRole,
     RemoveRole_1.RemoveRole,
     Invite_1.Invite,
-    Info_1.Information
+    Info_1.Information,
+    CheckPig_1.CheckPig,
+    FavouritePig_1.FavouritePigCmd
+];
+exports.TradeServerCommands = [
+    TradeBulletin_1.TradeBulletin
 ];
 exports.DebugCommands = [
     TestPack_1.TestPack,
