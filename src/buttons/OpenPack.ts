@@ -98,11 +98,10 @@ function SetUserCooldown(msgInfo: RandomPackMessage, userInfo: UserInfo, server:
 
     userInfo.LastTimeOpened = Timestamp.now();
 
-    LogInfo(`${PrintServer(server)} has ${server.memberCount} members`);
     if (server.memberCount > 5) { return; }
 
     const warningEmbed = new EmbedBuilder()
-        .setTitle("This server is too small")
+        .setTitle("This server is too small (Less than 5 members)")
         .setDescription(`To avoid cheating, the bot will give you an extended cooldown. ${userInfo.WarnedAboutCooldown ? "" : "\nSince this is your first time, you won't be penalized."}`)
         .setColor(Colors.DarkOrange);
 

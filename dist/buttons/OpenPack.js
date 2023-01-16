@@ -83,12 +83,11 @@ function SetUserCooldown(msgInfo, userInfo, server, interaction) {
         return;
     }
     userInfo.LastTimeOpened = lite_1.Timestamp.now();
-    (0, Log_1.LogInfo)(`${(0, Log_1.PrintServer)(server)} has ${server.memberCount} members`);
     if (server.memberCount > 5) {
         return;
     }
     const warningEmbed = new builders_1.EmbedBuilder()
-        .setTitle("This server is too small")
+        .setTitle("This server is too small (Less than 5 members)")
         .setDescription(`To avoid cheating, the bot will give you an extended cooldown. ${userInfo.WarnedAboutCooldown ? "" : "\nSince this is your first time, you won't be penalized."}`)
         .setColor(discord_js_1.Colors.DarkOrange);
     interaction.followUp({

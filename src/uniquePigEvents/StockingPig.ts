@@ -1,4 +1,3 @@
-import { db } from "../Bot";
 import { DropPack } from "../Utils/DropPack";
 import { GetPack } from "../database/Packs";
 import { GetServerInfo, ServerInfo } from "../database/ServerInfo";

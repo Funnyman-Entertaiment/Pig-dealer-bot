@@ -2,6 +2,7 @@ import { Colors, EmbedBuilder, GuildTextBasedChannel, PermissionFlagsBits, Slash
 import { Command } from "../Command";
 import { MakeErrorEmbed } from "../Utils/Errors";
 import { GetServerInfo } from "../database/ServerInfo";
+import { LogError, LogWarn, PrintServer } from "../Utils/Log";
 
 export const RemoveRole = new Command(
     new SlashCommandBuilder()
@@ -34,6 +35,8 @@ export const RemoveRole = new Command(
         const me = server.members.me;
 
         if(me === null){
+            LogError(`Bot couldn't find its user in server ${PrintServer(server)}`);
+
             const errorEmbed = MakeErrorEmbed(
                 `Couldn't find bot user in server`,
                 `Server: ${server.id}`
@@ -69,6 +72,8 @@ export const RemoveRole = new Command(
         const role = await server.roles.fetch(roleID);
 
         if(role === null){
+            LogWarn(`Pig collerctor role couldn't be found in server ${PrintServer(server)}`);
+
             const errorEmbed = new EmbedBuilder()
                 .setTitle(`The role couldn't be found`)
                 .setDescription(`Ask the admins to use the \`/setrole\` command again.`)

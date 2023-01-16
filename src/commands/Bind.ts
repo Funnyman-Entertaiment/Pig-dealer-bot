@@ -189,7 +189,5 @@ export const ShowBinder = new Command(
 
             AddMessageInfoToCache(newMessage);
         });
-
-        console.log("\n");
     }
 );

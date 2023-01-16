@@ -26,6 +26,8 @@ import { CheckPig } from "./commands/CheckPig";
 import { FavouritePigCmd } from "./commands/FavouritePig";
 import { SetAnnouncementChannel } from "./commands/SetAnnouncementChannel";
 import { TradeBulletin } from "./commands/TradeBulletin";
+import { ResetPackDropper } from "./commands/ResetPackDrops";
+import { client } from "./Bot";
 
 export const Commands = [
     Sex,
@@ -64,5 +66,18 @@ export const DebugCommands = [
     Change5PackCooldown,
     Change12PackCooldown,
     GreatWipe,
-    ClearCooldown
+    ClearCooldown,
+    ResetPackDropper
 ];
+
+export function SetCommands(){
+    if(client.user === null){ return; }
+
+    if(client.user.id === "1048616940194767009"){
+        Commands.forEach(cmd => DebugCommands.push(cmd));
+        TradeServerCommands.forEach(cmd => DebugCommands.push(cmd));
+
+        Commands.splice(0, Commands.length);
+        TradeServerCommands.splice(0, TradeServerCommands.length);
+    }
+}

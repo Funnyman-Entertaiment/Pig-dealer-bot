@@ -145,5 +145,4 @@ exports.ShowBinder = new Command_1.Command(new discord_js_1.SlashCommandBuilder(
         const newMessage = new MessageInfo_1.PigGalleryMessage(message.id, server.id, 0, userInfo === undefined ? {} : userInfo.Pigs, pigs, [], [], userInfo.FavouritePigs, userInfo.ID === interaction.user.id ? [] : sharedPigs, userInfo.ID === interaction.user.id && !onlyFavourites, interaction.user.id);
         (0, MessageInfo_1.AddMessageInfoToCache)(newMessage);
     });
-    console.log("\n");
 });

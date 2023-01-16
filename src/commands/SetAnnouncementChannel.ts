@@ -1,8 +1,7 @@
-import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, ChannelType, Colors, PermissionFlagsBits } from "discord.js";
-import { doc, setDoc } from "firebase/firestore/lite";
+import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, ChannelType, Colors, PermissionFlagsBits, GuildChannel, Guild } from "discord.js";
 import { AddServerInfoToCache, GetServerInfo, SaveAllServerInfo, ServerInfo } from "../database/ServerInfo";
 import { Command } from "../Command";
-import { db } from "../Bot";
+import { LogInfo, PrintChannel, PrintServer, PrintUser } from "../Utils/Log";
 
 export const SetAnnouncementChannel = new Command(
     new SlashCommandBuilder()
@@ -17,11 +16,7 @@ export const SetAnnouncementChannel = new Command(
         .setDMPermission(false),
 
     async (interaction) => {
-        const channel = (interaction.options as CommandInteractionOptionResolver).getChannel('channel')
-
-        if (channel === null) {
-            return;
-        }
+        const channel = (interaction.options as CommandInteractionOptionResolver).getChannel('channel', true)
 
         if (channel.type !== ChannelType.GuildText) {
             const errorEmbed = new EmbedBuilder()
@@ -48,6 +43,8 @@ export const SetAnnouncementChannel = new Command(
 
             return;
         }
+
+        LogInfo(`User ${PrintUser(interaction.user)} is setting the annoucement channel to ${PrintChannel(channel as any as GuildChannel)} in server ${PrintServer(interaction.guild as any as Guild)}`);
 
         let serverInfo = await GetServerInfo(interaction.guildId);
 

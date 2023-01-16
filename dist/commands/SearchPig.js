@@ -8,6 +8,7 @@ const lite_1 = require("firebase/firestore/lite");
 const Bot_1 = require("../Bot");
 const GetAuthor_1 = require("../Utils/GetAuthor");
 const UserInfo_1 = require("../database/UserInfo");
+const Log_1 = require("../Utils/Log");
 exports.SearchPig = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     .setName("searchpig")
     .addStringOption(option => option.setName('id')
@@ -15,10 +16,7 @@ exports.SearchPig = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     .setRequired(true))
     .setDescription("Searches for any users that have the specified pig.")
     .setDMPermission(false), async (interaction) => {
-    const pigID = interaction.options.getString('id');
-    if (pigID === null) {
-        return;
-    }
+    const pigID = interaction.options.getString('id', true);
     const pig = (0, Pigs_1.GetPig)(pigID);
     if (pig === undefined) {
         const pigEmbed = new discord_js_1.EmbedBuilder()
@@ -35,6 +33,7 @@ exports.SearchPig = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     if (server === null) {
         return;
     }
+    (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(user)} is looking for pig #${pigID.padStart(3, '0')} in server ${(0, Log_1.PrintServer)(server)}`);
     await interaction.deferReply();
     await (0, UserInfo_1.SaveAllUserInfo)();
     const q = (0, lite_1.query)((0, lite_1.collection)(Bot_1.db, `users`));

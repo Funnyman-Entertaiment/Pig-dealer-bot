@@ -1,6 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { Command } from "../Command";
 import { client } from "../Bot";
+import { LogInfo, PrintUser } from "../Utils/Log";
 
 export const Information = new Command(
     new SlashCommandBuilder()
@@ -53,6 +54,8 @@ export const Information = new Command(
                 .setStyle(ButtonStyle.Link)
                 .setURL("https://discord.gg/wnAnhRyKjM")
         );
+
+        LogInfo(`User ${PrintUser(interaction.user)} is checking the bot information`);
 
         interaction.reply({
             embeds: [embed],

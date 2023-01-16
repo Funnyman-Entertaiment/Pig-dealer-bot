@@ -6,16 +6,29 @@ const Command_1 = require("../Command");
 const Pigs_1 = require("../database/Pigs");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const MessageInfo_1 = require("../database/MessageInfo");
+const Log_1 = require("../Utils/Log");
 exports.Catalogue = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     .setName("catalogue")
-    .setDescription("shows all pigs in the bot sorted by set")
+    .addStringOption(option => option.setName("rarity")
+    .setDescription("Filter pigs by rarity. Multiple rarities separated by commas."))
+    .setDescription("Shows all pigs in the bot sorted by set")
     .setDMPermission(false), async (interaction) => {
     await interaction.deferReply();
     const serverId = interaction.guild?.id;
     if (serverId === undefined) {
         return;
     }
-    const pigs = (0, Pigs_1.GetAllPigs)();
+    const options = interaction.options;
+    const rarities = options.getString('rarity') ?? "";
+    const raritiesToFilter = rarities.split(',')
+        .map(rarity => rarity.trim().toLowerCase())
+        .filter(rarity => rarity.length > 0);
+    let pigs = (0, Pigs_1.GetAllPigs)();
+    if (raritiesToFilter.length > 0) {
+        pigs = pigs.filter(pig => {
+            return raritiesToFilter.includes(pig.Rarity.toLowerCase());
+        });
+    }
     const pigsBySet = {};
     const sets = [];
     pigs.forEach(pig => {
@@ -67,6 +80,7 @@ exports.Catalogue = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
         .setCustomId('SetNext')
         .setLabel('Next. Set ⏩')
         .setStyle(discord_js_1.ButtonStyle.Secondary));
+    (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} is checking the pig catalogue`);
     await interaction.followUp({
         ephemeral: true,
         embeds: [catalogueEmbed],

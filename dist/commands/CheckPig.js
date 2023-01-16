@@ -7,6 +7,7 @@ const Pigs_1 = require("../database/Pigs");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const UserInfo_1 = require("../database/UserInfo");
 const GetAuthor_1 = require("../Utils/GetAuthor");
+const Log_1 = require("../Utils/Log");
 exports.CheckPig = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     .setName("checkpig")
     .addStringOption(option => option.setName('id')
@@ -37,12 +38,14 @@ exports.CheckPig = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
         });
         return;
     }
+    (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} is checking it's pig #${pig.ID.padStart(3, '0')}`);
     const pigEmbed = new discord_js_1.EmbedBuilder()
         .setTitle("Here is your pig!")
         .setAuthor((0, GetAuthor_1.GetAuthor)(interaction));
     const img = (0, PigRenderer_1.AddPigRenderToEmbed)(pigEmbed, {
         pig: pig,
-        favourite: userInfo?.FavouritePigs.includes(pigID)
+        favourite: userInfo?.FavouritePigs.includes(pigID),
+        count: userInfo?.Pigs[pigID]
     });
     interaction.reply({
         embeds: [pigEmbed],

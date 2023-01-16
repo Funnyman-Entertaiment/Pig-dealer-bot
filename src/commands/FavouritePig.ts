@@ -3,6 +3,7 @@ import { Command } from "../Command";
 import { GetPig } from "../database/Pigs";
 import { GetUserInfo, GetUserPigIDs } from "../database/UserInfo";
 import { GetAuthor } from "../Utils/GetAuthor";
+import { LogInfo, PrintUser } from "../Utils/Log";
 
 
 export const FavouritePigCmd = new Command(
@@ -50,6 +51,8 @@ export const FavouritePigCmd = new Command(
         }
 
         if (userInfo.FavouritePigs.includes(pigID)) {
+            LogInfo(`User ${PrintUser(interaction.user)} unfavourited pig #${pig.ID.padStart(3, '0')}`);
+            
             const index = userInfo.FavouritePigs.indexOf(pigID);
             userInfo.FavouritePigs.splice(index, 1);
 
@@ -63,6 +66,8 @@ export const FavouritePigCmd = new Command(
                 ephemeral: true
             });
         } else {
+            LogInfo(`User ${PrintUser(interaction.user)} favourited pig #${pig.ID.padStart(3, '0')}`);
+
             userInfo.FavouritePigs.push(pigID);
 
             const successEmbed = new EmbedBuilder()

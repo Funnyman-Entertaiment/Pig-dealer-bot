@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DebugCommands = exports.TradeServerCommands = exports.Commands = void 0;
+exports.SetCommands = exports.DebugCommands = exports.TradeServerCommands = exports.Commands = void 0;
 const Sex_1 = require("./commands/Sex");
 const TestPig_1 = require("./commands/TestPig");
 const TestPack_1 = require("./commands/TestPack");
@@ -29,6 +29,8 @@ const CheckPig_1 = require("./commands/CheckPig");
 const FavouritePig_1 = require("./commands/FavouritePig");
 const SetAnnouncementChannel_1 = require("./commands/SetAnnouncementChannel");
 const TradeBulletin_1 = require("./commands/TradeBulletin");
+const ResetPackDrops_1 = require("./commands/ResetPackDrops");
+const Bot_1 = require("./Bot");
 exports.Commands = [
     Sex_1.Sex,
     SetChannel_1.SetBotChannel,
@@ -64,5 +66,18 @@ exports.DebugCommands = [
     ChangeCooldowns_1.Change5PackCooldown,
     ChangeCooldowns_1.Change12PackCooldown,
     GreatWipe_1.GreatWipe,
-    ClearCooldown_1.ClearCooldown
+    ClearCooldown_1.ClearCooldown,
+    ResetPackDrops_1.ResetPackDropper
 ];
+function SetCommands() {
+    if (Bot_1.client.user === null) {
+        return;
+    }
+    if (Bot_1.client.user.id === "1048616940194767009") {
+        exports.Commands.forEach(cmd => exports.DebugCommands.push(cmd));
+        exports.TradeServerCommands.forEach(cmd => exports.DebugCommands.push(cmd));
+        exports.Commands.splice(0, exports.Commands.length);
+        exports.TradeServerCommands.splice(0, exports.TradeServerCommands.length);
+    }
+}
+exports.SetCommands = SetCommands;

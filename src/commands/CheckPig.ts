@@ -4,6 +4,7 @@ import { GetPig } from "../database/Pigs";
 import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
 import { GetUserInfo, GetUserPigIDs } from "../database/UserInfo";
 import { GetAuthor } from "../Utils/GetAuthor";
+import { LogInfo, PrintUser } from "../Utils/Log";
 
 
 export const CheckPig = new Command(
@@ -50,13 +51,16 @@ export const CheckPig = new Command(
             return;
         }
 
+        LogInfo(`User ${PrintUser(interaction.user)} is checking it's pig #${pig.ID.padStart(3, '0')}`);
+
         const pigEmbed = new EmbedBuilder()
             .setTitle("Here is your pig!")
             .setAuthor(GetAuthor(interaction));
 
         const img = AddPigRenderToEmbed(pigEmbed, {
             pig: pig,
-            favourite: userInfo?.FavouritePigs.includes(pigID)
+            favourite: userInfo?.FavouritePigs.includes(pigID),
+            count: userInfo?.Pigs[pigID]
         });
 
         interaction.reply({

@@ -1,12 +1,12 @@
 import { PackDropper } from "../events/PackDropper";
-import { Commands, DebugCommands, TradeServerCommands } from "../Commands";
+import { Commands, DebugCommands, SetCommands, TradeServerCommands } from "../Commands";
 import { ReadPigsAndPacks } from "../database/ReadInitialDatabase";
 import { SaveCachePeriodically } from "../events/CacheSaver";
 import { RemoveOldMessagesFromCache } from "../events/RemoveOldMessages";
-import { client, db } from "../Bot";
+import { client } from "../Bot";
 import { GuildTextBasedChannel } from "discord.js";
 import { DevSpace, TradeServerSpace } from "../Constants/Variables";
-import { query, collection, getDocs, doc, updateDoc } from "firebase/firestore/lite";
+import { ResetServerAndUserInfo } from "../events/ResetServerAndUserInfo";
 
 export default () => {
     client.on("ready", async () => {
@@ -14,22 +14,12 @@ export default () => {
             return;
         }
 
-        const q = query(collection(db, "serverInfo"));
-        const servers = await getDocs(q);
+        console.log(`Initializing ${client.user.username}...`);
 
-        for (let i = 0; i < servers.size; i++) {
-            const element = servers.docs[i];
-            
-            const serverDoc = doc(db, `serverInfo/${element.id}`);
-            await updateDoc(serverDoc, {
-                Enabled: true
-            });
-        }
-
+        console.log(`Fetching pigs and packs information.`);
         ReadPigsAndPacks();
 
-        console.log(`${client.user.username} is online`);
-
+        console.log(`Fetching dev server information.`);
         const devServer = await client.guilds.fetch("1040735505127579718");
         const reportChannel = (await devServer.channels.fetch("1056247295571665018")) as GuildTextBasedChannel;
         const LogChannel = (await devServer.channels.fetch("1060270015724650536")) as GuildTextBasedChannel;
@@ -38,18 +28,35 @@ export default () => {
         DevSpace.ReportChannel = reportChannel;
         DevSpace.LogChannel = LogChannel;
 
+        console.log(`Fetching trade server information.`);
         const tradeServer = await client.guilds.fetch(process.env.TRADE_SERVER_ID?? "");
         const tradeBulletinChannel = (await tradeServer.channels.fetch(process.env.TRADE_BULLETIN_CHANNEL_ID?? "")) as GuildTextBasedChannel;
 
         TradeServerSpace.Server = tradeServer;
         TradeServerSpace.TradeBulletinChannel = tradeBulletinChannel;
 
-        await client.application.commands.set(Commands.map(c => c.slashCommand));
-        await DevSpace.Server.commands.set(DebugCommands.map(c => c.slashCommand));
-        await TradeServerSpace.Server.commands.set(TradeServerCommands.map(c => c.slashCommand));
+        SetCommands();
 
+        console.log(`Preparing commands...`);
+        if(Commands.length !== 0){
+            console.log(`Setting application commands.`);
+            await client.application.commands.set(Commands.map(c => c.slashCommand));
+        }
+        if(TradeServerCommands.length !== 0){
+            console.log(`Setting commands for the trade server.`);
+            await TradeServerSpace.Server.commands.set(TradeServerCommands.map(c => c.slashCommand));
+        }
+        if(DebugCommands.length !== 0){
+            console.log(`Setting commands for the dev server`);
+            await DevSpace.Server.commands.set(DebugCommands.map(c => c.slashCommand));
+        }
+
+        console.log(`Resetting server and user informations.`);
+        await ResetServerAndUserInfo();
         PackDropper();
         SaveCachePeriodically();
         RemoveOldMessagesFromCache();
+
+        console.log(`${client.user.username} is online!`);
     });
 };
