@@ -29,6 +29,11 @@ exports.default = () => {
         const tradeBulletinChannel = (await tradeServer.channels.fetch(process.env.TRADE_BULLETIN_CHANNEL_ID ?? ""));
         Variables_1.TradeServerSpace.Server = tradeServer;
         Variables_1.TradeServerSpace.TradeBulletinChannel = tradeBulletinChannel;
+        console.log(`Resetting server and user informations.`);
+        await (0, ResetServerAndUserInfo_1.ResetServerAndUserInfo)();
+        (0, CacheSaver_1.SaveCachePeriodically)();
+        (0, RemoveOldMessages_1.RemoveOldMessagesFromCache)();
+        setInterval(() => (0, DatabaseCacheList_1.SaveItems)(), 1000);
         (0, Commands_1.SetCommands)();
         console.log(`Preparing commands...`);
         if (Commands_1.Commands.length !== 0) {
@@ -43,12 +48,7 @@ exports.default = () => {
             console.log(`Setting commands for the dev server`);
             await Variables_1.DevSpace.Server.commands.set(Commands_1.DebugCommands.map(c => c.slashCommand));
         }
-        console.log(`Resetting server and user informations.`);
-        await (0, ResetServerAndUserInfo_1.ResetServerAndUserInfo)();
         (0, PackDropper_1.PackDropper)();
-        (0, CacheSaver_1.SaveCachePeriodically)();
-        (0, RemoveOldMessages_1.RemoveOldMessagesFromCache)();
-        setInterval(() => (0, DatabaseCacheList_1.SaveItems)(), 1000);
         console.log(`${Bot_1.client.user.username} is online!`);
     });
 };

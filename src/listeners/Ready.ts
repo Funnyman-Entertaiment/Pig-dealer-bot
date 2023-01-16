@@ -36,6 +36,13 @@ export default () => {
         TradeServerSpace.Server = tradeServer;
         TradeServerSpace.TradeBulletinChannel = tradeBulletinChannel;
 
+        console.log(`Resetting server and user informations.`);
+        await ResetServerAndUserInfo();
+        SaveCachePeriodically();
+        RemoveOldMessagesFromCache();
+
+        setInterval(() => SaveItems(), 1000);
+
         SetCommands();
 
         console.log(`Preparing commands...`);
@@ -52,13 +59,7 @@ export default () => {
             await DevSpace.Server.commands.set(DebugCommands.map(c => c.slashCommand));
         }
 
-        console.log(`Resetting server and user informations.`);
-        await ResetServerAndUserInfo();
         PackDropper();
-        SaveCachePeriodically();
-        RemoveOldMessagesFromCache();
-
-        setInterval(() => SaveItems(), 1000);
 
         console.log(`${client.user.username} is online!`);
     });
