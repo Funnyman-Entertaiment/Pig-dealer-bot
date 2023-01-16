@@ -7,6 +7,7 @@ import { client } from "../Bot";
 import { GuildTextBasedChannel } from "discord.js";
 import { DevSpace, TradeServerSpace } from "../Constants/Variables";
 import { ResetServerAndUserInfo } from "../events/ResetServerAndUserInfo";
+import { SaveItems } from "src/database/DatabaseCacheList";
 
 export default () => {
     client.on("ready", async () => {
@@ -56,6 +57,8 @@ export default () => {
         PackDropper();
         SaveCachePeriodically();
         RemoveOldMessagesFromCache();
+
+        setInterval(() => SaveItems(), 1000);
 
         console.log(`${client.user.username} is online!`);
     });

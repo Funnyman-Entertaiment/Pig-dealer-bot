@@ -8,7 +8,7 @@ exports.default = () => {
             (0, Log_1.LogError)(`${error.message}: ${error.url}`);
         }
         else if (error instanceof Error) {
-            if (error.stack !== undefined) {
+            if (error.stack !== undefined && error.stack.split("\n")[1] !== undefined) {
                 (0, Log_1.LogError)(`[${error.name}] ${error.message}: ${error.stack.split("\n")[1].trim()}`);
             }
             else {
