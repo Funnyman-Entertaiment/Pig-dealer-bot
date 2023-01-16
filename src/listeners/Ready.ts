@@ -7,7 +7,7 @@ import { client } from "../Bot";
 import { GuildTextBasedChannel } from "discord.js";
 import { DevSpace, TradeServerSpace } from "../Constants/Variables";
 import { ResetServerAndUserInfo } from "../events/ResetServerAndUserInfo";
-import { SaveItems } from "src/database/DatabaseCacheList";
+import { SaveItems } from "../database/DatabaseCacheList";
 
 export default () => {
     client.on("ready", async () => {

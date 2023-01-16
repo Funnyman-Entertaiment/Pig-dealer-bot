@@ -8,7 +8,7 @@ const RemoveOldMessages_1 = require("../events/RemoveOldMessages");
 const Bot_1 = require("../Bot");
 const Variables_1 = require("../Constants/Variables");
 const ResetServerAndUserInfo_1 = require("../events/ResetServerAndUserInfo");
-const DatabaseCacheList_1 = require("src/database/DatabaseCacheList");
+const DatabaseCacheList_1 = require("../database/DatabaseCacheList");
 exports.default = () => {
     Bot_1.client.on("ready", async () => {
         if (!Bot_1.client.user || !Bot_1.client.application) {
