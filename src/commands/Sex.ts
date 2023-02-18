@@ -8,7 +8,7 @@ export const Sex = new Command(
 
     async (interaction: CommandInteraction) => {
         const content = `I'm not having sex with you right now ${interaction.user.username}.`;
-
+        
         await interaction.reply({
             ephemeral: true,
             content

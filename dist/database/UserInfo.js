@@ -1,30 +1,39 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetUserInfo = exports.AddUserInfosToCache = exports.AddUserInfoToCache = exports.SaveAllUserInfo = exports.UserInfo = void 0;
+exports.GetUserPigs = exports.GetUserPigIDs = exports.GetUserInfo = exports.AddUserInfosToCache = exports.AddUserInfoToCache = exports.SaveAllUserInfo = exports.UserInfo = void 0;
 const lite_1 = require("firebase/firestore/lite");
 const DatabaseCacheList_1 = require("./DatabaseCacheList");
 const DatabaseElement_1 = require("./DatabaseElement");
 const Bot_1 = require("../Bot");
+const Pigs_1 = require("./Pigs");
 class UserInfo extends DatabaseElement_1.DatabaseElement {
     LastTimeOpened;
     AssembledPigs;
     Pigs;
     WarnedAboutCooldown;
-    constructor(id, assembledPigs, pigs, warnedAboutCooldown, lastTimeOpened) {
+    FavouritePigs;
+    BulletinMsgId;
+    constructor(id, assembledPigs, pigs, warnedAboutCooldown, favouritePigs, bulletinMsgId, lastTimeOpened) {
         super(id);
         this.AssembledPigs = assembledPigs;
         this.Pigs = pigs;
         this.LastTimeOpened = lastTimeOpened;
         this.WarnedAboutCooldown = warnedAboutCooldown;
+        this.FavouritePigs = favouritePigs;
+        this.BulletinMsgId = bulletinMsgId;
     }
     GetData() {
         const data = {
             Pigs: this.Pigs,
             AssembledPigs: this.AssembledPigs,
-            WarnedAboutCooldown: this.WarnedAboutCooldown
+            WarnedAboutCooldown: this.WarnedAboutCooldown,
+            FavouritePigs: this.FavouritePigs
         };
         if (this.LastTimeOpened !== undefined) {
             data.LastTimeOpened = this.LastTimeOpened;
+        }
+        if (this.BulletinMsgId !== undefined) {
+            data.BulletinMsgId = this.BulletinMsgId;
         }
         return data;
     }
@@ -36,7 +45,7 @@ async function SaveAllUserInfo() {
 }
 exports.SaveAllUserInfo = SaveAllUserInfo;
 function CreateUserInfoFromData(id, userInfoData) {
-    const newUserInfo = new UserInfo(id, userInfoData.AssembledPigs ?? [], userInfoData.Pigs ?? {}, userInfoData.WarnedAboutCooldown ?? false, userInfoData.LastTimeOpened);
+    const newUserInfo = new UserInfo(id, userInfoData.AssembledPigs ?? [], userInfoData.Pigs ?? {}, userInfoData.WarnedAboutCooldown ?? false, userInfoData.FavouritePigs ?? [], userInfoData.BulletinMsgId, userInfoData.LastTimeOpened);
     return newUserInfo;
 }
 function GetCachedUserInfos() {
@@ -76,3 +85,18 @@ async function GetUserInfo(userId) {
     }
 }
 exports.GetUserInfo = GetUserInfo;
+function GetUserPigIDs(userInfo) {
+    if (userInfo === undefined) {
+        return [];
+    }
+    const userPigs = [];
+    for (const pigId in userInfo.Pigs) {
+        userPigs.push(pigId);
+    }
+    return userPigs;
+}
+exports.GetUserPigIDs = GetUserPigIDs;
+function GetUserPigs(userInfo) {
+    return GetUserPigIDs(userInfo).map(pigID => (0, Pigs_1.GetPig)(pigID));
+}
+exports.GetUserPigs = GetUserPigs;

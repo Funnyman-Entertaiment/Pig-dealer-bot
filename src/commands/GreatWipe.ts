@@ -154,7 +154,8 @@ export const GreatWipe = new Command(
                 userID,
                 [],
                 {},
-                false
+                false,
+                []
             );
             AddUserInfoToCache(userInfo);
 

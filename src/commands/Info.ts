@@ -1,6 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { Command } from "../Command";
 import { client } from "../Bot";
+import { LogInfo, PrintUser } from "../Utils/Log";
 
 export const Information = new Command(
     new SlashCommandBuilder()
@@ -47,8 +48,14 @@ export const Information = new Command(
             new ButtonBuilder()
                 .setLabel("Invite the bot!")
                 .setStyle(ButtonStyle.Link)
-                .setURL("https://discord.com/api/oauth2/authorize?client_id=1040735137228406884&permissions=268470272&scope=bot%20applications.commands")
+                .setURL("https://discord.com/api/oauth2/authorize?client_id=1040735137228406884&permissions=268470272&scope=bot%20applications.commands"),
+            new ButtonBuilder()
+                .setLabel("Join the server!")
+                .setStyle(ButtonStyle.Link)
+                .setURL("https://discord.gg/wnAnhRyKjM")
         );
+
+        LogInfo(`User ${PrintUser(interaction.user)} is checking the bot information`);
 
         interaction.reply({
             embeds: [embed],

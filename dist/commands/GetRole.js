@@ -5,6 +5,7 @@ const discord_js_1 = require("discord.js");
 const Command_1 = require("../Command");
 const Errors_1 = require("../Utils/Errors");
 const ServerInfo_1 = require("../database/ServerInfo");
+const Log_1 = require("../Utils/Log");
 exports.GetRole = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     .setName("getrole")
     .setDescription("Assigns you the pig collector role in this server")
@@ -31,6 +32,7 @@ exports.GetRole = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     }
     const me = server.members.me;
     if (me === null) {
+        (0, Log_1.LogError)(`Bot couldn't find its user in server ${(0, Log_1.PrintServer)(server)}`);
         const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`Couldn't find bot user in server`, `Server: ${server.id}`);
         interaction.reply({
             embeds: [errorEmbed],
@@ -54,6 +56,7 @@ exports.GetRole = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     const member = await server.members.fetch(user.id);
     const role = await server.roles.fetch(roleID);
     if (role === null) {
+        (0, Log_1.LogWarn)(`Pig collerctor role couldn't be found in server ${(0, Log_1.PrintServer)(server)}`);
         const errorEmbed = new discord_js_1.EmbedBuilder()
             .setTitle(`The role couldn't be found`)
             .setDescription(`Ask the admins to use the \`/setrole\` command again.`)
@@ -63,6 +66,7 @@ exports.GetRole = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
         });
         return;
     }
+    (0, Log_1.LogInfo)(`Added pig collector role to user ${(0, Log_1.PrintUser)(member.user)}`);
     member.roles.add(role);
     const successEmbed = new discord_js_1.EmbedBuilder()
         .setTitle(`You've been given the pig collector role succesfully!`)

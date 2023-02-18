@@ -60,7 +60,6 @@ async function SpawnRandomPack() {
     if (packsUntil12Pack >= 0) {
         packsUntil12Pack--;
     }
-    console.log("");
     setTimeout(() => {
         SpawnRandomPack();
     }, 1000 * 60 * Variables_1.Cooldowns.MINUTES_BETWEEN_PACKS);
@@ -96,7 +95,7 @@ async function Set12PackSpawn() {
     }, 1000 * 60 * Variables_1.Cooldowns.MINUTES_BETWEEN_12_PACKS);
 }
 const PackDropper = function () {
-    setTimeout(async () => {
+    setTimeout(() => {
         SpawnRandomPack();
     }, 1000 * 5);
     Set5PackSpawn();

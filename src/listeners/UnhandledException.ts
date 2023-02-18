@@ -3,7 +3,14 @@ import { LogError } from "../Utils/Log";
 
 export default () => {
     process.on('unhandledRejection', error => {
-        const e = error as DiscordAPIError;
-        LogError(`${e.message}: ${e.url}`);
+        if(error instanceof DiscordAPIError){
+            LogError(`${error.message}: ${error.url}`);
+        }else if(error instanceof Error){
+            if(error.stack !== undefined && error.stack.split("\n")[1] !== undefined){
+                LogError(`[${error.name}] ${error.message}: ${error.stack.split("\n")[1].trim()}`);
+            }else{
+                LogError(`[${error.name}] ${error.message}`);
+            }
+        }        
     });
 };

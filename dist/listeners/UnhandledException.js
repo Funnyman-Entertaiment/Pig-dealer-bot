@@ -1,9 +1,19 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const discord_js_1 = require("discord.js");
 const Log_1 = require("../Utils/Log");
 exports.default = () => {
     process.on('unhandledRejection', error => {
-        const e = error;
-        (0, Log_1.LogError)(`${e.message}: ${e.url}`);
+        if (error instanceof discord_js_1.DiscordAPIError) {
+            (0, Log_1.LogError)(`${error.message}: ${error.url}`);
+        }
+        else if (error instanceof Error) {
+            if (error.stack !== undefined && error.stack.split("\n")[1] !== undefined) {
+                (0, Log_1.LogError)(`[${error.name}] ${error.message}: ${error.stack.split("\n")[1].trim()}`);
+            }
+            else {
+                (0, Log_1.LogError)(`[${error.name}] ${error.message}`);
+            }
+        }
     });
 };

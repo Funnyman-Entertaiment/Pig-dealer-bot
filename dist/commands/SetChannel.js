@@ -4,6 +4,7 @@ exports.SetBotChannel = void 0;
 const discord_js_1 = require("discord.js");
 const ServerInfo_1 = require("../database/ServerInfo");
 const Command_1 = require("../Command");
+const Log_1 = require("../Utils/Log");
 exports.SetBotChannel = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     .setName("setchannel")
     .addChannelOption(option => option.setName('channel')
@@ -37,9 +38,10 @@ exports.SetBotChannel = new Command_1.Command(new discord_js_1.SlashCommandBuild
         });
         return;
     }
+    (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} is setting the dropping channel to ${(0, Log_1.PrintChannel)(channel)} in server ${(0, Log_1.PrintServer)(interaction.guild)}`);
     let serverInfo = await (0, ServerInfo_1.GetServerInfo)(interaction.guildId);
     if (serverInfo === undefined) {
-        serverInfo = new ServerInfo_1.ServerInfo(interaction.guildId, channel.id, undefined, false, [], true);
+        serverInfo = new ServerInfo_1.ServerInfo(interaction.guildId, channel.id, undefined, channel.id, false, [], true);
     }
     else {
         serverInfo.Channel = channel.id;

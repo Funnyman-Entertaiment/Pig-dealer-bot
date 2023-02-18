@@ -9,22 +9,16 @@ const Pigs_1 = require("../database/Pigs");
 const UserInfo_1 = require("../database/UserInfo");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const MessageInfo_1 = require("../database/MessageInfo");
-function GetUserPigs(userInfo) {
-    if (userInfo === undefined) {
-        return [];
-    }
-    const userPigs = [];
-    for (const pigId in userInfo.Pigs) {
-        userPigs.push(pigId);
-    }
-    return userPigs;
-}
 exports.ShowBinderList = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     .setName("binderlist")
     .addBooleanOption(option => option.setName('set')
-    .setDescription('whether to order the pigs by set or not'))
+    .setDescription('Whether to order the pigs by set or not.'))
     .addUserOption(option => option.setName('user')
-    .setDescription('user to check the binder of'))
+    .setDescription('User to check the binder of.'))
+    .addStringOption(option => option.setName('rarity')
+    .setDescription('Filter pigs by rarity. Separate by commas to filter for several rarities.'))
+    .addBooleanOption(option => option.setName('favourites')
+    .setDescription('show only favourite pigs'))
     .setDescription("Let's you check your own or someone else's pig binder")
     .setDMPermission(false), async (interaction) => {
     await interaction.deferReply();
@@ -32,8 +26,13 @@ exports.ShowBinderList = new Command_1.Command(new discord_js_1.SlashCommandBuil
     if (server === null) {
         return;
     }
-    const user = interaction.options.getUser('user');
-    const orderBySet = interaction.options.getBoolean('set') ?? false;
+    const options = interaction.options;
+    const user = options.getUser('user');
+    const orderBySet = options.getBoolean('set') ?? false;
+    const rarities = options.getString('rarity') ?? "";
+    const raritiesToFilter = rarities.split(',')
+        .map(rarity => rarity.trim().toLowerCase())
+        .filter(rarity => rarity.length > 0);
     let userId;
     let author;
     if (user === null) {
@@ -45,15 +44,35 @@ exports.ShowBinderList = new Command_1.Command(new discord_js_1.SlashCommandBuil
         userId = interaction.user.id;
     }
     else {
-        (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} is checking the binder of ${(0, Log_1.PrintUser)(interaction.user)}`);
+        (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} is checking the binder of ${(0, Log_1.PrintUser)(user)}`);
         userId = user.id;
         const username = user.username;
         const avatar = user.avatarURL();
         author = { name: username, iconURL: avatar === null ? "" : avatar };
     }
     const userInfo = await (0, UserInfo_1.GetUserInfo)(userId);
-    const pigs = GetUserPigs(userInfo).map(pigID => (0, Pigs_1.GetPig)(pigID)).filter(pig => pig !== undefined);
-    if (pigs.length === 0) {
+    let pigs = (0, UserInfo_1.GetUserPigs)(userInfo);
+    if (userInfo === undefined) {
+        const emptyEmbed = new discord_js_1.EmbedBuilder()
+            .setAuthor(author)
+            .setColor(discord_js_1.Colors.DarkRed)
+            .setTitle("This user has no pigs!")
+            .setDescription("Open some packs, loser");
+        await interaction.followUp({
+            embeds: [emptyEmbed]
+        });
+        return;
+    }
+    if (raritiesToFilter.length > 0) {
+        pigs = pigs.filter(pig => {
+            return raritiesToFilter.includes(pig.Rarity.toLowerCase());
+        });
+    }
+    const onlyFavourites = options.getBoolean('favourites') ?? false;
+    if (onlyFavourites) {
+        pigs = pigs.filter(pig => userInfo.FavouritePigs.includes(pig.ID));
+    }
+    if (userInfo === undefined || pigs.length === 0) {
         const emptyEmbed = new discord_js_1.EmbedBuilder()
             .setAuthor(author)
             .setColor(discord_js_1.Colors.DarkRed)
@@ -100,10 +119,14 @@ exports.ShowBinderList = new Command_1.Command(new discord_js_1.SlashCommandBuil
         .setDescription(`**${firstSet === "-" ? "Default" : firstSet}**`)
         .setColor(discord_js_1.Colors.DarkVividPink)
         .setAuthor(author);
+    const interactionUserInfo = await (0, UserInfo_1.GetUserInfo)(interaction.user.id);
+    const sharedPigs = (0, UserInfo_1.GetUserPigIDs)(interactionUserInfo);
     const firstPigsPage = pigsBySet[firstSet].slice(0, Math.min(pigsBySet[firstSet].length, 9));
     (0, PigRenderer_1.AddPigListRenderToEmbed)(catalogueEmbed, {
         pigs: firstPigsPage.map(id => (0, Pigs_1.GetPig)(id)).filter(pig => pig !== undefined),
-        pigCounts: userInfo?.Pigs ?? {}
+        pigCounts: userInfo?.Pigs ?? {},
+        favouritePigs: userInfo?.FavouritePigs ?? [],
+        sharedPigs: userInfo.ID === interaction.user.id ? [] : sharedPigs
     });
     const row = new discord_js_1.ActionRowBuilder();
     if (orderBySet) {
@@ -139,7 +162,7 @@ exports.ShowBinderList = new Command_1.Command(new discord_js_1.SlashCommandBuil
         embeds: [catalogueEmbed],
         components: [row]
     }).then(message => {
-        const messageInfo = new MessageInfo_1.PigListMessage(message.id, server.id, userInfo === undefined ? {} : userInfo.Pigs, pigsBySet, firstSet, 0, interaction.user.id);
+        const messageInfo = new MessageInfo_1.PigListMessage(message.id, server.id, userInfo === undefined ? {} : userInfo.Pigs, pigsBySet, userInfo?.FavouritePigs ?? [], userInfo.ID === interaction.user.id ? [] : sharedPigs, firstSet, 0, interaction.user.id);
         (0, MessageInfo_1.AddMessageInfoToCache)(messageInfo);
     });
 });

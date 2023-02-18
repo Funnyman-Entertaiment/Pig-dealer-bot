@@ -5,6 +5,7 @@ import { query, collection, getDocs } from "firebase/firestore/lite";
 import { db } from "../Bot";
 import { GetAuthor } from "../Utils/GetAuthor";
 import { SaveAllUserInfo } from "../database/UserInfo";
+import { LogInfo, PrintServer, PrintUser } from "../Utils/Log";
 
 
 export const SearchPig = new Command(
@@ -18,8 +19,7 @@ export const SearchPig = new Command(
         .setDMPermission(false),
 
     async (interaction) => {
-        const pigID = (interaction.options as CommandInteractionOptionResolver).getString('id');
-        if (pigID === null) { return; }
+        const pigID = (interaction.options as CommandInteractionOptionResolver).getString('id', true);
 
         const pig = GetPig(pigID);
 
@@ -40,6 +40,8 @@ export const SearchPig = new Command(
         const user = interaction.user;
 
         if (server === null) { return; }
+
+        LogInfo(`User ${PrintUser(user)} is looking for pig #${pigID.padStart(3, '0')} in server ${PrintServer(server)}`);
 
         await interaction.deferReply();
 

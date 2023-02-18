@@ -1,6 +1,6 @@
 import { Interaction, CommandInteraction, ButtonInteraction } from "discord.js";
 import { Buttons } from "../Buttons";
-import { Commands, DebugCommands } from "../Commands";
+import { Commands, DebugCommands, TradeServerCommands } from "../Commands";
 import { client } from "../Bot";
 
 export default () => {
@@ -15,6 +15,10 @@ export default () => {
 
 const handleSlashCommand = async (interaction: CommandInteraction) => {
     let slashCommand = Commands.find(c => c.slashCommand.name === interaction.commandName);
+
+    if (slashCommand === undefined) {
+        slashCommand = TradeServerCommands.find(c => c.slashCommand.name === interaction.commandName);
+    }
 
     if (slashCommand === undefined) {
         slashCommand = DebugCommands.find(c => c.slashCommand.name === interaction.commandName);

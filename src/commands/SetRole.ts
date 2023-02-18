@@ -42,6 +42,7 @@ export const SetBotRole = new Command(
                 interaction.guildId,
                 undefined,
                 role.id,
+                undefined,
                 false,
                 [],
                 true

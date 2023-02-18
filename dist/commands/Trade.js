@@ -134,8 +134,8 @@ async function NewTrade(interaction, options) {
         });
         return;
     }
-    const starterInfo = await (0, UserInfo_1.GetUserInfo)(tradeStarter.id) ?? new UserInfo_1.UserInfo(tradeStarter.id, [], {}, false);
-    const receiverInfo = await (0, UserInfo_1.GetUserInfo)(tradeReceiver.id) ?? new UserInfo_1.UserInfo(tradeReceiver.id, [], {}, false);
+    const starterInfo = await (0, UserInfo_1.GetUserInfo)(tradeStarter.id) ?? new UserInfo_1.UserInfo(tradeStarter.id, [], {}, false, []);
+    const receiverInfo = await (0, UserInfo_1.GetUserInfo)(tradeReceiver.id) ?? new UserInfo_1.UserInfo(tradeReceiver.id, [], {}, false, []);
     await (0, UserInfo_1.AddUserInfosToCache)([starterInfo, receiverInfo]);
     const pigsString = options.getString("pigs") ?? "";
     const pigAmounts = ParseTradePigsString(interaction, pigsString);
@@ -203,8 +203,8 @@ async function CounterOfferTrade(interaction, options) {
         });
         return;
     }
-    const starterInfo = await (0, UserInfo_1.GetUserInfo)(msgInfo.TradeStarterID) ?? new UserInfo_1.UserInfo(msgInfo.TradeStarterID, [], {}, false);
-    const receiverInfo = await (0, UserInfo_1.GetUserInfo)(msgInfo.TradeReceiverID) ?? new UserInfo_1.UserInfo(msgInfo.TradeReceiverID, [], {}, false);
+    const starterInfo = await (0, UserInfo_1.GetUserInfo)(msgInfo.TradeStarterID) ?? new UserInfo_1.UserInfo(msgInfo.TradeStarterID, [], {}, false, []);
+    const receiverInfo = await (0, UserInfo_1.GetUserInfo)(msgInfo.TradeReceiverID) ?? new UserInfo_1.UserInfo(msgInfo.TradeReceiverID, [], {}, false, []);
     await (0, UserInfo_1.AddUserInfosToCache)([starterInfo, receiverInfo]);
     const pigsString = options.getString("pigs") ?? "";
     const pigAmounts = ParseTradePigsString(interaction, pigsString);

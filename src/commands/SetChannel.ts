@@ -1,8 +1,7 @@
-import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, ChannelType, Colors, PermissionFlagsBits } from "discord.js";
-import { doc, setDoc } from "firebase/firestore/lite";
+import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, ChannelType, Colors, PermissionFlagsBits, Guild, GuildChannel } from "discord.js";
 import { AddServerInfoToCache, GetServerInfo, SaveAllServerInfo, ServerInfo } from "../database/ServerInfo";
 import { Command } from "../Command";
-import { db } from "../Bot";
+import { LogInfo, PrintUser, PrintChannel, PrintServer } from "../Utils/Log";
 
 export const SetBotChannel = new Command(
     new SlashCommandBuilder()
@@ -49,6 +48,8 @@ export const SetBotChannel = new Command(
             return;
         }
 
+        LogInfo(`User ${PrintUser(interaction.user)} is setting the dropping channel to ${PrintChannel(channel as any as GuildChannel)} in server ${PrintServer(interaction.guild as any as Guild)}`);
+
         let serverInfo = await GetServerInfo(interaction.guildId);
 
         if(serverInfo === undefined){
@@ -56,6 +57,7 @@ export const SetBotChannel = new Command(
                 interaction.guildId,
                 channel.id,
                 undefined,
+                channel.id,
                 false,
                 [],
                 true

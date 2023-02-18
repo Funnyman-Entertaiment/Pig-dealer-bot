@@ -161,13 +161,15 @@ async function NewTrade(interaction: CommandInteraction, options: CommandInterac
         tradeStarter.id,
         [],
         {},
-        false
+        false,
+        []
     );
     const receiverInfo = await GetUserInfo(tradeReceiver.id) ?? new UserInfo(
         tradeReceiver.id,
         [],
         {},
-        false
+        false,
+        []
     );
     await AddUserInfosToCache([starterInfo, receiverInfo]);
 
@@ -268,13 +270,15 @@ async function CounterOfferTrade(interaction: CommandInteraction, options: Comma
         msgInfo.TradeStarterID,
         [],
         {},
-        false
+        false,
+        []
     );
     const receiverInfo = await GetUserInfo(msgInfo.TradeReceiverID) ?? new UserInfo(
         msgInfo.TradeReceiverID,
         [],
         {},
-        false
+        false,
+        []
     );
     await AddUserInfosToCache([starterInfo, receiverInfo]);
 

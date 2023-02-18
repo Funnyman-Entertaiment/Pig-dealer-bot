@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DatabaseElementList = void 0;
+exports.DatabaseElementList = exports.SaveItems = void 0;
 const lite_1 = require("firebase/firestore/lite");
 const MessageInfo_1 = require("./MessageInfo");
 const Packs_1 = require("./Packs");
@@ -9,6 +9,14 @@ const ServerInfo_1 = require("./ServerInfo");
 const UserInfo_1 = require("./UserInfo");
 const Bot_1 = require("../Bot");
 const MAX_CACHE_SIZE = 300;
+const saveQueue = [];
+function SaveItems() {
+    const saveData = saveQueue.shift();
+    if (saveData !== undefined) {
+        (0, lite_1.setDoc)(saveData.doc, saveData.data);
+    }
+}
+exports.SaveItems = SaveItems;
 function GetDocumentReference(element) {
     if (element instanceof Pigs_1.Pig) {
         return (0, lite_1.doc)(Bot_1.db, `pigs/${element.ID}`);
@@ -41,7 +49,10 @@ class DatabaseElementList {
             if (firstElement !== undefined) {
                 const document = GetDocumentReference(firstElement);
                 if (document !== undefined) {
-                    await (0, lite_1.setDoc)(document, firstElement.GetData());
+                    saveQueue.push({
+                        doc: document,
+                        data: firstElement.GetData()
+                    });
                 }
             }
         }

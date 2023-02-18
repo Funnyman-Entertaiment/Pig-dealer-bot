@@ -100,7 +100,9 @@ export const PrevGallery = new Button("GalleryPrevious",
             pig: pig,
             new: msgInfo.NewPigs.includes(pig.ID),
             showId: !DoesPigIdHaveUniqueEvent(pigToLoad),
-            count: msgInfo.PigCounts[pig.ID]
+            count: msgInfo.PigCounts[pig.ID],
+            favourite: msgInfo.FavouritePigs.includes(pig.ID),
+            shared: msgInfo.SharedPigs.includes(pig.ID)
         });
         const row = new ActionRowBuilder<ButtonBuilder>()
         .addComponents(
@@ -115,6 +117,24 @@ export const PrevGallery = new Button("GalleryPrevious",
                 .setStyle(ButtonStyle.Primary)
                 .setDisabled(msgInfo.Pigs.length === 1)
         );
+
+        if(msgInfo.ShowFavouriteButton){
+            if(!msgInfo.FavouritePigs.includes(pig.ID)){
+                row.addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('FavouritePig')
+                        .setLabel('Favourite ⭐')
+                        .setStyle(ButtonStyle.Secondary)
+                );
+            }else{
+                row.addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('UnfavouritePig')
+                        .setLabel('Unfavourite ⭐')
+                        .setStyle(ButtonStyle.Secondary)
+                );
+            }
+        }
 
         await message.edit({
             embeds: [editedEmbed],

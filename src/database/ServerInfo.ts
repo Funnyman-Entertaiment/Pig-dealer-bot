@@ -5,15 +5,17 @@ import { db } from "../Bot";
 
 export class ServerInfo extends DatabaseElement {
     Channel: string | undefined;
+    AnnouncementChannel: string | undefined;
     Role: string | undefined
     HasSpawnedGoldenPig: boolean;
     YearsSpawnedAllNewYearDeco: number[];
     Enabled: boolean;
 
-    constructor(id: string, channel: string | undefined, role: string | undefined, hasSpawnedGoldenPig: boolean, yearsSpawnedAllNewYearDeco: number[], enabled: boolean) {
+    constructor(id: string, channel: string | undefined, role: string | undefined, announcementChannel: string | undefined, hasSpawnedGoldenPig: boolean, yearsSpawnedAllNewYearDeco: number[], enabled: boolean) {
         super(id);
         this.Channel = channel;
         this.Role = role;
+        this.AnnouncementChannel = announcementChannel;
         this.HasSpawnedGoldenPig = hasSpawnedGoldenPig;
         this.YearsSpawnedAllNewYearDeco = yearsSpawnedAllNewYearDeco;
         this.Enabled = enabled;
@@ -32,6 +34,10 @@ export class ServerInfo extends DatabaseElement {
 
         if(this.Role !== undefined){
             data.Role = this.Role;
+        }
+
+        if(this.AnnouncementChannel !== undefined){
+            data.AnnouncementChannel = this.AnnouncementChannel;
         }
 
         return data;
@@ -61,6 +67,7 @@ export function CreateServerInfoFromData(id: string, serverInfoData: DocumentDat
         id,
         serverInfoData.Channel,
         serverInfoData.Role,
+        serverInfoData.AnnouncementChannel ?? serverInfoData.Channel,
         serverInfoData.HasSpawnedGoldenPig ?? false,
         serverInfoData.YearsSpawnedAllNewYearDeco ?? [],
         serverInfoData.Enabled ?? true

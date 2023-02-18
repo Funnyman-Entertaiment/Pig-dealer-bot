@@ -18,8 +18,11 @@ export const DevSpace: DevSpace = {
     LogChannel: undefined as any as GuildTextBasedChannel
 }
 
-export let MINUTES_BETWEEN_PACKS = 10;
-export let MINUTES_PACK_OPENING_CD = 20;
-
-export let HOURS_BETWEEN_5_PACKS = 3;
-export let HOURS_BETWEEN_12_PACKS = 9;
+interface TradeServerSpace {
+    Server: Guild,
+    TradeBulletinChannel: GuildTextBasedChannel
+}
+export const TradeServerSpace: TradeServerSpace = {
+    Server: undefined as any as Guild,
+    TradeBulletinChannel: undefined as any as GuildTextBasedChannel
+}

@@ -1,4 +1,4 @@
-import { doc, DocumentReference, Firestore, setDoc } from "firebase/firestore/lite";
+import { doc, DocumentData, DocumentReference, setDoc } from "firebase/firestore/lite";
 import { DatabaseElement } from "./DatabaseElement";
 import { MessageInfo } from "./MessageInfo";
 import { Pack } from "./Packs";
@@ -8,6 +8,20 @@ import { UserInfo } from "./UserInfo";
 import { db } from "../Bot";
 
 const MAX_CACHE_SIZE = 300;
+
+interface SaveData {
+    doc: DocumentReference<DocumentData>
+    data: object
+}
+const saveQueue: SaveData[] = [];
+
+export function SaveItems(){
+    const saveData = saveQueue.shift();
+
+    if(saveData !== undefined){
+        setDoc(saveData.doc, saveData.data);
+    }
+}
 
 function GetDocumentReference(element: DatabaseElement): DocumentReference | undefined {
     if (element instanceof Pig) {
@@ -44,7 +58,10 @@ export class DatabaseElementList<T extends DatabaseElement> {
                 const document = GetDocumentReference(firstElement);
 
                 if (document !== undefined) {
-                    await setDoc(document, firstElement.GetData());
+                    saveQueue.push({
+                        doc: document,
+                        data: firstElement.GetData()
+                    });
                 }
             }
         }

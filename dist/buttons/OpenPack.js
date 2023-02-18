@@ -87,7 +87,7 @@ function SetUserCooldown(msgInfo, userInfo, server, interaction) {
         return;
     }
     const warningEmbed = new builders_1.EmbedBuilder()
-        .setTitle("This server is too small")
+        .setTitle("This server is too small (Less than 5 members)")
         .setDescription(`To avoid cheating, the bot will give you an extended cooldown. ${userInfo.WarnedAboutCooldown ? "" : "\nSince this is your first time, you won't be penalized."}`)
         .setColor(discord_js_1.Colors.DarkOrange);
     interaction.followUp({
@@ -119,13 +119,6 @@ function EditEmbedWithOpenedPack(message, pack, embed) {
             files: [openedImg],
         });
     }
-}
-function GetUserPigs(userInfo) {
-    const userPigs = [];
-    for (const pigId in userInfo.Pigs) {
-        userPigs.push(pigId);
-    }
-    return userPigs;
 }
 function GetAvailablePigsFromPack(pack) {
     let pigs;
@@ -231,14 +224,15 @@ function NewYearEvent(chosenPigs, serverInfo) {
         chosenPigs.push(chosenNewYearPigs);
     }
 }
-function GetOpenPackFollowUp(packName, chosenPigs, newPigs, interaction) {
+function GetOpenPackFollowUp(packName, chosenPigs, newPigs, interaction, userInfo) {
     const openedPackEmbed = new builders_1.EmbedBuilder()
         .setTitle(`You've opened a ${packName}`)
         .setDescription(`1/${chosenPigs.length}`);
     const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(openedPackEmbed, {
         pig: chosenPigs[0],
         new: newPigs.includes(chosenPigs[0].ID),
-        count: 1
+        count: 1,
+        favourite: userInfo.FavouritePigs.includes(chosenPigs[0].ID)
     });
     if (imgPath === undefined) {
         return;
@@ -252,6 +246,18 @@ function GetOpenPackFollowUp(packName, chosenPigs, newPigs, interaction) {
         .setCustomId('GalleryNext')
         .setLabel('Next')
         .setStyle(discord_js_1.ButtonStyle.Primary));
+    if (!userInfo.FavouritePigs.includes(chosenPigs[0].ID)) {
+        row.addComponents(new discord_js_1.ButtonBuilder()
+            .setCustomId('FavouritePig')
+            .setLabel('Favourite ⭐')
+            .setStyle(discord_js_1.ButtonStyle.Secondary));
+    }
+    else {
+        row.addComponents(new discord_js_1.ButtonBuilder()
+            .setCustomId('UnfavouritePig')
+            .setLabel('Unfavourite ⭐')
+            .setStyle(discord_js_1.ButtonStyle.Secondary));
+    }
     const author = (0, GetAuthor_1.GetAuthor)(interaction);
     if (author !== null) {
         openedPackEmbed.setAuthor(author);
@@ -263,9 +269,9 @@ function GetOpenPackFollowUp(packName, chosenPigs, newPigs, interaction) {
     };
 }
 function SendOpenPackFollowUp(userInfo, chosenPigs, pigsToShowInPack, pack, serverId, interaction) {
-    const userPigs = GetUserPigs(userInfo);
+    const userPigs = (0, UserInfo_1.GetUserPigIDs)(userInfo);
     const newPigs = chosenPigs.filter(pig => !userPigs.includes(pig.ID)).map(pig => pig.ID);
-    const packFollowUp = GetOpenPackFollowUp(pack.Name, pigsToShowInPack, newPigs, interaction);
+    const packFollowUp = GetOpenPackFollowUp(pack.Name, pigsToShowInPack, newPigs, interaction, userInfo);
     if (packFollowUp === undefined) {
         return;
     }
@@ -273,7 +279,7 @@ function SendOpenPackFollowUp(userInfo, chosenPigs, pigsToShowInPack, pack, serv
         if (message === null) {
             return;
         }
-        const newMsgInfo = new MessageInfo_1.PigGalleryMessage(message.id, serverId, 0, {}, pigsToShowInPack.map(pig => pig.ID), newPigs, [], interaction.user.id);
+        const newMsgInfo = new MessageInfo_1.PigGalleryMessage(message.id, serverId, 0, {}, pigsToShowInPack.map(pig => pig.ID), newPigs, [], userInfo.FavouritePigs, [], true, interaction.user.id);
         (0, MessageInfo_1.AddMessageInfoToCache)(newMsgInfo);
     });
 }
@@ -299,7 +305,7 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (interaction) => {
     const userID = user.id;
     const msgID = message.id;
     const serverInfo = await (0, ServerInfo_1.GetServerInfo)(serverID);
-    const userInfo = await (0, UserInfo_1.GetUserInfo)(userID) ?? new UserInfo_1.UserInfo(userID, [], {}, false);
+    const userInfo = await (0, UserInfo_1.GetUserInfo)(userID) ?? new UserInfo_1.UserInfo(userID, [], {}, false, []);
     (0, UserInfo_1.AddUserInfoToCache)(userInfo);
     const msgInfo = (0, MessageInfo_1.GetMessageInfo)(serverID, msgID);
     if (msgInfo === undefined) {

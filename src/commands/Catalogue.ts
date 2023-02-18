@@ -1,13 +1,17 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, CommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { Command } from "../Command";
 import { GetAllPigs, GetPig, Pig } from "../database/Pigs";
 import { AddPigListRenderToEmbed } from "../Utils/PigRenderer";
 import { AddMessageInfoToCache, PigListMessage } from "../database/MessageInfo";
+import { LogInfo, PrintUser } from "../Utils/Log";
 
 export const Catalogue = new Command(
     new SlashCommandBuilder()
         .setName("catalogue")
-        .setDescription("shows all pigs in the bot sorted by set")
+        .addStringOption(option => 
+            option.setName("rarity")
+                .setDescription("Filter pigs by rarity. Multiple rarities separated by commas."))
+        .setDescription("Shows all pigs in the bot sorted by set")
         .setDMPermission(false),
 
     async (interaction: CommandInteraction) => {
@@ -19,7 +23,19 @@ export const Catalogue = new Command(
             return;
         }
 
-        const pigs = GetAllPigs();
+        const options = interaction.options as CommandInteractionOptionResolver;
+        const rarities = options.getString('rarity') ?? "";
+        const raritiesToFilter = rarities.split(',')
+            .map(rarity => rarity.trim().toLowerCase())
+            .filter(rarity => rarity.length > 0);
+
+        let pigs = GetAllPigs();
+
+        if (raritiesToFilter.length > 0) {
+            pigs = pigs.filter(pig => {
+                return raritiesToFilter.includes(pig.Rarity.toLowerCase())
+            });
+        }
 
         const pigsBySet: { [key: string]: string[] } = {};
         const sets: string[] = [];
@@ -87,6 +103,8 @@ export const Catalogue = new Command(
                     .setStyle(ButtonStyle.Secondary),
             );
 
+        LogInfo(`User ${PrintUser(interaction.user)} is checking the pig catalogue`);
+
         await interaction.followUp({
             ephemeral: true,
             embeds: [catalogueEmbed],
@@ -97,6 +115,8 @@ export const Catalogue = new Command(
                 serverId,
                 {},
                 pigsBySet,
+                [],
+                [],
                 firstSet,
                 0,
                 interaction.user.id

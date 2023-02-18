@@ -8,7 +8,8 @@ export interface PigRenderOptions {
     count?: number,
     new?: boolean,
     showId?: boolean,
-    favourite?: boolean
+    favourite?: boolean,
+    shared?: boolean
 }
 
 export function AddPigRenderToEmbed(embed: EmbedBuilder, options: PigRenderOptions): string{
@@ -39,7 +40,7 @@ export function AddPigRenderToEmbed(embed: EmbedBuilder, options: PigRenderOptio
     embedDescriptionLines.push(pig.Description.length > 0? pig.Description : "...");
 
     if(options.showId === undefined || options.showId){
-        embedDescriptionLines.push(`#${pig.ID.padStart(3, "0")}`);
+        embedDescriptionLines.push(`#${pig.ID.padStart(3, "0")}${options.favourite? " ⭐": ""}${options.shared? " ✅": ""}`);
     }
 
     const embedDescription = embedDescriptionLines.join("\n");
@@ -59,10 +60,15 @@ export function AddPigRenderToEmbed(embed: EmbedBuilder, options: PigRenderOptio
 
 export interface PigListRenderOptions {
     pigs: Pig[],
-    pigCounts: {[key: string]: number}
+    pigCounts: {[key: string]: number},
+    favouritePigs?: string[],
+    sharedPigs?: string[]
 }
 
 export function AddPigListRenderToEmbed(embed: EmbedBuilder, options: PigListRenderOptions){
+    const favouritePigs = options.favouritePigs?? [];
+    const sharedPigs = options.sharedPigs?? [];
+
     embed.setFields([]);
 
     embed.addFields(options.pigs.map(pig => {
@@ -72,9 +78,13 @@ export function AddPigListRenderToEmbed(embed: EmbedBuilder, options: PigListRen
             number = ` (${count})`;
         }
 
+        const isFavourite = favouritePigs.includes(pig.ID);
+        const isShared = sharedPigs.includes(pig.ID);
+        const stickers = `${isFavourite? "⭐": ""} ${isShared? "✅" : ""}`.trim();
+
         return {
             name: `${pig.Name} #${pig.ID.padStart(3, "0")}${number}`,
-            value: `_${pig.Rarity}_\n${pig.Description}`,
+            value: `${stickers}${stickers.length>0? "\n":""}_${pig.Rarity}_\n${pig.Description}`,
             inline: true
         };
     }));

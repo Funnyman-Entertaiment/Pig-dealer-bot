@@ -4,6 +4,7 @@ exports.Information = void 0;
 const discord_js_1 = require("discord.js");
 const Command_1 = require("../Command");
 const Bot_1 = require("../Bot");
+const Log_1 = require("../Utils/Log");
 exports.Information = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     .setName("information")
     .setDescription("Sends you an invitation link so you can have Pig Dealer in your own server."), async (interaction) => {
@@ -44,7 +45,11 @@ exports.Information = new Command_1.Command(new discord_js_1.SlashCommandBuilder
     const row = new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.ButtonBuilder()
         .setLabel("Invite the bot!")
         .setStyle(discord_js_1.ButtonStyle.Link)
-        .setURL("https://discord.com/api/oauth2/authorize?client_id=1040735137228406884&permissions=268470272&scope=bot%20applications.commands"));
+        .setURL("https://discord.com/api/oauth2/authorize?client_id=1040735137228406884&permissions=268470272&scope=bot%20applications.commands"), new discord_js_1.ButtonBuilder()
+        .setLabel("Join the server!")
+        .setStyle(discord_js_1.ButtonStyle.Link)
+        .setURL("https://discord.gg/wnAnhRyKjM"));
+    (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} is checking the bot information`);
     interaction.reply({
         embeds: [embed],
         components: [row],

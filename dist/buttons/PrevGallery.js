@@ -72,7 +72,9 @@ exports.PrevGallery = new Button_1.Button("GalleryPrevious", async (interaction)
         pig: pig,
         new: msgInfo.NewPigs.includes(pig.ID),
         showId: !(0, UniquePigEvents_1.DoesPigIdHaveUniqueEvent)(pigToLoad),
-        count: msgInfo.PigCounts[pig.ID]
+        count: msgInfo.PigCounts[pig.ID],
+        favourite: msgInfo.FavouritePigs.includes(pig.ID),
+        shared: msgInfo.SharedPigs.includes(pig.ID)
     });
     const row = new discord_js_1.ActionRowBuilder()
         .addComponents(new discord_js_1.ButtonBuilder()
@@ -84,6 +86,20 @@ exports.PrevGallery = new Button_1.Button("GalleryPrevious", async (interaction)
         .setLabel('Next')
         .setStyle(discord_js_1.ButtonStyle.Primary)
         .setDisabled(msgInfo.Pigs.length === 1));
+    if (msgInfo.ShowFavouriteButton) {
+        if (!msgInfo.FavouritePigs.includes(pig.ID)) {
+            row.addComponents(new discord_js_1.ButtonBuilder()
+                .setCustomId('FavouritePig')
+                .setLabel('Favourite ⭐')
+                .setStyle(discord_js_1.ButtonStyle.Secondary));
+        }
+        else {
+            row.addComponents(new discord_js_1.ButtonBuilder()
+                .setCustomId('UnfavouritePig')
+                .setLabel('Unfavourite ⭐')
+                .setStyle(discord_js_1.ButtonStyle.Secondary));
+        }
+    }
     await message.edit({
         embeds: [editedEmbed],
         files: [imgPath],
