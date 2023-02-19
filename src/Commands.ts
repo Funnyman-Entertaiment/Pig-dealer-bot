@@ -27,7 +27,9 @@ import { FavouritePigCmd } from "./commands/FavouritePig";
 import { SetAnnouncementChannel } from "./commands/SetAnnouncementChannel";
 import { TradeBulletin } from "./commands/TradeBulletin";
 import { ResetPackDropper } from "./commands/ResetPackDrops";
+import { Foil } from "./commands/Foil";
 import { client } from "./Bot";
+import { FoilPigs } from "./commands/FoilPigs";
 
 export const Commands = [
     // Sex,
@@ -45,7 +47,9 @@ export const Commands = [
     // Invite,
     // Information,
     CheckPig,
-    // FavouritePigCmd
+    // FavouritePigCmd,
+    Foil,
+    FoilPigs
 ];
 
 export const TradeServerCommands = [

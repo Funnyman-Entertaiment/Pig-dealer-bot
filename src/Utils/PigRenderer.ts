@@ -19,7 +19,7 @@ export function AddPigRenderToEmbed(embed: EmbedBuilder, options: PigRenderOptio
     if(pig.Tags.includes("gif")){
         img = `${pig.ID}.gif`;
     }
-
+    
     if(!fs.existsSync(`./img/pigs/${img}`)){
         img = `none.png`;
     }
@@ -52,7 +52,7 @@ export function AddPigRenderToEmbed(embed: EmbedBuilder, options: PigRenderOptio
         value: embedDescription
     })
     .setImage(`attachment://${img}`)
-    .setColor(COLOR_PER_PIG_RARITY[pig.Rarity]);
+    .setColor(COLOR_PER_PIG_RARITY[pig.Rarity.replace(" (foil)", "")]);
 
     return `./img/pigs/${img}`;
 }
