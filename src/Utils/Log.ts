@@ -4,7 +4,7 @@ import { client } from "../Bot";
 
 function SendLogMessage(msg: string){
     console.log(msg);
-    if(client.user !== null && client.user.id !== "1048616940194767009"){
+    if(client.user !== null){
         DevSpace.LogChannel.send(msg);
     }
 }

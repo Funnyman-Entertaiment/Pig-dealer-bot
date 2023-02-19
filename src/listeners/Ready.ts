@@ -21,9 +21,9 @@ export default () => {
         ReadPigsAndPacks();
 
         console.log(`Fetching dev server information.`);
-        const devServer = await client.guilds.fetch("1040735505127579718");
-        const reportChannel = (await devServer.channels.fetch("1056247295571665018")) as GuildTextBasedChannel;
-        const LogChannel = (await devServer.channels.fetch("1060270015724650536")) as GuildTextBasedChannel;
+        const devServer = await client.guilds.fetch(process.env.DEV_SERVER_ID ?? "");
+        const reportChannel = (await devServer.channels.fetch(process.env.DEV_REPORT_CHANNEL ?? "")) as GuildTextBasedChannel;
+        const LogChannel = (await devServer.channels.fetch(process.env.DEV_LOG_CHANNEL ?? "")) as GuildTextBasedChannel;
 
         DevSpace.Server = devServer;
         DevSpace.ReportChannel = reportChannel;

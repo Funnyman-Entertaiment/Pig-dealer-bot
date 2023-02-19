@@ -23,12 +23,14 @@ export class RandomPackMessage extends MessageInfo {
     Pack: string;
     Opened: boolean;
     IgnoreCooldown: boolean;
+    BeingOpenedBy: string | undefined;
 
     constructor(id: string, serverId: string, pack: string, opened: boolean, ignoreCooldown: boolean, user?: string, timeSent?: Timestamp) {
         super(id, serverId, "RandomPack", user, timeSent);
         this.Pack = pack;
         this.Opened = opened;
         this.IgnoreCooldown = ignoreCooldown;
+        this.BeingOpenedBy = undefined;
     }
 
     GetData(): object {

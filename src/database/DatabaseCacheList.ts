@@ -47,7 +47,13 @@ export class DatabaseElementList<T extends DatabaseElement> {
     }
 
     async Add(element: T) {
-        if(this.Get(element.ID) !== undefined){
+        let foundElement = this.Get(element.ID)
+        if(foundElement !== undefined){
+            //The element is already on the list, replace it
+            //so the newer changes get properly applied
+            let foundIndex = this.Elements.indexOf(foundElement);
+            this.Elements[foundIndex] = element;
+
             return;
         }
 
@@ -75,6 +81,7 @@ export class DatabaseElementList<T extends DatabaseElement> {
 
             if (document !== undefined) {
                 await setDoc(document, element.GetData());
+                await new Promise(r => setTimeout(r, 100)); 
             }
         });
     }

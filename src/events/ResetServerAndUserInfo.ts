@@ -2,8 +2,11 @@ import { query, collection, getDocs } from "firebase/firestore/lite";
 import { db } from "../Bot";
 import { GetServerInfo } from "../database/ServerInfo";
 import { GetUserInfo } from "../database/UserInfo";
+import { LogInfo } from "../Utils/Log";
 
 async function ResetServerUsers(){
+    LogInfo("Resetting server and user information.")
+
     const serverQuery = query(collection(db, "serverInfo"));
     const servers = await getDocs(serverQuery);
 

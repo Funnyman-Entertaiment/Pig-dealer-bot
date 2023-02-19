@@ -25,7 +25,7 @@ export async function DropPack(serverInfo: ServerInfo, options: PackDropOptions)
     } catch {
         LogWarn(`Missing access to server ${serverInfo.ID}. Disabling server.`)
         serverInfo.Enabled = false;
-        AddServerInfoToCache(serverInfo);
+        await AddServerInfoToCache(serverInfo);
         SaveAllServerInfo();
     }
 
