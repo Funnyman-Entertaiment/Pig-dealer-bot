@@ -1,7 +1,7 @@
 import { query, collection, getDocs } from "firebase/firestore/lite";
 import { db } from "../Bot";
-import { GetServerInfo } from "../database/ServerInfo";
-import { GetUserInfo } from "../database/UserInfo";
+import { AddServerInfoToCache, GetServerInfo, SaveAllServerInfo } from "../database/ServerInfo";
+import { AddUserInfoToCache, GetUserInfo, SaveAllUserInfo } from "../database/UserInfo";
 import { LogInfo } from "../Utils/Log";
 
 async function ResetServerUsers(){
@@ -18,8 +18,11 @@ async function ResetServerUsers(){
         await new Promise(r => setTimeout(r, 100));
         if(serverInfo !== undefined){
             serverInfo.Enabled = true;
+            await AddServerInfoToCache(serverInfo);
         }
     }
+
+    SaveAllServerInfo();
 
     const usersQuery = query(collection(db, "users"));
     const users = await getDocs(usersQuery);
@@ -32,8 +35,11 @@ async function ResetServerUsers(){
         await new Promise(r => setTimeout(r, 100));
         if(userInfo !== undefined){
             userInfo.WarnedAboutCooldown = false;
+            await AddUserInfoToCache(userInfo);
         }
     }
+
+    SaveAllUserInfo();
 }
 
 export async function ResetServerAndUserInfo() {

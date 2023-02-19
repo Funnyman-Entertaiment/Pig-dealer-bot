@@ -8,6 +8,7 @@ import { GuildTextBasedChannel } from "discord.js";
 import { DevSpace, TradeServerSpace } from "../Constants/Variables";
 import { ResetServerAndUserInfo } from "../events/ResetServerAndUserInfo";
 import { SaveItems } from "../database/DatabaseCacheList";
+import { CachedServerInfos } from "../database/ServerInfo";
 
 export default () => {
     client.on("ready", async () => {
@@ -40,7 +41,7 @@ export default () => {
         await ResetServerAndUserInfo();
         SaveCachePeriodically();
         RemoveOldMessagesFromCache();
-
+        
         setInterval(() => SaveItems(), 1000);
 
         SetCommands();

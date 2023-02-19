@@ -36,7 +36,7 @@ function AddPigRenderToEmbed(embed, options) {
         value: embedDescription
     })
         .setImage(`attachment://${img}`)
-        .setColor(ColorPerPigRarity_1.COLOR_PER_PIG_RARITY[pig.Rarity]);
+        .setColor(ColorPerPigRarity_1.COLOR_PER_PIG_RARITY[pig.Rarity.replace(" (foil)", "")]);
     return `./img/pigs/${img}`;
 }
 exports.AddPigRenderToEmbed = AddPigRenderToEmbed;

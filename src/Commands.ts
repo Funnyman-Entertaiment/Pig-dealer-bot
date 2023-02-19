@@ -30,24 +30,25 @@ import { ResetPackDropper } from "./commands/ResetPackDrops";
 import { Foil } from "./commands/Foil";
 import { client } from "./Bot";
 import { FoilPigs } from "./commands/FoilPigs";
+import { ChangeFoilRequirements } from "./commands/ChangeFoilRequiredPigs";
 
 export const Commands = [
-    // Sex,
+    Sex,
     SetBotChannel,
-    // SetBotRole,
-    // SetAnnouncementChannel,
+    SetBotRole,
+    SetAnnouncementChannel,
     ShowBinder,
     ShowBinderList,
-    // Report,
+    Report,
     Catalogue,
     SearchPig,
-    // Trade,
-    // GetRole,
-    // RemoveRole,
-    // Invite,
-    // Information,
+    Trade,
+    GetRole,
+    RemoveRole,
+    Invite,
+    Information,
     CheckPig,
-    // FavouritePigCmd,
+    FavouritePigCmd,
     Foil,
     FoilPigs
 ];
@@ -57,21 +58,22 @@ export const TradeServerCommands = [
 ]
 
 export const DebugCommands = [
-    // TestPack,
+    TestPack,
     TestPig,
-    // Announcement,
-    // ReloadPigsPacks,
+    Announcement,
+    ReloadPigsPacks,
     SaveCache,
     SpawnPack,
     SpawnPackUser,
     GivePig,
-    // ChangeOpeningCooldown,
-    // ChangePackCooldown,
-    // Change5PackCooldown,
-    // Change12PackCooldown,
-    // GreatWipe,
+    ChangeOpeningCooldown,
+    ChangePackCooldown,
+    Change5PackCooldown,
+    Change12PackCooldown,
+    GreatWipe,
     ClearCooldown,
-    // ResetPackDropper
+    ResetPackDropper,
+    ChangeFoilRequirements
 ];
 
 export function SetCommands(){

@@ -41,7 +41,10 @@ class DatabaseElementList {
         this.Elements = [];
     }
     async Add(element) {
-        if (this.Get(element.ID) !== undefined) {
+        let foundElement = this.Get(element.ID);
+        if (foundElement !== undefined) {
+            let foundIndex = this.Elements.indexOf(foundElement);
+            this.Elements[foundIndex] = element;
             return;
         }
         if (this.Elements.length >= MAX_CACHE_SIZE) {
@@ -63,6 +66,7 @@ class DatabaseElementList {
             const document = GetDocumentReference(element);
             if (document !== undefined) {
                 await (0, lite_1.setDoc)(document, element.GetData());
+                await new Promise(r => setTimeout(r, 100));
             }
         });
     }

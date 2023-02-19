@@ -6,7 +6,7 @@ const Command_1 = require("../Command");
 const PackDropper_1 = require("../events/PackDropper");
 exports.ResetPackDropper = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     .setName("resetpackdrops")
-    .setDescription("Resets pack drops. Only use if absolutely necessary or pack drops will duplicate."), async (interaction) => {
+    .setDescription("Resets pack drops. Only use if absolutely necessary or pack drops may duplicate."), async (interaction) => {
     (0, PackDropper_1.PackDropper)();
     const successEmbed = new discord_js_1.EmbedBuilder()
         .setTitle("Succesfully reset pack dropping")

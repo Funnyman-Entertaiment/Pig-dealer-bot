@@ -5,7 +5,7 @@ const Variables_1 = require("../Constants/Variables");
 const Bot_1 = require("../Bot");
 function SendLogMessage(msg) {
     console.log(msg);
-    if (Bot_1.client.user !== null && Bot_1.client.user.id !== "1048616940194767009") {
+    if (Bot_1.client.user !== null) {
         Variables_1.DevSpace.LogChannel.send(msg);
     }
 }

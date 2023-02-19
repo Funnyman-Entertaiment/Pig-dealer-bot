@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetServerInfo = exports.AddServerInfosToCache = exports.AddServerInfoToCache = exports.CreateServerInfoFromData = exports.SaveAllServerInfo = exports.ServerInfo = void 0;
+exports.GetServerInfo = exports.AddServerInfosToCache = exports.AddServerInfoToCache = exports.CreateServerInfoFromData = exports.SaveAllServerInfo = exports.CachedServerInfos = exports.ServerInfo = void 0;
 const lite_1 = require("firebase/firestore/lite");
 const DatabaseCacheList_1 = require("./DatabaseCacheList");
 const DatabaseElement_1 = require("./DatabaseElement");
@@ -40,15 +40,14 @@ class ServerInfo extends DatabaseElement_1.DatabaseElement {
     }
 }
 exports.ServerInfo = ServerInfo;
-let CachedServerInfos;
 function GetCachedServerInfos() {
-    if (CachedServerInfos === undefined) {
-        CachedServerInfos = new DatabaseCacheList_1.DatabaseElementList();
+    if (exports.CachedServerInfos === undefined) {
+        exports.CachedServerInfos = new DatabaseCacheList_1.DatabaseElementList();
     }
-    return CachedServerInfos;
+    return exports.CachedServerInfos;
 }
 function SaveAllServerInfo() {
-    CachedServerInfos?.SaveAll();
+    exports.CachedServerInfos?.SaveAll();
 }
 exports.SaveAllServerInfo = SaveAllServerInfo;
 function CreateServerInfoFromData(id, serverInfoData) {

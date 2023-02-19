@@ -45,7 +45,7 @@ export class ServerInfo extends DatabaseElement {
 }
 
 
-let CachedServerInfos: DatabaseElementList<ServerInfo> | undefined;
+export let CachedServerInfos: DatabaseElementList<ServerInfo> | undefined;
 
 
 function GetCachedServerInfos(){
