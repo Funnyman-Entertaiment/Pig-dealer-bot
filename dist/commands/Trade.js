@@ -11,6 +11,9 @@ const Bot_1 = require("../Bot");
 const Errors_1 = require("../Utils/Errors");
 const Log_1 = require("../Utils/Log");
 function ParseTradePigsString(interaction, pigsString) {
+    if (pigsString.trim() === "") {
+        return {};
+    }
     const pigTokens = pigsString.split(',');
     const pigAmounts = {};
     let hasFoundNonPig = undefined;

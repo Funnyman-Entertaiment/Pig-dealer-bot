@@ -1,7 +1,7 @@
 import { Timestamp } from "firebase/firestore/lite";
 import { DatabaseElement } from "./DatabaseElement";
 
-export type MessageType = "RandomPack" | "PigGallery" | "PigList" | "PigTrade"
+export type MessageType = "RandomPack" | "PigGallery" | "PigList" | "PigTrade" | "PigFoil"
 
 export class MessageInfo extends DatabaseElement {
     ServerId: string;
@@ -23,12 +23,14 @@ export class RandomPackMessage extends MessageInfo {
     Pack: string;
     Opened: boolean;
     IgnoreCooldown: boolean;
+    BeingOpenedBy: string | undefined;
 
     constructor(id: string, serverId: string, pack: string, opened: boolean, ignoreCooldown: boolean, user?: string, timeSent?: Timestamp) {
         super(id, serverId, "RandomPack", user, timeSent);
         this.Pack = pack;
         this.Opened = opened;
         this.IgnoreCooldown = ignoreCooldown;
+        this.BeingOpenedBy = undefined;
     }
 
     GetData(): object {
@@ -133,6 +135,19 @@ export class PigTradeMessage extends MessageInfo {
     }
 }
 
+
+export class PigFoilMessage extends MessageInfo {
+    OfferedPigs: { [key: string]: number };
+    Set: string;
+    Rarity: string;
+
+    constructor(id: string, serverId: string, user: string, offeredPigs: { [key: string]: number }, set: string, rarity: string){
+        super(id, serverId, "PigFoil", user);
+        this.OfferedPigs = offeredPigs;
+        this.Set = set;
+        this.Rarity = rarity;
+    }
+}
 
 export const CachedMessageInfosPerServer: { [key: string]: MessageInfo[] } = {};
 

@@ -18,9 +18,9 @@ exports.default = () => {
         console.log(`Fetching pigs and packs information.`);
         (0, ReadInitialDatabase_1.ReadPigsAndPacks)();
         console.log(`Fetching dev server information.`);
-        const devServer = await Bot_1.client.guilds.fetch("1040735505127579718");
-        const reportChannel = (await devServer.channels.fetch("1056247295571665018"));
-        const LogChannel = (await devServer.channels.fetch("1060270015724650536"));
+        const devServer = await Bot_1.client.guilds.fetch(process.env.DEV_SERVER_ID ?? "");
+        const reportChannel = (await devServer.channels.fetch(process.env.DEV_REPORT_CHANNEL ?? ""));
+        const LogChannel = (await devServer.channels.fetch(process.env.DEV_LOG_CHANNEL ?? ""));
         Variables_1.DevSpace.Server = devServer;
         Variables_1.DevSpace.ReportChannel = reportChannel;
         Variables_1.DevSpace.LogChannel = LogChannel;

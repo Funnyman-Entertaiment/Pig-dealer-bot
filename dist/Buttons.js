@@ -1,7 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Buttons = void 0;
+const AcceptFoil_1 = require("./buttons/AcceptFoil");
 const AcceptTrade_1 = require("./buttons/AcceptTrade");
+const CancelFoil_1 = require("./buttons/CancelFoil");
 const DenyTrade_1 = require("./buttons/DenyTrade");
 const FavouritePig_1 = require("./buttons/FavouritePig");
 const NextGallery_1 = require("./buttons/NextGallery");
@@ -23,5 +25,7 @@ exports.Buttons = [
     DenyTrade_1.DenyTrade,
     AcceptTrade_1.AcceptTrade,
     FavouritePig_1.FavouritePig,
-    UnfavouritePig_1.UnfavouritePig
+    UnfavouritePig_1.UnfavouritePig,
+    AcceptFoil_1.AcceptFoil,
+    CancelFoil_1.CancelFoil
 ];

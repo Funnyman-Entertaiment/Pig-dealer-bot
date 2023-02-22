@@ -402,6 +402,22 @@ export const OpenPack = new Button("OpenPack",
             return;
         }
 
+        if (msgInfo.BeingOpenedBy !== undefined){
+            const errorEmbed = new EmbedBuilder()
+                .setTitle("This pack is already being opened")
+                .setDescription("Someone is already trying to open this pack.\nWait a moment to see if they could succesfully open it.")
+                .setColor(Colors.Red);
+
+            interaction.reply({
+                embeds: [errorEmbed],
+                ephemeral: true
+            });
+
+            return;
+        }
+
+        msgInfo.BeingOpenedBy = user.id;
+
         const pack = GetPack(msgInfo.Pack);
 
         if (pack === undefined) {
@@ -416,6 +432,7 @@ export const OpenPack = new Button("OpenPack",
         }
 
         if (!CanUserOpenPack(interaction, userInfo, msgInfo)) {
+            msgInfo.BeingOpenedBy = undefined;
             return;
         }
 

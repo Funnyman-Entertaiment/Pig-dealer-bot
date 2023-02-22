@@ -12,11 +12,12 @@ const UnhandledException_1 = tslib_1.__importDefault(require("./listeners/Unhand
 const GuildJoin_1 = tslib_1.__importDefault(require("./listeners/GuildJoin"));
 const GuildLeave_1 = tslib_1.__importDefault(require("./listeners/GuildLeave"));
 DotEnv.config();
+const projectID = process.env.FIREBASE_PROJECT_ID;
 const firebaseConfig = {
     apiKey: process.env.FIREBASE_KEY,
-    authDomain: "pigsdiscordbot.firebaseapp.com",
-    projectId: "pigsdiscordbot",
-    storageBucket: "pigsdiscordbot.appspot.com",
+    authDomain: `${projectID}.firebaseapp.com`,
+    projectId: `${projectID}`,
+    storageBucket: `${projectID}.appspot.com`,
     messagingSenderId: process.env.FIREBASE_MSG_SENDER,
     appId: process.env.FIREBASE_API_ID,
     measurementId: "G-SLSDV1DJR9"

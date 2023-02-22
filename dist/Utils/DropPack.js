@@ -19,7 +19,7 @@ async function DropPack(serverInfo, options) {
     catch {
         (0, Log_1.LogWarn)(`Missing access to server ${serverInfo.ID}. Disabling server.`);
         serverInfo.Enabled = false;
-        (0, ServerInfo_1.AddServerInfoToCache)(serverInfo);
+        await (0, ServerInfo_1.AddServerInfoToCache)(serverInfo);
         (0, ServerInfo_1.SaveAllServerInfo)();
     }
     if (server === undefined) {

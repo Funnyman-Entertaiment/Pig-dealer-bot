@@ -11,6 +11,9 @@ const Variables_1 = require("../Constants/Variables");
 const SignificantPackIDs_1 = require("../Constants/SignificantPackIDs");
 let packsUntil5Pack = -1;
 let packsUntil12Pack = -1;
+let packDropperTimeout;
+let fivePackTimeout;
+let twelvePackTimeout;
 function GetRandomNumber(max, exception) {
     if (exception === undefined) {
         return Math.floor(Math.random() * max);
@@ -24,6 +27,9 @@ function GetRandomNumber(max, exception) {
     }
 }
 async function SpawnRandomPack() {
+    if (packDropperTimeout !== undefined) {
+        clearTimeout(packDropperTimeout);
+    }
     const q = (0, lite_1.query)((0, lite_1.collection)(Bot_1.db, "serverInfo"));
     const servers = await (0, lite_1.getDocs)(q);
     (0, Log_1.LogInfo)("Sending random packs.");
@@ -60,11 +66,14 @@ async function SpawnRandomPack() {
     if (packsUntil12Pack >= 0) {
         packsUntil12Pack--;
     }
-    setTimeout(() => {
+    packDropperTimeout = setTimeout(() => {
         SpawnRandomPack();
     }, 1000 * 60 * Variables_1.Cooldowns.MINUTES_BETWEEN_PACKS);
 }
 async function Set5PackSpawn() {
+    if (fivePackTimeout !== undefined) {
+        clearTimeout(fivePackTimeout);
+    }
     const maxPackNum = Math.floor(Variables_1.Cooldowns.MINUTES_BETWEEN_5_PACKS / Variables_1.Cooldowns.MINUTES_BETWEEN_PACKS);
     if (maxPackNum <= 0) {
         return;
@@ -75,11 +84,14 @@ async function Set5PackSpawn() {
     else {
         packsUntil5Pack = GetRandomNumber(maxPackNum);
     }
-    setTimeout(() => {
+    fivePackTimeout = setTimeout(() => {
         Set5PackSpawn();
     }, 1000 * 60 * Variables_1.Cooldowns.MINUTES_BETWEEN_5_PACKS);
 }
 async function Set12PackSpawn() {
+    if (twelvePackTimeout !== undefined) {
+        clearTimeout(twelvePackTimeout);
+    }
     const maxPackNum = Math.floor(Variables_1.Cooldowns.MINUTES_BETWEEN_12_PACKS / Variables_1.Cooldowns.MINUTES_BETWEEN_PACKS);
     if (maxPackNum <= 0) {
         return;
@@ -90,12 +102,12 @@ async function Set12PackSpawn() {
     else {
         packsUntil12Pack = GetRandomNumber(maxPackNum, packsUntil5Pack);
     }
-    setTimeout(() => {
+    twelvePackTimeout = setTimeout(() => {
         Set12PackSpawn();
     }, 1000 * 60 * Variables_1.Cooldowns.MINUTES_BETWEEN_12_PACKS);
 }
 const PackDropper = function () {
-    setTimeout(() => {
+    packDropperTimeout = setTimeout(() => {
         SpawnRandomPack();
     }, 1000 * 5);
     Set5PackSpawn();

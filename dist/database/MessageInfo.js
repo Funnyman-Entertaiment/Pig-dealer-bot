@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetTradeOfferForUser = exports.RemoveMessageInfoFromCache = exports.IsUserInTrade = exports.GetMessageInfo = exports.AddMessageInfosToCache = exports.AddMessageInfoToCache = exports.GetMessageInfoFromCache = exports.GetMsgInfoCacheForServer = exports.CachedMessageInfosPerServer = exports.PigTradeMessage = exports.PigListMessage = exports.PigGalleryMessage = exports.RandomPackMessage = exports.MessageInfo = void 0;
+exports.GetTradeOfferForUser = exports.RemoveMessageInfoFromCache = exports.IsUserInTrade = exports.GetMessageInfo = exports.AddMessageInfosToCache = exports.AddMessageInfoToCache = exports.GetMessageInfoFromCache = exports.GetMsgInfoCacheForServer = exports.CachedMessageInfosPerServer = exports.PigFoilMessage = exports.PigTradeMessage = exports.PigListMessage = exports.PigGalleryMessage = exports.RandomPackMessage = exports.MessageInfo = void 0;
 const lite_1 = require("firebase/firestore/lite");
 const DatabaseElement_1 = require("./DatabaseElement");
 class MessageInfo extends DatabaseElement_1.DatabaseElement {
@@ -21,11 +21,13 @@ class RandomPackMessage extends MessageInfo {
     Pack;
     Opened;
     IgnoreCooldown;
+    BeingOpenedBy;
     constructor(id, serverId, pack, opened, ignoreCooldown, user, timeSent) {
         super(id, serverId, "RandomPack", user, timeSent);
         this.Pack = pack;
         this.Opened = opened;
         this.IgnoreCooldown = ignoreCooldown;
+        this.BeingOpenedBy = undefined;
     }
     GetData() {
         if (this.User === undefined) {
@@ -121,6 +123,18 @@ class PigTradeMessage extends MessageInfo {
     }
 }
 exports.PigTradeMessage = PigTradeMessage;
+class PigFoilMessage extends MessageInfo {
+    OfferedPigs;
+    Set;
+    Rarity;
+    constructor(id, serverId, user, offeredPigs, set, rarity) {
+        super(id, serverId, "PigFoil", user);
+        this.OfferedPigs = offeredPigs;
+        this.Set = set;
+        this.Rarity = rarity;
+    }
+}
+exports.PigFoilMessage = PigFoilMessage;
 exports.CachedMessageInfosPerServer = {};
 function GetMsgInfoCacheForServer(serverId) {
     let msgInfoCacheForServer = exports.CachedMessageInfosPerServer[serverId];

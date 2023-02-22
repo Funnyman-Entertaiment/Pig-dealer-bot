@@ -6,12 +6,13 @@ import { LogInfo } from "../Utils/Log";
 import { db } from "../Bot";
 import { Cooldowns } from "../Constants/Variables";
 import { PACK_12, PACK_2, PACK_5 } from "../Constants/SignificantPackIDs";
-import { DiscordAPIError } from "discord.js";
-
 
 let packsUntil5Pack = -1;
 let packsUntil12Pack = -1;
 
+let packDropperTimeout: NodeJS.Timeout | undefined;
+let fivePackTimeout: NodeJS.Timeout | undefined;
+let twelvePackTimeout: NodeJS.Timeout | undefined;
 
 function GetRandomNumber(max: number, exception?: number): number {
     if (exception === undefined) {
@@ -29,6 +30,10 @@ function GetRandomNumber(max: number, exception?: number): number {
 
 
 async function SpawnRandomPack() {
+    if(packDropperTimeout !== undefined){
+        clearTimeout(packDropperTimeout);
+    }
+
     const q = query(collection(db, "serverInfo"));
     const servers = await getDocs(q);
 
@@ -68,13 +73,17 @@ async function SpawnRandomPack() {
     if (packsUntil5Pack >= 0) { packsUntil5Pack--; }
     if (packsUntil12Pack >= 0) { packsUntil12Pack--; }
 
-    setTimeout(() => {
+    packDropperTimeout = setTimeout(() => {
         SpawnRandomPack();
     }, 1000 * 60 * Cooldowns.MINUTES_BETWEEN_PACKS);
 }
 
 
 async function Set5PackSpawn() {
+    if(fivePackTimeout !== undefined){
+        clearTimeout(fivePackTimeout);
+    }
+
     const maxPackNum = Math.floor(Cooldowns.MINUTES_BETWEEN_5_PACKS / Cooldowns.MINUTES_BETWEEN_PACKS)
     
     if (maxPackNum <= 0) {
@@ -87,13 +96,17 @@ async function Set5PackSpawn() {
         packsUntil5Pack = GetRandomNumber(maxPackNum);
     }
 
-    setTimeout(() => {
+    fivePackTimeout = setTimeout(() => {
         Set5PackSpawn();
     }, 1000 * 60 * Cooldowns.MINUTES_BETWEEN_5_PACKS);
 }
 
 
 async function Set12PackSpawn() {
+    if(twelvePackTimeout !== undefined){
+        clearTimeout(twelvePackTimeout);
+    }
+
     const maxPackNum = Math.floor(Cooldowns.MINUTES_BETWEEN_12_PACKS / Cooldowns.MINUTES_BETWEEN_PACKS)
 
     if (maxPackNum <= 0) {
@@ -106,14 +119,14 @@ async function Set12PackSpawn() {
         packsUntil12Pack = GetRandomNumber(maxPackNum, packsUntil5Pack);
     }
 
-    setTimeout(() => {
+    twelvePackTimeout = setTimeout(() => {
         Set12PackSpawn();
     }, 1000 * 60 * Cooldowns.MINUTES_BETWEEN_12_PACKS);
 }
 
 
 export const PackDropper = function () {
-    setTimeout(() => {
+    packDropperTimeout = setTimeout(() => {
         SpawnRandomPack();
     }, 1000 * 5);
 

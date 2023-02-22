@@ -1,4 +1,6 @@
+import { AcceptFoil } from "./buttons/AcceptFoil";
 import { AcceptTrade } from "./buttons/AcceptTrade";
+import { CancelFoil } from "./buttons/CancelFoil";
 import { DenyTrade } from "./buttons/DenyTrade";
 import { FavouritePig } from "./buttons/FavouritePig";
 import { NextGallery } from "./buttons/NextGallery";
@@ -21,5 +23,7 @@ export const Buttons = [
     DenyTrade,
     AcceptTrade,
     FavouritePig,
-    UnfavouritePig
+    UnfavouritePig,
+    AcceptFoil,
+    CancelFoil
 ];

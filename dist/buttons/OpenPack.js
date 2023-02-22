@@ -319,6 +319,18 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (interaction) => {
         });
         return;
     }
+    if (msgInfo.BeingOpenedBy !== undefined) {
+        const errorEmbed = new builders_1.EmbedBuilder()
+            .setTitle("This pack is already being opened")
+            .setDescription("Someone is already trying to open this pack.\nWait a moment to see if they could succesfully open it.")
+            .setColor(discord_js_1.Colors.Red);
+        interaction.reply({
+            embeds: [errorEmbed],
+            ephemeral: true
+        });
+        return;
+    }
+    msgInfo.BeingOpenedBy = user.id;
     const pack = (0, Packs_1.GetPack)(msgInfo.Pack);
     if (pack === undefined) {
         const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Could't find pack for this message", `Pack Id: ${msgInfo.Pack}`);
@@ -329,6 +341,7 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (interaction) => {
         return;
     }
     if (!CanUserOpenPack(interaction, userInfo, msgInfo)) {
+        msgInfo.BeingOpenedBy = undefined;
         return;
     }
     await interaction.deferReply();

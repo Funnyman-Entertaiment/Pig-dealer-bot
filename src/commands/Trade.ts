@@ -9,6 +9,9 @@ import { MakeErrorEmbed } from "../Utils/Errors";
 import { LogInfo, PrintUser } from "../Utils/Log";
 
 function ParseTradePigsString(interaction: CommandInteraction, pigsString: string) {
+    if(pigsString.trim() === ""){
+        return {};
+    }
     const pigTokens = pigsString.split(',');
 
     const pigAmounts: { [key: string]: number } = {};

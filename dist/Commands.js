@@ -30,7 +30,10 @@ const FavouritePig_1 = require("./commands/FavouritePig");
 const SetAnnouncementChannel_1 = require("./commands/SetAnnouncementChannel");
 const TradeBulletin_1 = require("./commands/TradeBulletin");
 const ResetPackDrops_1 = require("./commands/ResetPackDrops");
+const Foil_1 = require("./commands/Foil");
 const Bot_1 = require("./Bot");
+const FoilPigs_1 = require("./commands/FoilPigs");
+const ChangeFoilRequiredPigs_1 = require("./commands/ChangeFoilRequiredPigs");
 exports.Commands = [
     Sex_1.Sex,
     SetChannel_1.SetBotChannel,
@@ -47,7 +50,9 @@ exports.Commands = [
     Invite_1.Invite,
     Info_1.Information,
     CheckPig_1.CheckPig,
-    FavouritePig_1.FavouritePigCmd
+    FavouritePig_1.FavouritePigCmd,
+    Foil_1.Foil,
+    FoilPigs_1.FoilPigs
 ];
 exports.TradeServerCommands = [
     TradeBulletin_1.TradeBulletin
@@ -67,7 +72,8 @@ exports.DebugCommands = [
     ChangeCooldowns_1.Change12PackCooldown,
     GreatWipe_1.GreatWipe,
     ClearCooldown_1.ClearCooldown,
-    ResetPackDrops_1.ResetPackDropper
+    ResetPackDrops_1.ResetPackDropper,
+    ChangeFoilRequiredPigs_1.ChangeFoilRequirements
 ];
 function SetCommands() {
     if (Bot_1.client.user === null) {
