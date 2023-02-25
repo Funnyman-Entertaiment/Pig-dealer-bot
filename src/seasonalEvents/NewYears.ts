@@ -13,12 +13,16 @@ function GetNewYearsYear(){
     return currentDate.getUTCFullYear();
 }
 
-export const NewYears = new SeasonalEvent(() =>{
-    const currentDate = Timestamp.now().toDate();
+export const NewYears = new SeasonalEvent(
+    "Pig's New Year",
+    "Party",
+    () =>{
+        const currentDate = Timestamp.now().toDate();
 
-    return (currentDate.getUTCMonth() === 11 && currentDate.getUTCDate() >= 30) ||
-    (currentDate.getUTCMonth() === 0 && currentDate.getUTCDate() == 1)
-});
+        return (currentDate.getUTCMonth() === 11 && currentDate.getUTCDate() >= 30) ||
+        (currentDate.getUTCMonth() === 0 && currentDate.getUTCDate() == 1)
+    }
+);
 
 NewYears.PostPackOpened = function(_pack, serverInfo, chosenPigs, _pigsToShow){
     const currentYear = GetNewYearsYear();

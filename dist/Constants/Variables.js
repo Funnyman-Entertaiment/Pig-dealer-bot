@@ -5,7 +5,8 @@ exports.Cooldowns = {
     MINUTES_BETWEEN_PACKS: 10,
     MINUTES_BETWEEN_5_PACKS: 180,
     MINUTES_BETWEEN_12_PACKS: 540,
-    MINUTES_PACK_OPENING_CD: 15
+    MINUTES_PACK_OPENING_CD: 15,
+    MINUTES_BETWEEN_EGG_PACKS: 120,
 };
 exports.DevSpace = {
     Server: undefined,

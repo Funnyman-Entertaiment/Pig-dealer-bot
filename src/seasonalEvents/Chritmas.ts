@@ -5,7 +5,10 @@ import { STOCKING_PIG } from "../Constants/SignificantPigIDs";
 import { GetPig, GetPigsByRarity } from "../database/Pigs";
 import { ChooseRandomElementFromList } from "../Utils/ExtraRandom";
 
-export const Christmas = new SeasonalEvent(() => {
+export const Christmas = new SeasonalEvent(
+    "Pigsmas",
+    "This is pigsmas",
+    () => {
     const currentDate = Timestamp.now().toDate();
 
     return currentDate.getUTCMonth() === 11 &&

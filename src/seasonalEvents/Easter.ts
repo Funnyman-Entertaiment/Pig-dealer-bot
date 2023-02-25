@@ -14,16 +14,20 @@ function GetFirstMondayOfMonth(): number {
     return firstMonday.getUTCDay();
 }
 
-export const Easter = new SeasonalEvent(() => {
-    const currentDate = Timestamp.now().toDate();
+export const Easter = new SeasonalEvent(
+    "Pigster",
+    "This is pigster, eat my balls",
+    () => {
+        const currentDate = Timestamp.now().toDate();
 
-    if(currentDate.getUTCMonth() !== 3){ return false; }
+        if(currentDate.getUTCMonth() !== 3){ return false; }
 
-    const firstMonday = GetFirstMondayOfMonth()
-    const lastDay = firstMonday + 7;
+        const firstMonday = GetFirstMondayOfMonth()
+        const lastDay = firstMonday + 7;
 
-    return currentDate.getUTCDay() >= firstMonday && currentDate.getUTCDate() <= lastDay;
-});
+        return currentDate.getUTCDay() >= firstMonday && currentDate.getUTCDate() <= lastDay;
+    }
+);
 
 let packsUntilEasterEgg = 0;
 
