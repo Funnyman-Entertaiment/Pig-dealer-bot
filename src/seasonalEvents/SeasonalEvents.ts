@@ -2,12 +2,14 @@ import { Pack } from "../database/Packs";
 import { Pig } from "../database/Pigs";
 import { ServerInfo } from "../database/ServerInfo";
 import { Christmas } from "./Chritmas";
+import { Easter } from "./Easter";
 import { NewYears } from "./NewYears";
 import { SeasonalEvent } from "./SeasonalEvent";
 
 const SeasonalEvents: SeasonalEvent[] = [
     Christmas,
-    NewYears
+    NewYears,
+    Easter
 ];
 
 export function RunPostPackOpened(pack: Pack, serverInfo: ServerInfo, chosenPigs: Pig[], pigsToShow: Pig[]){

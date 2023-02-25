@@ -21,7 +21,7 @@ import { GetAuthor } from "../Utils/GetAuthor";
 import { Cooldowns } from "../Constants/Variables";
 import { RunPostAssembledPigs, RunPostPackOpened } from "../seasonalEvents/SeasonalEvents";
 import { ChooseRandomElementFromList } from "../Utils/ExtraRandom";
-import { EGG_PACK } from "src/Constants/SignificantPackIDs";
+import { EGG_PACK } from "../Constants/SignificantPackIDs";
 
 function GetEditedEmbed(embed: EmbedBuilder, pack: Pack) {
     let openedImg = `./img/packs/opened/${pack.ID}.png`;
@@ -375,14 +375,15 @@ function OpenSpoledEgg(message: Message, embed: Embed, interaction: ButtonIntera
     }
 
     const spoiledEmbed = new EmbedBuilder()
-        .setTitle("You've opened an spoiled egg!")
-        .setDescription("Yikes!")
+        .setTitle("The egg has spoiled!")
+        .setDescription("Sucks to be you...")
         .setAuthor(GetAuthor(interaction as any as CommandInteraction))
         .setColor(Colors.Red)
-        .setImage(`./img/special/yolk.png`);
+        .setImage(`attachment://spoiledegg.png`);
 
     interaction.followUp({
-        embeds: [spoiledEmbed]
+        embeds: [spoiledEmbed],
+        files: [`./img/special/spoiledegg.png`]
     });
 }
 
@@ -391,7 +392,7 @@ function GetEasterStagePack(msgInfo: MessageInfo, pack: Pack): Pack {
 
     const currentTime = Timestamp.now();
     const elapsedTime = currentTime.seconds - msgInfo.TimeSent.seconds;
-    const elapsedMinutes = Math.floor(elapsedTime / 60);
+    const elapsedMinutes = Math.max(1, Math.floor(elapsedTime / 60));
 
     const newPack = GetPackByName(`Egg Stage ${elapsedMinutes}`) ?? pack;
 

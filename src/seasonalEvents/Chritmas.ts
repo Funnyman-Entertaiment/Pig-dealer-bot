@@ -3,7 +3,7 @@ import { SeasonalEvent } from "./SeasonalEvent";
 import { STOCKING_PACK } from "../Constants/SignificantPackIDs";
 import { STOCKING_PIG } from "../Constants/SignificantPigIDs";
 import { GetPig, GetPigsByRarity } from "../database/Pigs";
-import { ChooseRandomElementFromList } from "src/Utils/ExtraRandom";
+import { ChooseRandomElementFromList } from "../Utils/ExtraRandom";
 
 export const Christmas = new SeasonalEvent(() => {
     const currentDate = Timestamp.now().toDate();

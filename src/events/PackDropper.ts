@@ -6,7 +6,7 @@ import { LogInfo } from "../Utils/Log";
 import { db } from "../Bot";
 import { Cooldowns } from "../Constants/Variables";
 import { PACK_12, PACK_2, PACK_5 } from "../Constants/SignificantPackIDs";
-import { RunPostChooseRandomPack } from "src/seasonalEvents/SeasonalEvents";
+import { RunPostChooseRandomPack } from "../seasonalEvents/SeasonalEvents";
 
 let packsUntil5Pack = -1;
 let packsUntil12Pack = -1;
