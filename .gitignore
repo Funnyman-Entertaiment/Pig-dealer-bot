@@ -2,3 +2,4 @@
 .vscode
 .luarc.json
 node_modules
+.VSCodeCounter

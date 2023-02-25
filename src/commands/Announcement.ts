@@ -1,4 +1,4 @@
-import { APIEmbedField, Client, Colors, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder, GuildTextBasedChannel, SlashCommandBuilder, roleMention } from "discord.js";
+import { APIEmbedField, ActionRowBuilder, ButtonBuilder, ButtonStyle, Client, Colors, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder, GuildTextBasedChannel, SlashCommandBuilder, roleMention } from "discord.js";
 import { Command } from "../Command";
 import { query, collection, getDocs } from "firebase/firestore/lite";
 import { client, db } from "../Bot";
@@ -153,12 +153,27 @@ async function SendAnnouncement(interaction: CommandInteraction){
     }
 
     const embed = new EmbedBuilder(announcementEmbed?.data);
+    embed.addFields({
+        name: "JOIN THE DISCORD",
+        value: "In case you didn't know, we have a Discord server dedicated to collecting and trading pigs, with pig emotes, exclusive features and a lovely community! Make sure to stop by, we'd love to see you there!"
+    });
+
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+            .setLabel("Invite the bot!")
+            .setStyle(ButtonStyle.Link)
+            .setURL("https://discord.com/api/oauth2/authorize?client_id=1040735137228406884&permissions=268470272&scope=bot%20applications.commands"),
+        new ButtonBuilder()
+            .setLabel("Join the server!")
+            .setStyle(ButtonStyle.Link)
+            .setURL("https://discord.gg/wnAnhRyKjM")
+    );
 
     const q = query(collection(db, "serverInfo"));
     const servers = await getDocs(q);
 
     servers.forEach(async server => {
-        if (server.data().Channel === undefined || server.data().AnnouncementChannel === undefined) { return; }
+        if (server.data().Channel === undefined && server.data().AnnouncementChannel === undefined) { return; }
 
         try{
             const channelID = server.data().AnnouncementChannel?? server.data().Channel
@@ -179,11 +194,13 @@ async function SendAnnouncement(interaction: CommandInteraction){
                 if(server.data().Role !== undefined){
                     (channel as GuildTextBasedChannel).send({
                         content: roleMention(server.data().Role),
-                        embeds: [embed]
+                        embeds: [embed],
+                        components: [row]
                     });
                 }else{
                     (channel as GuildTextBasedChannel).send({
-                        embeds: [embed]
+                        embeds: [embed],
+                        components: [row]
                     });
                 }
 

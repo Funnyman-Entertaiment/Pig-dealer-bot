@@ -9,18 +9,19 @@ import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
 import { GOLDEN_PIG_CHANCE_PER_RARITY } from "../Constants/GoldenPigChancePerRarity";
 import { MakeErrorEmbed } from "../Utils/Errors";
 import { AddUserInfoToCache, GetUserInfo, GetUserPigIDs, UserInfo } from "../database/UserInfo";
-import { AddMessageInfoToCache, GetMessageInfo, PigGalleryMessage, RandomPackMessage } from "../database/MessageInfo";
-import { GetAllPigs, GetPig, GetPigsByRarity, GetPigsBySet, GetPigsWithTag, Pig } from "../database/Pigs";
+import { AddMessageInfoToCache, GetMessageInfo, MessageInfo, PigGalleryMessage, RandomPackMessage } from "../database/MessageInfo";
+import { GetAllPigs, GetPig, GetPigsBySet, GetPigsWithTag, Pig } from "../database/Pigs";
 import { GetServerInfo, ServerInfo } from "../database/ServerInfo";
-import { GetNewYearsYear, IsChristmas, IsNewYear } from "../Utils/SeasonalEvents";
 import { LogError, LogInfo, PrintChannel, PrintServer, PrintUser } from "../Utils/Log";
-import { GetPack, Pack } from "../database/Packs";
+import { GetPack, GetPackByName, Pack } from "../database/Packs";
 import { existsSync } from "fs";
-import { ASSEMBLY_NEW_YEAR_PIG, GOLDEN_PIG, STOCKING_PIG } from "../Constants/SignificantPigIDs";
-import { STOCKING_PACK } from "../Constants/SignificantPackIDs";
+import { GOLDEN_PIG } from "../Constants/SignificantPigIDs";
 import { CheckAndSendAssemblyPigEmbeds } from "../Utils/AssemblyyPigs";
 import { GetAuthor } from "../Utils/GetAuthor";
 import { Cooldowns } from "../Constants/Variables";
+import { RunPostAssembledPigs, RunPostPackOpened } from "../seasonalEvents/SeasonalEvents";
+import { ChooseRandomElementFromList } from "../Utils/ExtraRandom";
+import { EGG_PACK } from "../Constants/SignificantPackIDs";
 
 function GetEditedEmbed(embed: EmbedBuilder, pack: Pack) {
     let openedImg = `./img/packs/opened/${pack.ID}.png`;
@@ -191,10 +192,6 @@ function GetRandomRarityFromWeightedList(rarities: { readonly [key: string]: num
     return rarity;
 }
 
-function ChooseRandomPigFromList(pigs: Pig[]): Pig {
-    return pigs[Math.floor(Math.random() * pigs.length)]
-}
-
 function ChoosePigs(serverInfo: ServerInfo, pack: Pack) {
     const availablePigsForPack = GetAvailablePigsFromPack(pack);
     const pigRaritiesForPack = GetPigRaritiesFromPack(pack);
@@ -210,7 +207,7 @@ function ChoosePigs(serverInfo: ServerInfo, pack: Pack) {
         let chosenPig: Pig;
 
         do {
-            chosenPig = ChooseRandomPigFromList(pigsOfRarity);
+            chosenPig = ChooseRandomElementFromList(pigsOfRarity);
         } while (chosenPigs.includes(chosenPig));
 
         const goldenPigChance = GOLDEN_PIG_CHANCE_PER_RARITY[rarity] ?? 0
@@ -236,33 +233,6 @@ function ChoosePigs(serverInfo: ServerInfo, pack: Pack) {
     });
 
     return chosenPigs;
-}
-
-function ChristmasEvent(chosenPigs: Pig[], pigsToShowInPack: Pig[], pack: Pack) {
-    if (!IsChristmas()) { return; }
-    if (pack.ID === STOCKING_PACK) { return; }
-
-    if (Math.random() < 0.05) {
-        const stockingPig = GetPig(STOCKING_PIG);
-        if (stockingPig !== undefined) { pigsToShowInPack.push(stockingPig); }
-    } else if (Math.random() < 0.1) {
-        const christmasPigs = GetPigsByRarity("Christmas");
-        const chosenChristmasPig = ChooseRandomPigFromList(christmasPigs);
-        chosenPigs.push(chosenChristmasPig);
-    }
-}
-
-function NewYearEvent(chosenPigs: Pig[], serverInfo: ServerInfo) {
-    return;
-    if (!IsNewYear()) { return; }
-
-    const currentYear = GetNewYearsYear();
-
-    if (!serverInfo.YearsSpawnedAllNewYearDeco.includes(currentYear) && Math.random() < 0.1) {
-        const newYearPigs: Pig[] = GetPigsByRarity("New Year");
-        const chosenNewYearPigs = newYearPigs[Math.floor(Math.random() * newYearPigs.length)];
-        chosenPigs.push(chosenNewYearPigs);
-    }
 }
 
 function GetOpenPackFollowUp(packName: string, chosenPigs: Pig[], newPigs: string[], interaction: Interaction, userInfo: UserInfo) {
@@ -363,6 +333,72 @@ function AddPigsToUser(chosenPigs: Pig[], userInfo: UserInfo) {
     })
 }
 
+function CheckSpoiledEgg(msgInfo: MessageInfo, pack: Pack): boolean {
+    if(pack.ID !== EGG_PACK){ return false; }
+
+    const currentTime = Timestamp.now();
+    const elapsedTime = currentTime.seconds - msgInfo.TimeSent.seconds;
+
+    return elapsedTime >= 60 * 11;
+}
+
+function OpenSpoledEgg(message: Message, embed: Embed, interaction: ButtonInteraction) {
+    const editedEmbed = new EmbedBuilder(embed.data);
+
+    let openedImg = `./img/packs/opened/spoiled.png`;
+
+    if (!existsSync(openedImg)) {
+        return;
+    }
+
+    editedEmbed.setImage(`attachment://spoiled.png`);
+
+    const row = new ActionRowBuilder<ButtonBuilder>()
+        .addComponents(
+            new ButtonBuilder()
+                .setCustomId('OpenPack')
+                .setLabel('Open!')
+                .setStyle(ButtonStyle.Primary)
+                .setDisabled(true),
+        );
+
+    if (openedImg === undefined) {
+        message.edit({
+            components: [row]
+        });
+    } else {
+        message.edit({
+            embeds: [editedEmbed],
+            components: [row],
+            files: [openedImg],
+        });
+    }
+
+    const spoiledEmbed = new EmbedBuilder()
+        .setTitle("The egg has spoiled!")
+        .setDescription("Sucks to be you...")
+        .setAuthor(GetAuthor(interaction as any as CommandInteraction))
+        .setColor(Colors.Red)
+        .setImage(`attachment://spoiledegg.png`);
+
+    interaction.followUp({
+        embeds: [spoiledEmbed],
+        files: [`./img/special/spoiledegg.png`]
+    });
+}
+
+function GetEasterStagePack(msgInfo: MessageInfo, pack: Pack): Pack {
+    if(pack.ID !== EGG_PACK){ return pack; }
+
+    const currentTime = Timestamp.now();
+    const elapsedTime = currentTime.seconds - msgInfo.TimeSent.seconds;
+    const elapsedMinutes = Math.max(1, Math.floor(elapsedTime / 60));
+
+    const newPack = GetPackByName(`Egg Stage ${elapsedMinutes}`) ?? pack;
+
+    return newPack;
+}
+
 export const OpenPack = new Button("OpenPack",
     async (interaction) => {
         if (interaction.guild === null) {
@@ -418,7 +454,7 @@ export const OpenPack = new Button("OpenPack",
 
         msgInfo.BeingOpenedBy = user.id;
 
-        const pack = GetPack(msgInfo.Pack);
+        let pack = GetPack(msgInfo.Pack);
 
         if (pack === undefined) {
             const errorEmbed = MakeErrorEmbed("Could't find pack for this message", `Pack Id: ${msgInfo.Pack}`);
@@ -453,15 +489,21 @@ export const OpenPack = new Button("OpenPack",
             return;
         }
 
+        if(CheckSpoiledEgg(msgInfo, pack)){
+            OpenSpoledEgg(message, embed, interaction);
+            return;
+        };
+        
         EditEmbedWithOpenedPack(message, pack, embed);
+
+        pack = GetEasterStagePack(msgInfo, pack);
 
         LogInfo(`User ${PrintUser(interaction.user)} opened ${pack.Name} pack in server ${PrintServer(server)}`);
 
         const chosenPigs = ChoosePigs(serverInfo, pack).filter(x => x !== undefined);
         const pigsToShowInPack = [...chosenPigs];
 
-        ChristmasEvent(chosenPigs, pigsToShowInPack, pack);
-        NewYearEvent(chosenPigs, serverInfo);
+        RunPostPackOpened(pack, serverInfo, chosenPigs, pigsToShowInPack);
 
         SendOpenPackFollowUp(userInfo, chosenPigs, pigsToShowInPack, pack, serverID, interaction);
 
@@ -471,11 +513,6 @@ export const OpenPack = new Button("OpenPack",
 
         if (assembledPigs === undefined) { return; }
 
-        if (assembledPigs.some(pig => pig.ID === ASSEMBLY_NEW_YEAR_PIG)) {
-            const serverInfo = await GetServerInfo(server.id) as any as ServerInfo;
-            const currentYear = GetNewYearsYear();
-
-            serverInfo.YearsSpawnedAllNewYearDeco.push(currentYear);
-        }
+        RunPostAssembledPigs(pack, serverInfo, assembledPigs);
     }
 );

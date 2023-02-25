@@ -9,6 +9,7 @@ const Log_1 = require("../Utils/Log");
 const Bot_1 = require("../Bot");
 const Variables_1 = require("../Constants/Variables");
 const SignificantPackIDs_1 = require("../Constants/SignificantPackIDs");
+const SeasonalEvents_1 = require("../seasonalEvents/SeasonalEvents");
 let packsUntil5Pack = -1;
 let packsUntil12Pack = -1;
 let packDropperTimeout;
@@ -33,14 +34,21 @@ async function SpawnRandomPack() {
     const q = (0, lite_1.query)((0, lite_1.collection)(Bot_1.db, "serverInfo"));
     const servers = await (0, lite_1.getDocs)(q);
     (0, Log_1.LogInfo)("Sending random packs.");
+    let pack = (0, Packs_1.GetPack)(SignificantPackIDs_1.PACK_2);
+    if (packsUntil5Pack === 0) {
+        pack = (0, Packs_1.GetPack)(SignificantPackIDs_1.PACK_5);
+    }
+    if (packsUntil12Pack === 0) {
+        pack = (0, Packs_1.GetPack)(SignificantPackIDs_1.PACK_12);
+    }
+    if (pack === undefined) {
+        return;
+    }
+    const returnedPack = (0, SeasonalEvents_1.RunPostChooseRandomPack)(pack);
+    if (returnedPack !== undefined) {
+        pack = returnedPack;
+    }
     servers.forEach(async (server) => {
-        let pack = (0, Packs_1.GetPack)(SignificantPackIDs_1.PACK_2);
-        if (packsUntil5Pack === 0) {
-            pack = (0, Packs_1.GetPack)(SignificantPackIDs_1.PACK_5);
-        }
-        if (packsUntil12Pack === 0) {
-            pack = (0, Packs_1.GetPack)(SignificantPackIDs_1.PACK_12);
-        }
         if (pack === undefined) {
             return;
         }
@@ -96,12 +104,7 @@ async function Set12PackSpawn() {
     if (maxPackNum <= 0) {
         return;
     }
-    if (packsUntil5Pack >= 0 && packsUntil5Pack <= maxPackNum) {
-        packsUntil12Pack = GetRandomNumber(maxPackNum, packsUntil5Pack);
-    }
-    else {
-        packsUntil12Pack = GetRandomNumber(maxPackNum, packsUntil5Pack);
-    }
+    packsUntil12Pack = GetRandomNumber(maxPackNum, packsUntil5Pack);
     twelvePackTimeout = setTimeout(() => {
         Set12PackSpawn();
     }, 1000 * 60 * Variables_1.Cooldowns.MINUTES_BETWEEN_12_PACKS);

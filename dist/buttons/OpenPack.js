@@ -15,15 +15,16 @@ const UserInfo_1 = require("../database/UserInfo");
 const MessageInfo_1 = require("../database/MessageInfo");
 const Pigs_1 = require("../database/Pigs");
 const ServerInfo_1 = require("../database/ServerInfo");
-const SeasonalEvents_1 = require("../Utils/SeasonalEvents");
 const Log_1 = require("../Utils/Log");
 const Packs_1 = require("../database/Packs");
 const fs_1 = require("fs");
 const SignificantPigIDs_1 = require("../Constants/SignificantPigIDs");
-const SignificantPackIDs_1 = require("../Constants/SignificantPackIDs");
 const AssemblyyPigs_1 = require("../Utils/AssemblyyPigs");
 const GetAuthor_1 = require("../Utils/GetAuthor");
 const Variables_1 = require("../Constants/Variables");
+const SeasonalEvents_1 = require("../seasonalEvents/SeasonalEvents");
+const ExtraRandom_1 = require("../Utils/ExtraRandom");
+const SignificantPackIDs_1 = require("../Constants/SignificantPackIDs");
 function GetEditedEmbed(embed, pack) {
     let openedImg = `./img/packs/opened/${pack.ID}.png`;
     if (!(0, fs_1.existsSync)(openedImg)) {
@@ -158,9 +159,6 @@ function GetRandomRarityFromWeightedList(rarities) {
     }
     return rarity;
 }
-function ChooseRandomPigFromList(pigs) {
-    return pigs[Math.floor(Math.random() * pigs.length)];
-}
 function ChoosePigs(serverInfo, pack) {
     const availablePigsForPack = GetAvailablePigsFromPack(pack);
     const pigRaritiesForPack = GetPigRaritiesFromPack(pack);
@@ -171,7 +169,7 @@ function ChoosePigs(serverInfo, pack) {
         const pigsOfRarity = availablePigsForPack[rarity];
         let chosenPig;
         do {
-            chosenPig = ChooseRandomPigFromList(pigsOfRarity);
+            chosenPig = (0, ExtraRandom_1.ChooseRandomElementFromList)(pigsOfRarity);
         } while (chosenPigs.includes(chosenPig));
         const goldenPigChance = GoldenPigChancePerRarity_1.GOLDEN_PIG_CHANCE_PER_RARITY[rarity] ?? 0;
         if (Math.random() <= goldenPigChance && allowGoldenPig) {
@@ -192,37 +190,6 @@ function ChoosePigs(serverInfo, pack) {
         return aOrder - bOrder;
     });
     return chosenPigs;
-}
-function ChristmasEvent(chosenPigs, pigsToShowInPack, pack) {
-    if (!(0, SeasonalEvents_1.IsChristmas)()) {
-        return;
-    }
-    if (pack.ID === SignificantPackIDs_1.STOCKING_PACK) {
-        return;
-    }
-    if (Math.random() < 0.05) {
-        const stockingPig = (0, Pigs_1.GetPig)(SignificantPigIDs_1.STOCKING_PIG);
-        if (stockingPig !== undefined) {
-            pigsToShowInPack.push(stockingPig);
-        }
-    }
-    else if (Math.random() < 0.1) {
-        const christmasPigs = (0, Pigs_1.GetPigsByRarity)("Christmas");
-        const chosenChristmasPig = ChooseRandomPigFromList(christmasPigs);
-        chosenPigs.push(chosenChristmasPig);
-    }
-}
-function NewYearEvent(chosenPigs, serverInfo) {
-    return;
-    if (!(0, SeasonalEvents_1.IsNewYear)()) {
-        return;
-    }
-    const currentYear = (0, SeasonalEvents_1.GetNewYearsYear)();
-    if (!serverInfo.YearsSpawnedAllNewYearDeco.includes(currentYear) && Math.random() < 0.1) {
-        const newYearPigs = (0, Pigs_1.GetPigsByRarity)("New Year");
-        const chosenNewYearPigs = newYearPigs[Math.floor(Math.random() * newYearPigs.length)];
-        chosenPigs.push(chosenNewYearPigs);
-    }
 }
 function GetOpenPackFollowUp(packName, chosenPigs, newPigs, interaction, userInfo) {
     const openedPackEmbed = new builders_1.EmbedBuilder()
@@ -294,6 +261,60 @@ function AddPigsToUser(chosenPigs, userInfo) {
         }
     });
 }
+function CheckSpoiledEgg(msgInfo, pack) {
+    if (pack.ID !== SignificantPackIDs_1.EGG_PACK) {
+        return false;
+    }
+    const currentTime = lite_1.Timestamp.now();
+    const elapsedTime = currentTime.seconds - msgInfo.TimeSent.seconds;
+    return elapsedTime >= 60 * 11;
+}
+function OpenSpoledEgg(message, embed, interaction) {
+    const editedEmbed = new builders_1.EmbedBuilder(embed.data);
+    let openedImg = `./img/packs/opened/spoiled.png`;
+    if (!(0, fs_1.existsSync)(openedImg)) {
+        return;
+    }
+    editedEmbed.setImage(`attachment://spoiled.png`);
+    const row = new discord_js_1.ActionRowBuilder()
+        .addComponents(new discord_js_1.ButtonBuilder()
+        .setCustomId('OpenPack')
+        .setLabel('Open!')
+        .setStyle(discord_js_1.ButtonStyle.Primary)
+        .setDisabled(true));
+    if (openedImg === undefined) {
+        message.edit({
+            components: [row]
+        });
+    }
+    else {
+        message.edit({
+            embeds: [editedEmbed],
+            components: [row],
+            files: [openedImg],
+        });
+    }
+    const spoiledEmbed = new builders_1.EmbedBuilder()
+        .setTitle("The egg has spoiled!")
+        .setDescription("Sucks to be you...")
+        .setAuthor((0, GetAuthor_1.GetAuthor)(interaction))
+        .setColor(discord_js_1.Colors.Red)
+        .setImage(`attachment://spoiledegg.png`);
+    interaction.followUp({
+        embeds: [spoiledEmbed],
+        files: [`./img/special/spoiledegg.png`]
+    });
+}
+function GetEasterStagePack(msgInfo, pack) {
+    if (pack.ID !== SignificantPackIDs_1.EGG_PACK) {
+        return pack;
+    }
+    const currentTime = lite_1.Timestamp.now();
+    const elapsedTime = currentTime.seconds - msgInfo.TimeSent.seconds;
+    const elapsedMinutes = Math.max(1, Math.floor(elapsedTime / 60));
+    const newPack = (0, Packs_1.GetPackByName)(`Egg Stage ${elapsedMinutes}`) ?? pack;
+    return newPack;
+}
 exports.OpenPack = new Button_1.Button("OpenPack", async (interaction) => {
     if (interaction.guild === null) {
         return;
@@ -331,7 +352,7 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (interaction) => {
         return;
     }
     msgInfo.BeingOpenedBy = user.id;
-    const pack = (0, Packs_1.GetPack)(msgInfo.Pack);
+    let pack = (0, Packs_1.GetPack)(msgInfo.Pack);
     if (pack === undefined) {
         const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Could't find pack for this message", `Pack Id: ${msgInfo.Pack}`);
         interaction.reply({
@@ -357,21 +378,22 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (interaction) => {
         });
         return;
     }
+    if (CheckSpoiledEgg(msgInfo, pack)) {
+        OpenSpoledEgg(message, embed, interaction);
+        return;
+    }
+    ;
     EditEmbedWithOpenedPack(message, pack, embed);
+    pack = GetEasterStagePack(msgInfo, pack);
     (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} opened ${pack.Name} pack in server ${(0, Log_1.PrintServer)(server)}`);
     const chosenPigs = ChoosePigs(serverInfo, pack).filter(x => x !== undefined);
     const pigsToShowInPack = [...chosenPigs];
-    ChristmasEvent(chosenPigs, pigsToShowInPack, pack);
-    NewYearEvent(chosenPigs, serverInfo);
+    (0, SeasonalEvents_1.RunPostPackOpened)(pack, serverInfo, chosenPigs, pigsToShowInPack);
     SendOpenPackFollowUp(userInfo, chosenPigs, pigsToShowInPack, pack, serverID, interaction);
     AddPigsToUser(chosenPigs, userInfo);
     const assembledPigs = await (0, AssemblyyPigs_1.CheckAndSendAssemblyPigEmbeds)(serverID, userID, chosenPigs);
     if (assembledPigs === undefined) {
         return;
     }
-    if (assembledPigs.some(pig => pig.ID === SignificantPigIDs_1.ASSEMBLY_NEW_YEAR_PIG)) {
-        const serverInfo = await (0, ServerInfo_1.GetServerInfo)(server.id);
-        const currentYear = (0, SeasonalEvents_1.GetNewYearsYear)();
-        serverInfo.YearsSpawnedAllNewYearDeco.push(currentYear);
-    }
+    (0, SeasonalEvents_1.RunPostAssembledPigs)(pack, serverInfo, assembledPigs);
 });

@@ -31,6 +31,7 @@ import { Foil } from "./commands/Foil";
 import { client } from "./Bot";
 import { FoilPigs } from "./commands/FoilPigs";
 import { ChangeFoilRequirements } from "./commands/ChangeFoilRequiredPigs";
+import { Events } from "./commands/Events";
 
 export const Commands = [
     Sex,
@@ -50,7 +51,8 @@ export const Commands = [
     CheckPig,
     FavouritePigCmd,
     Foil,
-    FoilPigs
+    FoilPigs,
+    Events
 ];
 
 export const TradeServerCommands = [

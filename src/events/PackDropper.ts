@@ -6,6 +6,7 @@ import { LogInfo } from "../Utils/Log";
 import { db } from "../Bot";
 import { Cooldowns } from "../Constants/Variables";
 import { PACK_12, PACK_2, PACK_5 } from "../Constants/SignificantPackIDs";
+import { RunPostChooseRandomPack } from "../seasonalEvents/SeasonalEvents";
 
 let packsUntil5Pack = -1;
 let packsUntil12Pack = -1;
@@ -39,17 +40,24 @@ async function SpawnRandomPack() {
 
     LogInfo("Sending random packs.");
 
+    let pack = GetPack(PACK_2);
+
+    if (packsUntil5Pack === 0) {
+        pack = GetPack(PACK_5);
+    }
+
+    if (packsUntil12Pack === 0) {
+        pack = GetPack(PACK_12);
+    }
+
+    if(pack === undefined){ return; }
+    
+    const returnedPack = RunPostChooseRandomPack(pack);
+    if(returnedPack !== undefined){
+        pack = returnedPack;
+    }
+
     servers.forEach(async server => {
-        let pack = GetPack(PACK_2);
-
-        if (packsUntil5Pack === 0) {
-            pack = GetPack(PACK_5);
-        }
-
-        if (packsUntil12Pack === 0) {
-            pack = GetPack(PACK_12);
-        }
-
         if (pack === undefined) { return; }
 
         const serverInfo = CreateServerInfoFromData(server.id, server.data());
@@ -113,11 +121,8 @@ async function Set12PackSpawn() {
         return;
     }
 
-    if (packsUntil5Pack >= 0 && packsUntil5Pack <= maxPackNum) {
-        packsUntil12Pack = GetRandomNumber(maxPackNum, packsUntil5Pack);
-    }else{
-        packsUntil12Pack = GetRandomNumber(maxPackNum, packsUntil5Pack);
-    }
+    packsUntil12Pack = GetRandomNumber(maxPackNum, packsUntil5Pack);
+
 
     twelvePackTimeout = setTimeout(() => {
         Set12PackSpawn();

@@ -113,10 +113,21 @@ async function SendAnnouncement(interaction) {
         return;
     }
     const embed = new discord_js_1.EmbedBuilder(announcementEmbed?.data);
+    embed.addFields({
+        name: "JOIN THE DISCORD",
+        value: "In case you didn't know, we have a Discord server dedicated to collecting and trading pigs, with pig emotes, exclusive features and a lovely community! Make sure to stop by, we'd love to see you there!"
+    });
+    const row = new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.ButtonBuilder()
+        .setLabel("Invite the bot!")
+        .setStyle(discord_js_1.ButtonStyle.Link)
+        .setURL("https://discord.com/api/oauth2/authorize?client_id=1040735137228406884&permissions=268470272&scope=bot%20applications.commands"), new discord_js_1.ButtonBuilder()
+        .setLabel("Join the server!")
+        .setStyle(discord_js_1.ButtonStyle.Link)
+        .setURL("https://discord.gg/wnAnhRyKjM"));
     const q = (0, lite_1.query)((0, lite_1.collection)(Bot_1.db, "serverInfo"));
     const servers = await (0, lite_1.getDocs)(q);
     servers.forEach(async (server) => {
-        if (server.data().Channel === undefined || server.data().AnnouncementChannel === undefined) {
+        if (server.data().Channel === undefined && server.data().AnnouncementChannel === undefined) {
             return;
         }
         try {
@@ -136,12 +147,14 @@ async function SendAnnouncement(interaction) {
                 if (server.data().Role !== undefined) {
                     channel.send({
                         content: (0, discord_js_1.roleMention)(server.data().Role),
-                        embeds: [embed]
+                        embeds: [embed],
+                        components: [row]
                     });
                 }
                 else {
                     channel.send({
-                        embeds: [embed]
+                        embeds: [embed],
+                        components: [row]
                     });
                 }
             });
