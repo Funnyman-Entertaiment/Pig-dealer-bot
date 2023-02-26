@@ -15,4 +15,5 @@ export const COLOR_PER_PIG_RARITY: { readonly [key: string]: number } = {
     ["Apology Present"]: Colors.White,
     ["Personal Gift"]: Colors.White,
     ["Unimplemented"]: Colors.Grey,
+    ["Easter"]: 9031664
 }

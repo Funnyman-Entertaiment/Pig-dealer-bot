@@ -122,7 +122,7 @@ export const ShowBinder = new Command(
         }
 
         const openedPackEmbed = new EmbedBuilder()
-            .setTitle(`${author.name}'s pig bind`)
+            .setTitle(`${author.name}'s pig binder`)
             .setDescription(`1/${pigs.length}`)
             .setAuthor(author);
 
