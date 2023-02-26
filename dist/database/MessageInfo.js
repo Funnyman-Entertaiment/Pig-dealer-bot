@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetTradeOfferForUser = exports.RemoveMessageInfoFromCache = exports.IsUserInTrade = exports.GetMessageInfo = exports.AddMessageInfosToCache = exports.AddMessageInfoToCache = exports.GetMessageInfoFromCache = exports.GetMsgInfoCacheForServer = exports.CachedMessageInfosPerServer = exports.PigFoilMessage = exports.PigTradeMessage = exports.PigListMessage = exports.PigGalleryMessage = exports.RandomPackMessage = exports.MessageInfo = void 0;
+exports.GetTradeOfferForUser = exports.RemoveMessageInfoFromCache = exports.IsUserInTrade = exports.GetMessageInfo = exports.AddMessageInfosToCache = exports.AddMessageInfoToCache = exports.GetMessageInfoFromCache = exports.GetMsgInfoCacheForServer = exports.CachedMessageInfosPerServer = exports.FoilChecksMessage = exports.PigFoilMessage = exports.PigTradeMessage = exports.PigListMessage = exports.PigGalleryMessage = exports.RandomPackMessage = exports.MessageInfo = void 0;
 const lite_1 = require("firebase/firestore/lite");
 const DatabaseElement_1 = require("./DatabaseElement");
 class MessageInfo extends DatabaseElement_1.DatabaseElement {
@@ -135,6 +135,16 @@ class PigFoilMessage extends MessageInfo {
     }
 }
 exports.PigFoilMessage = PigFoilMessage;
+class FoilChecksMessage extends MessageInfo {
+    PigAmountsPerSet;
+    CurrentPage;
+    constructor(id, serverId, user, pigAmountsPerSet) {
+        super(id, serverId, "FoilChecks", user);
+        this.PigAmountsPerSet = pigAmountsPerSet;
+        this.CurrentPage = 0;
+    }
+}
+exports.FoilChecksMessage = FoilChecksMessage;
 exports.CachedMessageInfosPerServer = {};
 function GetMsgInfoCacheForServer(serverId) {
     let msgInfoCacheForServer = exports.CachedMessageInfosPerServer[serverId];

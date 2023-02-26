@@ -1,7 +1,7 @@
 import { Timestamp } from "firebase/firestore/lite";
 import { DatabaseElement } from "./DatabaseElement";
 
-export type MessageType = "RandomPack" | "PigGallery" | "PigList" | "PigTrade" | "PigFoil"
+export type MessageType = "RandomPack" | "PigGallery" | "PigList" | "PigTrade" | "PigFoil" | "FoilChecks"
 
 export class MessageInfo extends DatabaseElement {
     ServerId: string;
@@ -146,6 +146,17 @@ export class PigFoilMessage extends MessageInfo {
         this.OfferedPigs = offeredPigs;
         this.Set = set;
         this.Rarity = rarity;
+    }
+}
+
+export class FoilChecksMessage extends MessageInfo {
+    PigAmountsPerSet: {[key: string]: {[key: string]: number}};
+    CurrentPage: number;
+
+    constructor(id: string, serverId: string, user: string, pigAmountsPerSet: {[key: string]: {[key: string]: number}}){
+        super(id, serverId, "FoilChecks", user);
+        this.PigAmountsPerSet = pigAmountsPerSet;
+        this.CurrentPage = 0;
     }
 }
 

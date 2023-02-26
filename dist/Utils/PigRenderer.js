@@ -1,9 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AddPigListRenderToEmbed = exports.AddPigRenderToEmbed = void 0;
+exports.AddFoilChecksToEmbed = exports.AddPigListRenderToEmbed = exports.AddPigRenderToEmbed = void 0;
 const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const ColorPerPigRarity_1 = require("../Constants/ColorPerPigRarity");
+const PigsPerFoilRarity_1 = require("../Constants/PigsPerFoilRarity");
 function AddPigRenderToEmbed(embed, options) {
     const pig = options.pig;
     let img = `${pig.ID}.png`;
@@ -61,3 +62,38 @@ function AddPigListRenderToEmbed(embed, options) {
     }));
 }
 exports.AddPigListRenderToEmbed = AddPigListRenderToEmbed;
+const FOILED_RARITIES = ["Common", "Rare", "Epic", "Legendary"];
+function AddFoilChecksToEmbed(embed, options) {
+    let currentSetNum = 0;
+    const minSetNum = options.page * 6;
+    const maxSetNum = (options.page + 1) * 6;
+    const sets = [];
+    for (const set in options.pigAmountsPerSet) {
+        sets.push(set);
+    }
+    sets.sort();
+    sets.forEach(set => {
+        if (currentSetNum < minSetNum) {
+            currentSetNum++;
+            return;
+        }
+        else if (currentSetNum >= maxSetNum) {
+            return;
+        }
+        currentSetNum++;
+        const pigAmountsPerRarity = options.pigAmountsPerSet[set];
+        let fieldDescription = "";
+        FOILED_RARITIES.forEach(rarity => {
+            const amount = pigAmountsPerRarity[rarity] ?? 0;
+            const targetAmount = PigsPerFoilRarity_1.PIGS_PER_FOIL_RARITY[rarity];
+            fieldDescription += `${rarity} ${amount}/${targetAmount} ${amount < targetAmount ? "❌" : "✅"}\n`;
+        });
+        embed.addFields({
+            name: set === "-" ? "Default" : set,
+            value: fieldDescription,
+            inline: true
+        });
+    });
+    return currentSetNum >= maxSetNum;
+}
+exports.AddFoilChecksToEmbed = AddFoilChecksToEmbed;
