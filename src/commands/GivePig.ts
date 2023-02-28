@@ -12,6 +12,8 @@ import { AddUserInfoToCache, GetUserInfo, UserInfo } from "../database/UserInfo"
 import { CheckAndSendAssemblyPigEmbeds } from "../Utils/AssemblyyPigs";
 
 export const GivePig = new Command(
+    "",
+    "",
     new SlashCommandBuilder()
         .setName("givepig")
         .addStringOption(new SlashCommandStringOption()

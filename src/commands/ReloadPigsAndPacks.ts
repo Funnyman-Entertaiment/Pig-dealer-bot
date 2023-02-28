@@ -5,6 +5,8 @@ import { ClearPigs } from "../database/Pigs";
 import { ReadPigsAndPacks } from "../database/ReadInitialDatabase";
 
 export const ReloadPigsPacks = new Command(
+    "",
+    "",
     new SlashCommandBuilder()
         .setName("reloadpigspacks")
         .setDescription("Reloads the pigs and the packs from the database"),

@@ -4,9 +4,11 @@ import { client } from "../Bot";
 import { LogInfo, PrintUser } from "../Utils/Log";
 
 export const Information = new Command(
+    "Information",
+    "Sends a message that contains some general information about Pig Dealer.",
     new SlashCommandBuilder()
         .setName("information")
-        .setDescription("Sends you an invitation link so you can have Pig Dealer in your own server."),
+        .setDescription("Sends a message that contains some general information about Pig Dealer."),
 
     async (interaction) => {
         const botUser = client.user;

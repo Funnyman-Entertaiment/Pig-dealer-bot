@@ -1,10 +1,10 @@
 import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, Colors, PermissionFlagsBits } from "discord.js";
-import { doc, setDoc } from "firebase/firestore/lite";
 import { AddServerInfoToCache, GetServerInfo, SaveAllServerInfo, ServerInfo } from "../database/ServerInfo";
 import { Command } from "../Command";
-import { db } from "../Bot";
 
 export const SetBotRole = new Command(
+    "SetRole",
+    "Sets the role Pig Dealer will ping whenever a pack drops or a it sends a new announcement.",
     new SlashCommandBuilder()
         .setName("setrole")
         .addRoleOption(option =>
@@ -44,6 +44,7 @@ export const SetBotRole = new Command(
                 role.id,
                 undefined,
                 false,
+                [],
                 [],
                 true
             );

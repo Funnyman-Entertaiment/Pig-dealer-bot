@@ -127,7 +127,7 @@ export function AddFoilChecksToEmbed(embed: EmbedBuilder, options: FoilCheckRend
             const amount = pigAmountsPerRarity[rarity] ?? 0;
             const targetAmount = PIGS_PER_FOIL_RARITY[rarity];
 
-            fieldDescription += `${rarity} ${amount}/${targetAmount} ${amount < targetAmount? "❌":"✅"}\n`
+            fieldDescription += `${rarity} ${amount}/${targetAmount} ${amount < targetAmount? "":"✅"}\n`
         });
 
         embed.addFields({

@@ -4,6 +4,8 @@ import { Command } from "../Command";
 import { LogInfo, PrintChannel, PrintServer, PrintUser } from "../Utils/Log";
 
 export const SetAnnouncementChannel = new Command(
+    "SetAnnouncementChannel",
+    "Sets the channel the bot will send announcements to.",
     new SlashCommandBuilder()
         .setName("setannouncementchannel")
         .addChannelOption(option =>
@@ -55,6 +57,7 @@ export const SetAnnouncementChannel = new Command(
                 undefined,
                 channel.id,
                 false,
+                [],
                 [],
                 true
             );

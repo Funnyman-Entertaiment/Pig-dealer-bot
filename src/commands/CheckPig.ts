@@ -8,6 +8,8 @@ import { LogInfo, PrintUser } from "../Utils/Log";
 
 
 export const CheckPig = new Command(
+    "CheckPig",
+    "Shows a single pig in your collection",
     new SlashCommandBuilder()
     .setName("checkpig")
     .addStringOption(option =>

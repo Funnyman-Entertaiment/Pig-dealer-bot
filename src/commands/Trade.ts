@@ -441,6 +441,8 @@ async function CounterOfferTrade(interaction: CommandInteraction, options: Comma
 }
 
 export const Trade = new Command(
+    "Trade",
+    "Starts trade with a user.",
     new SlashCommandBuilder()
         .setName("trade")
         .addSubcommand(new SlashCommandSubcommandBuilder()

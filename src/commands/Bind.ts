@@ -8,6 +8,8 @@ import { GetUserInfo, GetUserPigIDs } from "../database/UserInfo";
 import { GetAuthor } from "../Utils/GetAuthor";
 
 export const ShowBinder = new Command(
+    "binder",
+    "Allows you to check your binder in gallery view, one pig at a time.",
     new SlashCommandBuilder()
         .setName("binder")
         .addUserOption(option =>

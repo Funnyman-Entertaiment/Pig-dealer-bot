@@ -86,7 +86,7 @@ function AddFoilChecksToEmbed(embed, options) {
         FOILED_RARITIES.forEach(rarity => {
             const amount = pigAmountsPerRarity[rarity] ?? 0;
             const targetAmount = PigsPerFoilRarity_1.PIGS_PER_FOIL_RARITY[rarity];
-            fieldDescription += `${rarity} ${amount}/${targetAmount} ${amount < targetAmount ? "❌" : "✅"}\n`;
+            fieldDescription += `${rarity} ${amount}/${targetAmount} ${amount < targetAmount ? "" : "✅"}\n`;
         });
         embed.addFields({
             name: set === "-" ? "Default" : set,

@@ -5,6 +5,8 @@ import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
 
 
 export const TestPig = new Command(
+    "",
+    "",
     new SlashCommandBuilder()
     .setName("testpig")
     .addStringOption(option =>

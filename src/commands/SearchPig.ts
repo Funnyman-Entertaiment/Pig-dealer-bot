@@ -9,6 +9,8 @@ import { LogInfo, PrintServer, PrintUser } from "../Utils/Log";
 
 
 export const SearchPig = new Command(
+    "SearchPig",
+    "Searches for all the users in the current server that have an specified pig.",
     new SlashCommandBuilder()
         .setName("searchpig")
         .addStringOption(option =>

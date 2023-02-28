@@ -4,6 +4,8 @@ import { Command } from "../Command";
 import { LogInfo, PrintUser, PrintChannel, PrintServer } from "../Utils/Log";
 
 export const SetBotChannel = new Command(
+    "SetChannel",
+    "Sets the channel Pig Dealer will send packs to.",
     new SlashCommandBuilder()
         .setName("setchannel")
         .addChannelOption(option =>
@@ -59,6 +61,7 @@ export const SetBotChannel = new Command(
                 undefined,
                 channel.id,
                 false,
+                [],
                 [],
                 true
             );

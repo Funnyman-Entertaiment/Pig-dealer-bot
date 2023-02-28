@@ -3,6 +3,8 @@ import { Command } from "../Command";
 import { GetUserInfo } from "../database/UserInfo";
 
 export const ClearCooldown = new Command(
+    "",
+    "",
     new SlashCommandBuilder()
         .setName("clearcooldown")
         .addStringOption(option =>

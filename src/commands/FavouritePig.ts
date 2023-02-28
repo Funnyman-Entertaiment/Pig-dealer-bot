@@ -7,6 +7,8 @@ import { LogInfo, PrintUser } from "../Utils/Log";
 
 
 export const FavouritePigCmd = new Command(
+    "Favourite",
+    "Favourites a single pig in your collection. If the pig was already a favourite, it unfavourites it.",
     new SlashCommandBuilder()
         .setName("favourite")
         .addStringOption(option =>

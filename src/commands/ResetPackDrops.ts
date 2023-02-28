@@ -3,6 +3,8 @@ import { Command } from "../Command";
 import { PackDropper } from "../events/PackDropper";
 
 export const ResetPackDropper = new Command(
+    "",
+    "",
     new SlashCommandBuilder()
     .setName("resetpackdrops")
     .setDescription("Resets pack drops. Only use if absolutely necessary or pack drops may duplicate."),

@@ -9,6 +9,8 @@ import { PigListMessage, AddMessageInfoToCache } from "../database/MessageInfo";
 
 
 export const ShowBinderList = new Command(
+    "binderlist",
+    "Allows you to check your binder in list view, nine pigs at a time. Also allows you to sort by set.",
     new SlashCommandBuilder()
         .setName("binderlist")
         .addBooleanOption(option =>

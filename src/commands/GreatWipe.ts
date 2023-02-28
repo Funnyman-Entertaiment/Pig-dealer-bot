@@ -6,6 +6,8 @@ import { TrySendMessageToChannel } from "../Utils/SendMessage";
 import { AddUserInfoToCache, GetUserInfo, SaveAllUserInfo, UserInfo } from "../database/UserInfo";
 
 export const GreatWipe = new Command(
+    "",
+    "",
     new SlashCommandBuilder()
         .setName("order66")
         .setDescription("Kill all the pigs"),

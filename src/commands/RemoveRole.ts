@@ -5,6 +5,8 @@ import { GetServerInfo } from "../database/ServerInfo";
 import { LogError, LogWarn, PrintServer } from "../Utils/Log";
 
 export const RemoveRole = new Command(
+    "RemoveRole",
+    "Takes away the pig collector role from you.",
     new SlashCommandBuilder()
         .setName("removerole")
         .setDescription("Remove the pig collector role from you in this server")

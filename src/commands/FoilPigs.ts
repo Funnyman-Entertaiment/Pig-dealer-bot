@@ -97,6 +97,8 @@ function GetFieldDescriptionFromPigAmounts(pigAmounts: { [key: string]: number }
 }
 
 export const FoilPigs = new Command(
+    "FoilPigs",
+    "Attempts to craft a foil pig with the given pigs.",
     new SlashCommandBuilder()
         .setName("foilpigs")
         .addStringOption(new SlashCommandStringOption()
