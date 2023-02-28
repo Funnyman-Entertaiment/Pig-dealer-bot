@@ -9,7 +9,7 @@ const Bot_1 = require("../Bot");
 const GetAuthor_1 = require("../Utils/GetAuthor");
 const UserInfo_1 = require("../database/UserInfo");
 const Log_1 = require("../Utils/Log");
-exports.SearchPig = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.SearchPig = new Command_1.Command("SearchPig", "Searches for all the users in the current server that have an specified pig.", new discord_js_1.SlashCommandBuilder()
     .setName("searchpig")
     .addStringOption(option => option.setName('id')
     .setDescription('Pig id')

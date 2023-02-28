@@ -82,7 +82,7 @@ function GetFieldDescriptionFromPigAmounts(pigAmounts) {
     }
     return descriptionLines.join("\n");
 }
-exports.FoilPigs = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.FoilPigs = new Command_1.Command("FoilPigs", "Attempts to craft a foil pig with the given pigs.", new discord_js_1.SlashCommandBuilder()
     .setName("foilpigs")
     .addStringOption(new discord_js_1.SlashCommandStringOption()
     .setName("set")

@@ -4,7 +4,7 @@ import { ReadPigsAndPacks } from "../database/ReadInitialDatabase";
 import { SaveCachePeriodically } from "../events/CacheSaver";
 import { RemoveOldMessagesFromCache } from "../events/RemoveOldMessages";
 import { client } from "../Bot";
-import { GuildTextBasedChannel } from "discord.js";
+import { GuildTextBasedChannel, TextChannel } from "discord.js";
 import { DevSpace, TradeServerSpace } from "../Constants/Variables";
 import { ResetServerAndUserInfo } from "../events/ResetServerAndUserInfo";
 import { SaveItems } from "../database/DatabaseCacheList";
@@ -23,8 +23,8 @@ export default () => {
 
         console.log(`Fetching dev server information.`);
         const devServer = await client.guilds.fetch(process.env.DEV_SERVER_ID ?? "");
-        const reportChannel = (await devServer.channels.fetch(process.env.DEV_REPORT_CHANNEL ?? "")) as GuildTextBasedChannel;
-        const LogChannel = (await devServer.channels.fetch(process.env.DEV_LOG_CHANNEL ?? "")) as GuildTextBasedChannel;
+        const reportChannel = (await devServer.channels.fetch(process.env.DEV_REPORT_CHANNEL ?? "")) as TextChannel;
+        const LogChannel = (await devServer.channels.fetch(process.env.DEV_LOG_CHANNEL ?? "")) as TextChannel;
 
         DevSpace.Server = devServer;
         DevSpace.ReportChannel = reportChannel;
@@ -32,7 +32,7 @@ export default () => {
 
         console.log(`Fetching trade server information.`);
         const tradeServer = await client.guilds.fetch(process.env.TRADE_SERVER_ID?? "");
-        const tradeBulletinChannel = (await tradeServer.channels.fetch(process.env.TRADE_BULLETIN_CHANNEL_ID?? "")) as GuildTextBasedChannel;
+        const tradeBulletinChannel = (await tradeServer.channels.fetch(process.env.TRADE_BULLETIN_CHANNEL_ID?? "")) as TextChannel;
 
         TradeServerSpace.Server = tradeServer;
         TradeServerSpace.TradeBulletinChannel = tradeBulletinChannel;

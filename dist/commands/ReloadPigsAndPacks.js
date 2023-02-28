@@ -6,7 +6,7 @@ const Command_1 = require("../Command");
 const Packs_1 = require("../database/Packs");
 const Pigs_1 = require("../database/Pigs");
 const ReadInitialDatabase_1 = require("../database/ReadInitialDatabase");
-exports.ReloadPigsPacks = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.ReloadPigsPacks = new Command_1.Command("", "", new discord_js_1.SlashCommandBuilder()
     .setName("reloadpigspacks")
     .setDescription("Reloads the pigs and the packs from the database"), async (interaction) => {
     await interaction.deferReply();

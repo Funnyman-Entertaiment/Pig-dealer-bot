@@ -4,7 +4,7 @@ exports.Change12PackCooldown = exports.Change5PackCooldown = exports.ChangePackC
 const discord_js_1 = require("discord.js");
 const Command_1 = require("../Command");
 const Variables_1 = require("../Constants/Variables");
-exports.ChangeOpeningCooldown = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.ChangeOpeningCooldown = new Command_1.Command("", "", new discord_js_1.SlashCommandBuilder()
     .setName("setopeningcooldown")
     .addIntegerOption(new discord_js_1.SlashCommandIntegerOption()
     .setName("cooldown")
@@ -21,7 +21,7 @@ exports.ChangeOpeningCooldown = new Command_1.Command(new discord_js_1.SlashComm
         embeds: [successEmbed]
     });
 });
-exports.ChangePackCooldown = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.ChangePackCooldown = new Command_1.Command("", "", new discord_js_1.SlashCommandBuilder()
     .setName("setpackcooldown")
     .addIntegerOption(new discord_js_1.SlashCommandIntegerOption()
     .setName("cooldown")
@@ -38,7 +38,7 @@ exports.ChangePackCooldown = new Command_1.Command(new discord_js_1.SlashCommand
         embeds: [successEmbed]
     });
 });
-exports.Change5PackCooldown = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.Change5PackCooldown = new Command_1.Command("", "", new discord_js_1.SlashCommandBuilder()
     .setName("set5packinterval")
     .addIntegerOption(new discord_js_1.SlashCommandIntegerOption()
     .setName("cooldown")
@@ -55,7 +55,7 @@ exports.Change5PackCooldown = new Command_1.Command(new discord_js_1.SlashComman
         embeds: [successEmbed]
     });
 });
-exports.Change12PackCooldown = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.Change12PackCooldown = new Command_1.Command("", "", new discord_js_1.SlashCommandBuilder()
     .setName("set12packinterval")
     .addIntegerOption(new discord_js_1.SlashCommandIntegerOption()
     .setName("cooldown")

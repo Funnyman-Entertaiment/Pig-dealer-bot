@@ -5,7 +5,7 @@ const discord_js_1 = require("discord.js");
 const ServerInfo_1 = require("../database/ServerInfo");
 const Command_1 = require("../Command");
 const Log_1 = require("../Utils/Log");
-exports.SetAnnouncementChannel = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.SetAnnouncementChannel = new Command_1.Command("SetAnnouncementChannel", "Sets the channel the bot will send announcements to.", new discord_js_1.SlashCommandBuilder()
     .setName("setannouncementchannel")
     .addChannelOption(option => option.setName('channel')
     .setDescription('channel to send announcements')
@@ -38,7 +38,7 @@ exports.SetAnnouncementChannel = new Command_1.Command(new discord_js_1.SlashCom
     (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} is setting the annoucement channel to ${(0, Log_1.PrintChannel)(channel)} in server ${(0, Log_1.PrintServer)(interaction.guild)}`);
     let serverInfo = await (0, ServerInfo_1.GetServerInfo)(interaction.guildId);
     if (serverInfo === undefined) {
-        serverInfo = new ServerInfo_1.ServerInfo(interaction.guildId, undefined, undefined, channel.id, false, [], true);
+        serverInfo = new ServerInfo_1.ServerInfo(interaction.guildId, undefined, undefined, channel.id, false, [], [], true);
     }
     else {
         serverInfo.AnnouncementChannel = channel.id;

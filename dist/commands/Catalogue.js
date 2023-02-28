@@ -7,7 +7,7 @@ const Pigs_1 = require("../database/Pigs");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const MessageInfo_1 = require("../database/MessageInfo");
 const Log_1 = require("../Utils/Log");
-exports.Catalogue = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.Catalogue = new Command_1.Command("catalogue", "Allows you to see all the pigs. Cool.", new discord_js_1.SlashCommandBuilder()
     .setName("catalogue")
     .addStringOption(option => option.setName("rarity")
     .setDescription("Filter pigs by rarity. Multiple rarities separated by commas."))
@@ -32,6 +32,9 @@ exports.Catalogue = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     const pigsBySet = {};
     const sets = [];
     pigs.forEach(pig => {
+        if (pig.Rarity.endsWith("(foil)")) {
+            return;
+        }
         if (pigsBySet[pig.Set] === undefined) {
             pigsBySet[pig.Set] = [];
         }

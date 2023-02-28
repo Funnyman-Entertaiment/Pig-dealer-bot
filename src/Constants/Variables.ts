@@ -1,4 +1,4 @@
-import { Guild, GuildTextBasedChannel } from "discord.js";
+import { Guild, GuildTextBasedChannel, TextChannel } from "discord.js";
 
 export const Cooldowns = {
     MINUTES_BETWEEN_PACKS: 10,
@@ -11,20 +11,20 @@ export const Cooldowns = {
 
 interface DevSpace {
     Server: Guild,
-    ReportChannel: GuildTextBasedChannel,
-    LogChannel: GuildTextBasedChannel
+    ReportChannel: TextChannel,
+    LogChannel: TextChannel
 }
 export const DevSpace: DevSpace = {
     Server: undefined as any as Guild,
-    ReportChannel: undefined as any as GuildTextBasedChannel,
-    LogChannel: undefined as any as GuildTextBasedChannel
+    ReportChannel: undefined as any as TextChannel,
+    LogChannel: undefined as any as TextChannel
 }
 
 interface TradeServerSpace {
     Server: Guild,
-    TradeBulletinChannel: GuildTextBasedChannel
+    TradeBulletinChannel: TextChannel
 }
 export const TradeServerSpace: TradeServerSpace = {
     Server: undefined as any as Guild,
-    TradeBulletinChannel: undefined as any as GuildTextBasedChannel
+    TradeBulletinChannel: undefined as any as TextChannel
 }

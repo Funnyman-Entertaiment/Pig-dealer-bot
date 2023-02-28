@@ -9,7 +9,7 @@ const Pigs_1 = require("../database/Pigs");
 const UserInfo_1 = require("../database/UserInfo");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const MessageInfo_1 = require("../database/MessageInfo");
-exports.ShowBinderList = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.ShowBinderList = new Command_1.Command("binderlist", "Allows you to check your binder in list view, nine pigs at a time. Also allows you to sort by set.", new discord_js_1.SlashCommandBuilder()
     .setName("binderlist")
     .addBooleanOption(option => option.setName('set')
     .setDescription('Whether to order the pigs by set or not.'))

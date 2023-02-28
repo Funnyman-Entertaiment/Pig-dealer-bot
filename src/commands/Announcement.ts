@@ -1,4 +1,4 @@
-import { APIEmbedField, ActionRowBuilder, ButtonBuilder, ButtonStyle, Client, Colors, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder, GuildTextBasedChannel, SlashCommandBuilder, roleMention } from "discord.js";
+import { APIEmbedField, ActionRowBuilder, ButtonBuilder, ButtonStyle, Client, Colors, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder, GuildTextBasedChannel, SlashCommandBuilder, TextChannel, roleMention } from "discord.js";
 import { Command } from "../Command";
 import { query, collection, getDocs } from "firebase/firestore/lite";
 import { client, db } from "../Bot";
@@ -183,7 +183,7 @@ async function SendAnnouncement(interaction: CommandInteraction){
 
                 const guild = await client.guilds.fetch(server.id);
 
-                const permissions = guild.members.me?.permissionsIn(channel as GuildTextBasedChannel);
+                const permissions = guild.members.me?.permissionsIn(channel as TextChannel);
 
                 if(permissions === undefined){ return; }
 
@@ -192,13 +192,13 @@ async function SendAnnouncement(interaction: CommandInteraction){
                 }
 
                 if(server.data().Role !== undefined){
-                    (channel as GuildTextBasedChannel).send({
+                    (channel as TextChannel).send({
                         content: roleMention(server.data().Role),
                         embeds: [embed],
                         components: [row]
                     });
                 }else{
-                    (channel as GuildTextBasedChannel).send({
+                    (channel as TextChannel).send({
                         embeds: [embed],
                         components: [row]
                     });

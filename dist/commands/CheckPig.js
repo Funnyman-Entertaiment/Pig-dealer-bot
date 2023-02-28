@@ -8,7 +8,7 @@ const PigRenderer_1 = require("../Utils/PigRenderer");
 const UserInfo_1 = require("../database/UserInfo");
 const GetAuthor_1 = require("../Utils/GetAuthor");
 const Log_1 = require("../Utils/Log");
-exports.CheckPig = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.CheckPig = new Command_1.Command("CheckPig", "Shows a single pig in your collection", new discord_js_1.SlashCommandBuilder()
     .setName("checkpig")
     .addStringOption(option => option.setName('id')
     .setDescription('ID of the pig you wanna check.')

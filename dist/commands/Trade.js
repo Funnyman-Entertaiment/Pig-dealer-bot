@@ -308,7 +308,7 @@ async function CounterOfferTrade(interaction, options) {
         ephemeral: true
     });
 }
-exports.Trade = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.Trade = new Command_1.Command("Trade", "Starts trade with a user.", new discord_js_1.SlashCommandBuilder()
     .setName("trade")
     .addSubcommand(new discord_js_1.SlashCommandSubcommandBuilder()
     .setName("start")

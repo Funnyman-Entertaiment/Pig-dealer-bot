@@ -4,7 +4,7 @@ exports.ClearCooldown = void 0;
 const discord_js_1 = require("discord.js");
 const Command_1 = require("../Command");
 const UserInfo_1 = require("../database/UserInfo");
-exports.ClearCooldown = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.ClearCooldown = new Command_1.Command("", "", new discord_js_1.SlashCommandBuilder()
     .setName("clearcooldown")
     .addStringOption(option => option.setName('user')
     .setDescription('user to check the cooldown of')

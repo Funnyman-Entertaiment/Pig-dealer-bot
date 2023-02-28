@@ -9,7 +9,7 @@ const MessageInfo_1 = require("../database/MessageInfo");
 const Log_1 = require("../Utils/Log");
 const UserInfo_1 = require("../database/UserInfo");
 const GetAuthor_1 = require("../Utils/GetAuthor");
-exports.ShowBinder = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.ShowBinder = new Command_1.Command("binder", "Allows you to check your binder in gallery view, one pig at a time.", new discord_js_1.SlashCommandBuilder()
     .setName("binder")
     .addUserOption(option => option.setName('user')
     .setDescription('user to check the binder of'))

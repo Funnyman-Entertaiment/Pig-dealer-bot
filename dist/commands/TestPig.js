@@ -5,7 +5,7 @@ const discord_js_1 = require("discord.js");
 const Command_1 = require("../Command");
 const Pigs_1 = require("../database/Pigs");
 const PigRenderer_1 = require("../Utils/PigRenderer");
-exports.TestPig = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.TestPig = new Command_1.Command("", "", new discord_js_1.SlashCommandBuilder()
     .setName("testpig")
     .addStringOption(option => option.setName('id')
     .setDescription('Pig id')

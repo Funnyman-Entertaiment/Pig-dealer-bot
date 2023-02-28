@@ -59,7 +59,7 @@ async function RemoveTradeBulletin(interaction, userInfo) {
         embeds: [successEmbed]
     });
 }
-exports.TradeBulletin = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.TradeBulletin = new Command_1.Command("TradeBulletin", "Sends a message in the trade bulletin board.", new discord_js_1.SlashCommandBuilder()
     .setName("tradebulletin")
     .addSubcommand(new discord_js_1.SlashCommandSubcommandBuilder()
     .setName("add")

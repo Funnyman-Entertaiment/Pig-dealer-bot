@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, SlashCommandStringOption, CommandInteraction, SlashCommandSubcommandBuilder, SlashCommandUserOption, CommandInteractionOptionResolver, EmbedBuilder, Colors, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import { SlashCommandBuilder, SlashCommandStringOption, CommandInteraction, SlashCommandSubcommandBuilder, SlashCommandUserOption, CommandInteractionOptionResolver, EmbedBuilder, Colors, ActionRowBuilder, ButtonBuilder, ButtonStyle, GuildChannel, TextChannel } from "discord.js";
 import { Command } from "../Command";
 import { GetPig } from "../database/Pigs";
 import { GetAuthor } from "../Utils/GetAuthor";
@@ -315,7 +315,7 @@ async function CounterOfferTrade(interaction: CommandInteraction, options: Comma
     msgInfo.TradeReceiverOffer = pigAmounts;
 
     const tradeServer = await client.guilds.fetch(msgInfo.ServerId);
-    const tradeChannel = await tradeServer.channels.fetch(msgInfo.ChannelSentID);
+    const tradeChannel = await tradeServer.channels.fetch(msgInfo.ChannelSentID) as TextChannel;
     if (tradeChannel === null || !tradeChannel.isTextBased()) {
         const errorEmbed = MakeErrorEmbed(
             `Error fetching original channel of trade`,

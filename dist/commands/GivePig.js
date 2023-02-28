@@ -13,7 +13,7 @@ const Pigs_1 = require("../database/Pigs");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const UserInfo_1 = require("../database/UserInfo");
 const AssemblyyPigs_1 = require("../Utils/AssemblyyPigs");
-exports.GivePig = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.GivePig = new Command_1.Command("", "", new discord_js_1.SlashCommandBuilder()
     .setName("givepig")
     .addStringOption(new discord_js_1.SlashCommandStringOption()
     .setName("pig")
