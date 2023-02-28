@@ -2,6 +2,7 @@ import { EmbedBuilder } from "discord.js";
 import fs from 'fs';
 import { Pig } from "../database/Pigs";
 import { COLOR_PER_PIG_RARITY } from "../Constants/ColorPerPigRarity";
+import { PIGS_PER_FOIL_RARITY } from "../Constants/PigsPerFoilRarity";
 
 export interface PigRenderOptions {
     pig: Pig,
@@ -88,4 +89,53 @@ export function AddPigListRenderToEmbed(embed: EmbedBuilder, options: PigListRen
             inline: true
         };
     }));
+}
+
+
+export interface FoilCheckRenderOptions {
+    pigAmountsPerSet: {[key: string]: {[key: string]: number}},
+    page: number
+}
+const FOILED_RARITIES = ["Common", "Rare", "Epic", "Legendary"];
+
+export function AddFoilChecksToEmbed(embed: EmbedBuilder, options: FoilCheckRenderOptions): boolean{
+    let currentSetNum = 0;
+
+    const minSetNum = options.page * 6;
+    const maxSetNum = (options.page + 1) * 6;
+
+    const sets: string[] = []
+    for (const set in options.pigAmountsPerSet) {
+        sets.push(set);
+    }
+    sets.sort();
+
+    sets.forEach(set => {
+        if(currentSetNum < minSetNum){
+            currentSetNum++;
+            return;
+        }else if(currentSetNum >= maxSetNum){
+            return;
+        }
+
+        currentSetNum++;
+
+        const pigAmountsPerRarity = options.pigAmountsPerSet[set];
+        let fieldDescription = "";
+
+        FOILED_RARITIES.forEach(rarity => {
+            const amount = pigAmountsPerRarity[rarity] ?? 0;
+            const targetAmount = PIGS_PER_FOIL_RARITY[rarity];
+
+            fieldDescription += `${rarity} ${amount}/${targetAmount} ${amount < targetAmount? "❌":"✅"}\n`
+        });
+
+        embed.addFields({
+            name: set === "-" ? "Default" : set,
+            value: fieldDescription,
+            inline: true
+        });
+    });
+
+    return currentSetNum >= maxSetNum;
 }

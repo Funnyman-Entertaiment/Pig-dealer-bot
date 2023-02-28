@@ -14,7 +14,15 @@ function GetFirstMondayOfMonth() {
     const firstMonday = new Date(today.getFullYear(), today.getMonth(), daysUntilMonday);
     return firstMonday.getUTCDay();
 }
-exports.Easter = new SeasonalEvent_1.SeasonalEvent("Pigster", "This is pigster, eat my balls", () => {
+exports.Easter = new SeasonalEvent_1.SeasonalEvent("Pigster", "It's pigster, everyone! Easter is a great holiday. Family, food, eggs, Christian imagery... What's not love?" +
+    "Well, on that list of reasons to love Easter you can also put the Pig Dealer Easter event, Pigster!" +
+    "Pigster lasts over the duration of the first week of April. " +
+    "Here's how it works: Every once in a while, an egg will drop instead of a pack. " +
+    "These eggs normally only contain a single pig, but with time, the egg will grow bigger and healthier, " +
+    "containing more pigs for you to claim! Every minute, its odds of containing a Pigster exclusive Pig will increase, " +
+    "and so will the amount of pigs it contains every two minutes! This sounds great, right? Well, there's a catch. " +
+    "If the egg is left unopened too long (11 minutes, to be precise) it will go bad!" +
+    "Opening it will only yield the horrific stench of sulfur and the disappointment of a wasted egg, so stay on your toes!", () => {
     const currentDate = lite_1.Timestamp.now().toDate();
     if (currentDate.getUTCMonth() !== 3) {
         return false;

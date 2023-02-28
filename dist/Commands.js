@@ -35,6 +35,7 @@ const Bot_1 = require("./Bot");
 const FoilPigs_1 = require("./commands/FoilPigs");
 const ChangeFoilRequiredPigs_1 = require("./commands/ChangeFoilRequiredPigs");
 const Events_1 = require("./commands/Events");
+const CheckFoil_1 = require("./commands/CheckFoil");
 exports.Commands = [
     Sex_1.Sex,
     SetChannel_1.SetBotChannel,
@@ -54,6 +55,7 @@ exports.Commands = [
     FavouritePig_1.FavouritePigCmd,
     Foil_1.Foil,
     FoilPigs_1.FoilPigs,
+    CheckFoil_1.CheckFoils,
     Events_1.Events
 ];
 exports.TradeServerCommands = [

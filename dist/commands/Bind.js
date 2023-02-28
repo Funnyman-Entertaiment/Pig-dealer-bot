@@ -102,7 +102,7 @@ exports.ShowBinder = new Command_1.Command(new discord_js_1.SlashCommandBuilder(
         return;
     }
     const openedPackEmbed = new discord_js_1.EmbedBuilder()
-        .setTitle(`${author.name}'s pig bind`)
+        .setTitle(`${author.name}'s pig binder`)
         .setDescription(`1/${pigs.length}`)
         .setAuthor(author);
     const interactionUserInfo = await (0, UserInfo_1.GetUserInfo)(interaction.user.id);
