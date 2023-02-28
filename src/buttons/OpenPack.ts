@@ -21,7 +21,7 @@ import { GetAuthor } from "../Utils/GetAuthor";
 import { Cooldowns } from "../Constants/Variables";
 import { RunPostAssembledPigs, RunPostPackOpened } from "../seasonalEvents/SeasonalEvents";
 import { ChooseRandomElementFromList } from "../Utils/ExtraRandom";
-import { EGG_PACK } from "../Constants/SignificantPackIDs";
+import { EGG_PACK, PACK_2 } from "../Constants/SignificantPackIDs";
 
 function GetEditedEmbed(embed: EmbedBuilder, pack: Pack) {
     let openedImg = `./img/packs/opened/${pack.ID}.png`;
@@ -63,7 +63,10 @@ function CanUserOpenPack(interaction: ButtonInteraction, userInfo: UserInfo, msg
         return false;
     }
 
-    const lastTimeOpened = userInfo.LastTimeOpened;
+    let lastTimeOpened = userInfo.LastTimeOpened;
+    if(msgInfo.Pack === PACK_2){
+        lastTimeOpened = userInfo.LastTimeOpened2Pack;
+    }
     const currentTime = Timestamp.now();
 
     if (
@@ -97,7 +100,11 @@ function CanUserOpenPack(interaction: ButtonInteraction, userInfo: UserInfo, msg
 function SetUserCooldown(msgInfo: RandomPackMessage, userInfo: UserInfo, server: Guild, interaction: ButtonInteraction) {
     if (msgInfo.IgnoreCooldown) { return; }
 
-    userInfo.LastTimeOpened = Timestamp.now();
+    if(msgInfo.Pack === PACK_2){
+        userInfo.LastTimeOpened2Pack = Timestamp.now();
+    }else{
+        userInfo.LastTimeOpened = Timestamp.now();
+    }
 
     if (server.memberCount > 5) { return; }
 
@@ -111,7 +118,9 @@ function SetUserCooldown(msgInfo: RandomPackMessage, userInfo: UserInfo, server:
     });
 
     if (userInfo.WarnedAboutCooldown) {
-        userInfo.LastTimeOpened = Timestamp.fromMillis(userInfo.LastTimeOpened.toMillis() + 1000 * 60 * 60 * 96);
+        const longTime = Timestamp.fromMillis(Timestamp.now().toMillis() + 1000 * 60 * 60 * 96)
+        userInfo.LastTimeOpened2Pack = longTime;
+        userInfo.LastTimeOpened = longTime;
     }
 
     userInfo.WarnedAboutCooldown = true;

@@ -33,6 +33,7 @@ export const ClearCooldown = new Command(
         }
 
         userInfo.LastTimeOpened = undefined;
+        userInfo.LastTimeOpened2Pack = undefined;
 
         const successEmbed = new EmbedBuilder()
             .setTitle("User's cooldown has been reset")
