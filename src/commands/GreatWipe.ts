@@ -8,6 +8,8 @@ import { AddUserInfoToCache, GetUserInfo, SaveAllUserInfo, UserInfo } from "../d
 export const GreatWipe = new Command(
     "",
     "",
+    false,
+    false,
     new SlashCommandBuilder()
         .setName("order66")
         .setDescription("Kill all the pigs"),

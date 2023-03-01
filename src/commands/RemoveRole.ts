@@ -7,6 +7,8 @@ import { LogError, LogWarn, PrintServer } from "../Utils/Log";
 export const RemoveRole = new Command(
     "RemoveRole",
     "Takes away the pig collector role from you.",
+    true,
+    false,
     new SlashCommandBuilder()
         .setName("removerole")
         .setDescription("Remove the pig collector role from you in this server")

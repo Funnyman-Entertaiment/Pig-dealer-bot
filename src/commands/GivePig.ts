@@ -14,6 +14,8 @@ import { CheckAndSendAssemblyPigEmbeds } from "../Utils/AssemblyyPigs";
 export const GivePig = new Command(
     "",
     "",
+    false,
+    false,
     new SlashCommandBuilder()
         .setName("givepig")
         .addStringOption(new SlashCommandStringOption()
@@ -152,7 +154,8 @@ export const GivePig = new Command(
             .setTitle(title?? `${user.user.username} has received a free pig!`);
 
         const img = AddPigRenderToEmbed(pigEmbed, {
-            pig: pig
+            pig: pig,
+            safe: serverInfo.SafeMode
         });
 
         if(sendEmbed){

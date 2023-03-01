@@ -4,11 +4,15 @@ exports.Command = void 0;
 class Command {
     name;
     description;
+    requireServerInfo;
+    requireUserInfo;
     slashCommand;
     response;
-    constructor(name, description, slashCommand, response) {
+    constructor(name, description, requireServerInfo, requireUserInfo, slashCommand, response) {
         this.name = name;
         this.description = description;
+        this.requireServerInfo = requireServerInfo;
+        this.requireUserInfo = requireUserInfo;
         this.slashCommand = slashCommand;
         this.response = response;
     }

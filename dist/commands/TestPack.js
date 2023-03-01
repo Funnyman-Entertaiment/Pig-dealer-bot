@@ -5,7 +5,7 @@ const discord_js_1 = require("discord.js");
 const Command_1 = require("../Command");
 const Packs_1 = require("../database/Packs");
 const ColorPerPackRarity_1 = require("../Constants/ColorPerPackRarity");
-exports.TestPack = new Command_1.Command("", "", new discord_js_1.SlashCommandBuilder()
+exports.TestPack = new Command_1.Command("", "", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("testpack")
     .addIntegerOption(option => option.setName('id')
     .setDescription('Pack id')

@@ -5,7 +5,7 @@ const discord_js_1 = require("discord.js");
 const Command_1 = require("../Command");
 const UserInfo_1 = require("../database/UserInfo");
 const ServerInfo_1 = require("../database/ServerInfo");
-exports.SaveCache = new Command_1.Command("", "", new discord_js_1.SlashCommandBuilder()
+exports.SaveCache = new Command_1.Command("", "", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("savecache")
     .setDescription("Saves all cache to the db"), async (interaction) => {
     await interaction.deferReply();

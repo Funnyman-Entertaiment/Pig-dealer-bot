@@ -7,12 +7,15 @@ const Pigs_1 = require("../database/Pigs");
 const UserInfo_1 = require("../database/UserInfo");
 const GetAuthor_1 = require("../Utils/GetAuthor");
 const Log_1 = require("../Utils/Log");
-exports.FavouritePigCmd = new Command_1.Command("Favourite", "Favourites a single pig in your collection. If the pig was already a favourite, it unfavourites it.", new discord_js_1.SlashCommandBuilder()
+exports.FavouritePigCmd = new Command_1.Command("Favourite", "Favourites a single pig in your collection. If the pig was already a favourite, it unfavourites it.", true, true, new discord_js_1.SlashCommandBuilder()
     .setName("favourite")
     .addStringOption(option => option.setName('id')
     .setDescription('ID of the pig you wanna favourite.')
     .setRequired(true))
-    .setDescription("Favourites a pig. If the pig was already favourite, it unfavourites it"), async function (interaction) {
+    .setDescription("Favourites a pig. If the pig was already favourite, it unfavourites it"), async function (interaction, _serverInfo, userInfo) {
+    if (userInfo === undefined) {
+        return;
+    }
     const pigID = interaction.options.getString('id', true);
     const pig = (0, Pigs_1.GetPig)(pigID);
     if (pig === undefined) {
@@ -25,7 +28,6 @@ exports.FavouritePigCmd = new Command_1.Command("Favourite", "Favourites a singl
         });
         return;
     }
-    const userInfo = await (0, UserInfo_1.GetUserInfo)(interaction.user.id);
     const userPigs = (0, UserInfo_1.GetUserPigIDs)(userInfo);
     if (userInfo === undefined || !userPigs.includes(pigID)) {
         const errorEmbed = new discord_js_1.EmbedBuilder()

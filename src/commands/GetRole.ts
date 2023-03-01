@@ -7,6 +7,8 @@ import { LogError, LogInfo, LogWarn, PrintServer, PrintUser } from "../Utils/Log
 export const GetRole = new Command(
     "GetRole",
     "Gives yourself the pig collector role for this server.",
+    true,
+    false,
     new SlashCommandBuilder()
         .setName("getrole")
         .setDescription("Assigns you the pig collector role in this server")

@@ -5,17 +5,18 @@ const discord_js_1 = require("discord.js");
 const Command_1 = require("../Command");
 const Pigs_1 = require("../database/Pigs");
 const PigRenderer_1 = require("../Utils/PigRenderer");
-exports.TestPig = new Command_1.Command("", "", new discord_js_1.SlashCommandBuilder()
+exports.TestPig = new Command_1.Command("", "", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("testpig")
     .addStringOption(option => option.setName('id')
     .setDescription('Pig id')
     .setRequired(true))
+    .addBooleanOption(option => option.setName('safe')
+    .setDescription('Safe or not'))
     .setDescription("pig"), async (interaction) => {
-    const rawId = interaction.options.getString('id');
-    let id = "0";
-    if (rawId !== null) {
-        id = rawId.toString();
-    }
+    const options = interaction.options;
+    const rawId = options.getString('id', true);
+    const safe = options.getBoolean('safe') ?? false;
+    const id = rawId.toString();
     const pig = (0, Pigs_1.GetPig)(id);
     if (pig === undefined) {
         const pigEmbed = new discord_js_1.EmbedBuilder()
@@ -29,7 +30,7 @@ exports.TestPig = new Command_1.Command("", "", new discord_js_1.SlashCommandBui
     }
     const pigEmbed = new discord_js_1.EmbedBuilder()
         .setTitle("Here's your pig");
-    const img = (0, PigRenderer_1.AddPigRenderToEmbed)(pigEmbed, { pig: pig });
+    const img = (0, PigRenderer_1.AddPigRenderToEmbed)(pigEmbed, { pig: pig, safe: safe });
     await interaction.reply({
         embeds: [pigEmbed],
         files: [img]

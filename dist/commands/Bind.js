@@ -9,7 +9,7 @@ const MessageInfo_1 = require("../database/MessageInfo");
 const Log_1 = require("../Utils/Log");
 const UserInfo_1 = require("../database/UserInfo");
 const GetAuthor_1 = require("../Utils/GetAuthor");
-exports.ShowBinder = new Command_1.Command("binder", "Allows you to check your binder in gallery view, one pig at a time.", new discord_js_1.SlashCommandBuilder()
+exports.ShowBinder = new Command_1.Command("binder", "Allows you to check your binder in gallery view, one pig at a time.", true, true, new discord_js_1.SlashCommandBuilder()
     .setName("binder")
     .addUserOption(option => option.setName('user')
     .setDescription('user to check the binder of'))
@@ -18,7 +18,13 @@ exports.ShowBinder = new Command_1.Command("binder", "Allows you to check your b
     .addBooleanOption(option => option.setName('favourites')
     .setDescription('show only favourite pigs'))
     .setDescription("Let's you check your own or someone else's pig binder")
-    .setDMPermission(false), async (interaction) => {
+    .setDMPermission(false), async (interaction, serverInfo, userInfo) => {
+    if (serverInfo === undefined) {
+        return;
+    }
+    if (userInfo === undefined) {
+        return;
+    }
     await interaction.deferReply();
     const server = interaction.guild;
     if (server === null) {
@@ -47,7 +53,6 @@ exports.ShowBinder = new Command_1.Command("binder", "Allows you to check your b
     const raritiesToFilter = rarities.split(',')
         .map(rarity => rarity.trim().toLowerCase())
         .filter(rarity => rarity.length > 0);
-    const userInfo = await (0, UserInfo_1.GetUserInfo)(userId);
     let pigs = (0, UserInfo_1.GetUserPigIDs)(userInfo);
     if (userInfo === undefined) {
         const emptyEmbed = new discord_js_1.EmbedBuilder()
@@ -109,6 +114,7 @@ exports.ShowBinder = new Command_1.Command("binder", "Allows you to check your b
     const sharedPigs = (0, UserInfo_1.GetUserPigIDs)(interactionUserInfo);
     const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(openedPackEmbed, {
         pig: firstPig,
+        safe: serverInfo.SafeMode,
         count: userInfo?.Pigs[firstPig.ID] ?? 1,
         favourite: favouritePigs.includes(firstPig.ID),
         shared: userInfo.ID === interaction.user.id ? false : sharedPigs.includes(firstPig.ID)

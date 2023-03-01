@@ -14,7 +14,6 @@ const Errors_1 = require("../Utils/Errors");
 const UserInfo_1 = require("../database/UserInfo");
 const MessageInfo_1 = require("../database/MessageInfo");
 const Pigs_1 = require("../database/Pigs");
-const ServerInfo_1 = require("../database/ServerInfo");
 const Log_1 = require("../Utils/Log");
 const Packs_1 = require("../database/Packs");
 const fs_1 = require("fs");
@@ -56,7 +55,10 @@ function CanUserOpenPack(interaction, userInfo, msgInfo) {
         });
         return false;
     }
-    const lastTimeOpened = userInfo.LastTimeOpened;
+    let lastTimeOpened = userInfo.LastTimeOpened;
+    if (msgInfo.Pack === SignificantPackIDs_1.PACK_2) {
+        lastTimeOpened = userInfo.LastTimeOpened2Pack;
+    }
     const currentTime = lite_1.Timestamp.now();
     if (lastTimeOpened !== undefined &&
         currentTime.seconds - lastTimeOpened.seconds <= 60 * Variables_1.Cooldowns.MINUTES_PACK_OPENING_CD &&
@@ -83,7 +85,12 @@ function SetUserCooldown(msgInfo, userInfo, server, interaction) {
     if (msgInfo.IgnoreCooldown) {
         return;
     }
-    userInfo.LastTimeOpened = lite_1.Timestamp.now();
+    if (msgInfo.Pack === SignificantPackIDs_1.PACK_2) {
+        userInfo.LastTimeOpened2Pack = lite_1.Timestamp.now();
+    }
+    else {
+        userInfo.LastTimeOpened = lite_1.Timestamp.now();
+    }
     if (server.memberCount > 5) {
         return;
     }
@@ -95,7 +102,9 @@ function SetUserCooldown(msgInfo, userInfo, server, interaction) {
         embeds: [warningEmbed],
     });
     if (userInfo.WarnedAboutCooldown) {
-        userInfo.LastTimeOpened = lite_1.Timestamp.fromMillis(userInfo.LastTimeOpened.toMillis() + 1000 * 60 * 60 * 96);
+        const longTime = lite_1.Timestamp.fromMillis(lite_1.Timestamp.now().toMillis() + 1000 * 60 * 60 * 96);
+        userInfo.LastTimeOpened2Pack = longTime;
+        userInfo.LastTimeOpened = longTime;
     }
     userInfo.WarnedAboutCooldown = true;
 }
@@ -191,12 +200,13 @@ function ChoosePigs(serverInfo, pack) {
     });
     return chosenPigs;
 }
-function GetOpenPackFollowUp(packName, chosenPigs, newPigs, interaction, userInfo) {
+function GetOpenPackFollowUp(packName, chosenPigs, newPigs, interaction, userInfo, serverInfo) {
     const openedPackEmbed = new builders_1.EmbedBuilder()
         .setTitle(`You've opened a ${packName}`)
         .setDescription(`1/${chosenPigs.length}`);
     const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(openedPackEmbed, {
         pig: chosenPigs[0],
+        safe: serverInfo.SafeMode,
         new: newPigs.includes(chosenPigs[0].ID),
         count: 1,
         favourite: userInfo.FavouritePigs.includes(chosenPigs[0].ID)
@@ -235,10 +245,10 @@ function GetOpenPackFollowUp(packName, chosenPigs, newPigs, interaction, userInf
         files: [imgPath]
     };
 }
-function SendOpenPackFollowUp(userInfo, chosenPigs, pigsToShowInPack, pack, serverId, interaction) {
+function SendOpenPackFollowUp(userInfo, chosenPigs, pigsToShowInPack, pack, serverId, interaction, serverInfo) {
     const userPigs = (0, UserInfo_1.GetUserPigIDs)(userInfo);
     const newPigs = chosenPigs.filter(pig => !userPigs.includes(pig.ID)).map(pig => pig.ID);
-    const packFollowUp = GetOpenPackFollowUp(pack.Name, pigsToShowInPack, newPigs, interaction, userInfo);
+    const packFollowUp = GetOpenPackFollowUp(pack.Name, pigsToShowInPack, newPigs, interaction, userInfo, serverInfo);
     if (packFollowUp === undefined) {
         return;
     }
@@ -315,7 +325,13 @@ function GetEasterStagePack(msgInfo, pack) {
     const newPack = (0, Packs_1.GetPackByName)(`Egg Stage ${elapsedMinutes}`) ?? pack;
     return newPack;
 }
-exports.OpenPack = new Button_1.Button("OpenPack", async (interaction) => {
+exports.OpenPack = new Button_1.Button("OpenPack", true, true, false, async (interaction, serverInfo, messageInfo) => {
+    if (serverInfo === undefined) {
+        return;
+    }
+    if (messageInfo === undefined) {
+        return;
+    }
     if (interaction.guild === null) {
         return;
     }
@@ -325,19 +341,10 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (interaction) => {
     const serverID = server.id;
     const userID = user.id;
     const msgID = message.id;
-    const serverInfo = await (0, ServerInfo_1.GetServerInfo)(serverID);
     const userInfo = await (0, UserInfo_1.GetUserInfo)(userID) ?? new UserInfo_1.UserInfo(userID, [], {}, false, []);
     (0, UserInfo_1.AddUserInfoToCache)(userInfo);
-    const msgInfo = (0, MessageInfo_1.GetMessageInfo)(serverID, msgID);
+    const msgInfo = messageInfo;
     if (msgInfo === undefined) {
-        const errorEmbed = new builders_1.EmbedBuilder()
-            .setTitle("This message has expired")
-            .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
-            .setColor(discord_js_1.Colors.Red);
-        interaction.reply({
-            embeds: [errorEmbed],
-            ephemeral: true
-        });
         return;
     }
     if (msgInfo.BeingOpenedBy !== undefined) {
@@ -389,7 +396,7 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (interaction) => {
     const chosenPigs = ChoosePigs(serverInfo, pack).filter(x => x !== undefined);
     const pigsToShowInPack = [...chosenPigs];
     (0, SeasonalEvents_1.RunPostPackOpened)(pack, serverInfo, chosenPigs, pigsToShowInPack);
-    SendOpenPackFollowUp(userInfo, chosenPigs, pigsToShowInPack, pack, serverID, interaction);
+    SendOpenPackFollowUp(userInfo, chosenPigs, pigsToShowInPack, pack, serverID, interaction, serverInfo);
     AddPigsToUser(chosenPigs, userInfo);
     const assembledPigs = await (0, AssemblyyPigs_1.CheckAndSendAssemblyPigEmbeds)(serverID, userID, chosenPigs);
     if (assembledPigs === undefined) {

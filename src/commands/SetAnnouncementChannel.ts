@@ -6,6 +6,8 @@ import { LogInfo, PrintChannel, PrintServer, PrintUser } from "../Utils/Log";
 export const SetAnnouncementChannel = new Command(
     "SetAnnouncementChannel",
     "Sets the channel the bot will send announcements to.",
+    false,
+    false,
     new SlashCommandBuilder()
         .setName("setannouncementchannel")
         .addChannelOption(option =>
@@ -17,7 +19,8 @@ export const SetAnnouncementChannel = new Command(
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .setDMPermission(false),
 
-    async (interaction) => {
+    async (interaction, serverInfo) => {
+        if(serverInfo === undefined){ return; }
         const channel = (interaction.options as CommandInteractionOptionResolver).getChannel('channel', true)
 
         if (channel.type !== ChannelType.GuildText) {
@@ -48,22 +51,7 @@ export const SetAnnouncementChannel = new Command(
 
         LogInfo(`User ${PrintUser(interaction.user)} is setting the annoucement channel to ${PrintChannel(channel as any as GuildChannel)} in server ${PrintServer(interaction.guild as any as Guild)}`);
 
-        let serverInfo = await GetServerInfo(interaction.guildId);
-
-        if(serverInfo === undefined){
-            serverInfo = new ServerInfo(
-                interaction.guildId,
-                undefined,
-                undefined,
-                channel.id,
-                false,
-                [],
-                [],
-                true
-            );
-        }else{
-            serverInfo.AnnouncementChannel = channel.id;
-        }
+        serverInfo.AnnouncementChannel = channel.id;
 
         await AddServerInfoToCache(serverInfo);
 

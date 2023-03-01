@@ -5,6 +5,8 @@ import { PIGS_PER_FOIL_RARITY } from "../Constants/PigsPerFoilRarity";
 export const ChangeFoilRequirements = new Command(
     "",
     "",
+    false,
+    false,
     new SlashCommandBuilder()
         .setName("changefoilrequiredpigs")
         .addIntegerOption(new SlashCommandIntegerOption()

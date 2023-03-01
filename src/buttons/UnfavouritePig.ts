@@ -7,74 +7,25 @@ import { LogError, PrintChannel, PrintServer } from "../Utils/Log";
 import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
 import { GetPig } from "../database/Pigs";
 import { DoesPigIdHaveUniqueEvent } from "../uniquePigEvents/UniquePigEvents";
+import { GetServerInfo } from "../database/ServerInfo";
 
-export const UnfavouritePig = new Button("UnfavouritePig",
-    async function(interaction){
+export const UnfavouritePig = new Button(
+    "UnfavouritePig",
+    true,
+    true,
+    true,
+    async function(interaction, serverInfo, messageInfo, userInfo){
+        if(serverInfo === undefined){ return; }
+        if(messageInfo === undefined){ return; }
+        if(userInfo === undefined){return;}
         await interaction.deferUpdate();
 
         const server = interaction.guild;
-        if(server === null) {
-            const errorEmbed = MakeErrorEmbed(
-                "Error fetching server from interaction",
-                "Where did you find this message?"
-            );
-
-            await interaction.followUp({
-                embeds: [errorEmbed]
-            });
-
-            return;
-        }
+        if(server === null) {return;}
 
         const message = interaction.message;
-        const msgInfo = GetMessageInfo(server.id, message.id) as PigGalleryMessage;
-
-        if(msgInfo === undefined){
-            const errorEmbed = new EmbedBuilder()
-                .setTitle("This message has expired")
-                .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
-                .setColor(Colors.Red);
-            
-            interaction.reply({
-                embeds: [errorEmbed],
-                ephemeral: true
-            });
-    
-            return;
-        }
-
-        if(msgInfo === undefined || msgInfo.Type !== "PigGallery"){ return; }
-
-        if(msgInfo.User === undefined){
-            const errorEmbed = MakeErrorEmbed(
-                "This message doesn't have an associated user",
-                `Server: ${server.id}`,
-                `Message: ${message.id}`
-            );
-
-            await interaction.followUp({
-                embeds: [errorEmbed]
-            });
-
-            return;
-        }
-
-        if(interaction.user.id !== msgInfo.User){ return; }
-
-        const userInfo = await GetUserInfo(interaction.user.id);
-
-        if(userInfo === undefined){
-            const errorEmbed = MakeErrorEmbed(
-                "This user has no information stored",
-                `User: ${userInfo}`
-            );
-
-            await interaction.followUp({
-                embeds: [errorEmbed]
-            });
-
-            return;
-        }
+        const msgInfo = messageInfo as PigGalleryMessage;
+        if(msgInfo === undefined){ return; }
         
         const currentPigID = msgInfo.Pigs[msgInfo.CurrentPig];
 
@@ -117,6 +68,7 @@ export const UnfavouritePig = new Button("UnfavouritePig",
 
         const imgPath = AddPigRenderToEmbed(editedEmbed, {
             pig: pig,
+            safe: serverInfo.SafeMode,
             new: msgInfo.NewPigs.includes(pig.ID),
             showId: !DoesPigIdHaveUniqueEvent(currentPigID),
             count: msgInfo.PigCounts[pig.ID],

@@ -227,6 +227,8 @@ async function SendAnnouncement(interaction: CommandInteraction){
 export const Announcement = new Command(
     "",
     "",
+    false,
+    false,
     new SlashCommandBuilder()
         .setName("announcement")
         .addSubcommand(subcommand =>

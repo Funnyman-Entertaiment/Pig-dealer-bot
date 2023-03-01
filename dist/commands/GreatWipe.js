@@ -7,7 +7,7 @@ const Bot_1 = require("../Bot");
 const Command_1 = require("../Command");
 const SendMessage_1 = require("../Utils/SendMessage");
 const UserInfo_1 = require("../database/UserInfo");
-exports.GreatWipe = new Command_1.Command("", "", new discord_js_1.SlashCommandBuilder()
+exports.GreatWipe = new Command_1.Command("", "", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("order66")
     .setDescription("Kill all the pigs"), async (interaction) => {
     await interaction.deferReply();

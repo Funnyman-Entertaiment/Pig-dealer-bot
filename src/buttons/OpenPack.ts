@@ -244,13 +244,14 @@ function ChoosePigs(serverInfo: ServerInfo, pack: Pack) {
     return chosenPigs;
 }
 
-function GetOpenPackFollowUp(packName: string, chosenPigs: Pig[], newPigs: string[], interaction: Interaction, userInfo: UserInfo) {
+function GetOpenPackFollowUp(packName: string, chosenPigs: Pig[], newPigs: string[], interaction: Interaction, userInfo: UserInfo, serverInfo: ServerInfo) {
     const openedPackEmbed = new EmbedBuilder()
         .setTitle(`You've opened a ${packName}`)
         .setDescription(`1/${chosenPigs.length}`);
 
     const imgPath = AddPigRenderToEmbed(openedPackEmbed, {
         pig: chosenPigs[0],
+        safe: serverInfo.SafeMode,
         new: newPigs.includes(chosenPigs[0].ID),
         count: 1,
         favourite: userInfo.FavouritePigs.includes(chosenPigs[0].ID)
@@ -299,12 +300,12 @@ function GetOpenPackFollowUp(packName: string, chosenPigs: Pig[], newPigs: strin
     }
 }
 
-function SendOpenPackFollowUp(userInfo: UserInfo, chosenPigs: Pig[], pigsToShowInPack: Pig[], pack: Pack, serverId: string, interaction: ButtonInteraction) {
+function SendOpenPackFollowUp(userInfo: UserInfo, chosenPigs: Pig[], pigsToShowInPack: Pig[], pack: Pack, serverId: string, interaction: ButtonInteraction, serverInfo: ServerInfo) {
     const userPigs = GetUserPigIDs(userInfo);
 
     const newPigs = chosenPigs.filter(pig => !userPigs.includes(pig.ID)).map(pig => pig.ID);
 
-    const packFollowUp = GetOpenPackFollowUp(pack.Name, pigsToShowInPack, newPigs, interaction, userInfo);
+    const packFollowUp = GetOpenPackFollowUp(pack.Name, pigsToShowInPack, newPigs, interaction, userInfo, serverInfo);
 
     if (packFollowUp === undefined) {
         return;
@@ -408,8 +409,15 @@ function GetEasterStagePack(msgInfo: MessageInfo, pack: Pack): Pack {
     return newPack;
 }
 
-export const OpenPack = new Button("OpenPack",
-    async (interaction) => {
+export const OpenPack = new Button(
+    "OpenPack",
+    true,
+    true,
+    false,
+    async (interaction, serverInfo, messageInfo) => {
+        if(serverInfo === undefined){ return; }
+        if(messageInfo === undefined){ return; }
+
         if (interaction.guild === null) {
             return;
         }
@@ -422,7 +430,6 @@ export const OpenPack = new Button("OpenPack",
         const userID = user.id;
         const msgID = message.id;
 
-        const serverInfo = await GetServerInfo(serverID) as any as ServerInfo;
         const userInfo = await GetUserInfo(userID) ?? new UserInfo(
             userID,
             [],
@@ -431,21 +438,8 @@ export const OpenPack = new Button("OpenPack",
             []
         );
         AddUserInfoToCache(userInfo);
-        const msgInfo = GetMessageInfo(serverID, msgID) as RandomPackMessage | undefined;
-
-        if (msgInfo === undefined) {
-            const errorEmbed = new EmbedBuilder()
-                .setTitle("This message has expired")
-                .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
-                .setColor(Colors.Red);
-
-            interaction.reply({
-                embeds: [errorEmbed],
-                ephemeral: true
-            });
-
-            return;
-        }
+        const msgInfo = messageInfo as RandomPackMessage;
+        if(msgInfo === undefined){return;}
 
         if (msgInfo.BeingOpenedBy !== undefined){
             const errorEmbed = new EmbedBuilder()
@@ -514,7 +508,7 @@ export const OpenPack = new Button("OpenPack",
 
         RunPostPackOpened(pack, serverInfo, chosenPigs, pigsToShowInPack);
 
-        SendOpenPackFollowUp(userInfo, chosenPigs, pigsToShowInPack, pack, serverID, interaction);
+        SendOpenPackFollowUp(userInfo, chosenPigs, pigsToShowInPack, pack, serverID, interaction, serverInfo);
 
         AddPigsToUser(chosenPigs, userInfo);
 

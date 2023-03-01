@@ -7,20 +7,24 @@ import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
 export const TestPig = new Command(
     "",
     "",
+    false,
+    false,
     new SlashCommandBuilder()
     .setName("testpig")
     .addStringOption(option =>
 		option.setName('id')
 			.setDescription('Pig id')
 			.setRequired(true))
+    .addBooleanOption(option =>
+        option.setName('safe')
+            .setDescription('Safe or not'))
     .setDescription("pig"),
 
     async (interaction) => {
-        const rawId = (interaction.options as CommandInteractionOptionResolver).getString('id')
-        let id: string = "0"
-        if(rawId !== null){
-            id = rawId.toString();
-        }
+        const options = (interaction.options as CommandInteractionOptionResolver)
+        const rawId = options.getString('id', true)
+        const safe = options.getBoolean('safe') ?? false
+        const id = rawId.toString();
 
         const pig = GetPig(id);
 
@@ -40,7 +44,7 @@ export const TestPig = new Command(
         const pigEmbed = new EmbedBuilder()
             .setTitle("Here's your pig");
 
-        const img = AddPigRenderToEmbed(pigEmbed, {pig: pig});
+        const img = AddPigRenderToEmbed(pigEmbed, {pig: pig, safe: safe});
 
         await interaction.reply({
             embeds: [pigEmbed],

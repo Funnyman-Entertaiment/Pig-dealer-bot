@@ -11,6 +11,8 @@ import { PigListMessage, AddMessageInfoToCache } from "../database/MessageInfo";
 export const ShowBinderList = new Command(
     "binderlist",
     "Allows you to check your binder in list view, nine pigs at a time. Also allows you to sort by set.",
+    true,
+    true,
     new SlashCommandBuilder()
         .setName("binderlist")
         .addBooleanOption(option =>
@@ -28,7 +30,10 @@ export const ShowBinderList = new Command(
         .setDescription("Let's you check your own or someone else's pig binder")
         .setDMPermission(false),
 
-    async (interaction) => {
+    async (interaction, serverInfo, userInfo) => {
+        if(serverInfo === undefined){ return; }
+        if(userInfo === undefined){ return; }
+
         await interaction.deferReply();
 
         const server = interaction.guild;
@@ -62,21 +67,7 @@ export const ShowBinderList = new Command(
             author = { name: username, iconURL: avatar === null ? "" : avatar };
         }
 
-        const userInfo = await GetUserInfo(userId);
         let pigs = GetUserPigs(userInfo);
-
-        if (userInfo === undefined) {
-            const emptyEmbed = new EmbedBuilder()
-                .setAuthor(author)
-                .setColor(Colors.DarkRed)
-                .setTitle("This user has no pigs!")
-                .setDescription("Open some packs, loser");
-
-            await interaction.followUp({
-                embeds: [emptyEmbed]
-            });
-            return;
-        }
 
         if (raritiesToFilter.length > 0) {
             pigs = pigs.filter(pig => {
@@ -151,6 +142,7 @@ export const ShowBinderList = new Command(
         const firstPigsPage = pigsBySet[firstSet].slice(0, Math.min(pigsBySet[firstSet].length, 9));
         AddPigListRenderToEmbed(catalogueEmbed, {
             pigs: firstPigsPage.map(id => GetPig(id)).filter(pig => pig !== undefined) as any as Pig[],
+            safe: serverInfo.SafeMode,
             pigCounts: userInfo?.Pigs ?? {},
             favouritePigs: userInfo?.FavouritePigs ?? [],
             sharedPigs: userInfo.ID === interaction.user.id ? [] : sharedPigs

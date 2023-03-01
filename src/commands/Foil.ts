@@ -27,6 +27,8 @@ function GetFieldDescriptionFromPigAmounts(pigAmounts: { [key: string]: number }
 export const Foil = new Command(
     "Foil",
     "Attempts to craft a foil of a given rarity and set.",
+    true,
+    true,
     new SlashCommandBuilder()
         .setName("foil")
         .addStringOption(new SlashCommandStringOption()
@@ -61,25 +63,12 @@ export const Foil = new Command(
         .setDescription("Attempt to craft a foil pig using other random pigs for a set and rarity.")
         .setDMPermission(false),
 
-    async function (interaction) {
+    async function (interaction, _serverInfo, userInfo) {
+        if(userInfo === undefined){ return; }
         const server = interaction.guild;
         if(server === null){ return; }
 
         const user = interaction.user;
-        const userInfo = await GetUserInfo(user.id);
-
-        if (userInfo === undefined) {
-            const emptyEmbed = new EmbedBuilder()
-                .setAuthor(GetAuthor(interaction))
-                .setColor(Colors.DarkRed)
-                .setTitle("You have no pigs!")
-                .setDescription("Open some packs, you'll need a lot of them.");
-
-            await interaction.reply({
-                embeds: [emptyEmbed]
-            });
-            return;
-        }
 
         const options = (interaction.options as CommandInteractionOptionResolver);
         let targetSet = options.getString("set", true).toLowerCase();

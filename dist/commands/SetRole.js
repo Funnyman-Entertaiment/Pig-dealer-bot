@@ -4,18 +4,18 @@ exports.SetBotRole = void 0;
 const discord_js_1 = require("discord.js");
 const ServerInfo_1 = require("../database/ServerInfo");
 const Command_1 = require("../Command");
-exports.SetBotRole = new Command_1.Command("SetRole", "Sets the role Pig Dealer will ping whenever a pack drops or a it sends a new announcement.", new discord_js_1.SlashCommandBuilder()
+exports.SetBotRole = new Command_1.Command("SetRole", "Sets the role Pig Dealer will ping whenever a pack drops or a it sends a new announcement.", true, false, new discord_js_1.SlashCommandBuilder()
     .setName("setrole")
     .addRoleOption(option => option.setName('role')
     .setDescription('role that will get pinged when the bot drops a pack')
     .setRequired(true))
     .setDescription("Let's you choose what role the bot pings")
     .setDefaultMemberPermissions(discord_js_1.PermissionFlagsBits.Administrator)
-    .setDMPermission(false), async (interaction) => {
-    const role = interaction.options.getRole('role');
-    if (role === null) {
+    .setDMPermission(false), async (interaction, serverInfo) => {
+    if (serverInfo === undefined) {
         return;
     }
+    const role = interaction.options.getRole('role', true);
     if (interaction.guildId === null) {
         const errorEmbed = new discord_js_1.EmbedBuilder()
             .setTitle("There was an error fetching the server id.")
@@ -26,13 +26,7 @@ exports.SetBotRole = new Command_1.Command("SetRole", "Sets the role Pig Dealer 
         });
         return;
     }
-    let serverInfo = await (0, ServerInfo_1.GetServerInfo)(interaction.guildId);
-    if (serverInfo === undefined) {
-        serverInfo = new ServerInfo_1.ServerInfo(interaction.guildId, undefined, role.id, undefined, false, [], [], true);
-    }
-    else {
-        serverInfo.Role = role.id;
-    }
+    serverInfo.Role = role.id;
     await (0, ServerInfo_1.AddServerInfoToCache)(serverInfo);
     (0, ServerInfo_1.SaveAllServerInfo)();
     const successEmbed = new discord_js_1.EmbedBuilder()

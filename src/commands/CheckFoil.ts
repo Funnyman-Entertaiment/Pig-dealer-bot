@@ -10,6 +10,8 @@ const FOILED_RARITIES = ["Common", "Rare", "Epic", "Legendary"];
 export const CheckFoils = new Command(
     "CheckFoils",
     "Shows you a list of all the foils you are able to craft.",
+    true,
+    true,
     new SlashCommandBuilder()
         .setName("checkfoils")
         .setDescription("Gives you a list of all foils you can craft.")
@@ -18,12 +20,13 @@ export const CheckFoils = new Command(
             .setDescription("Whether to only count dupe pigs or not. Default is true."))
         .setDMPermission(false),
 
-    async function (interaction) {
+    async function (interaction, _serverInfo, userInfo) {
+        if(userInfo === undefined){ return; }
+
         const options = (interaction.options as CommandInteractionOptionResolver);
         const onlydupes = options.getBoolean("onlydupes") ?? true;
 
         const user = interaction.user;
-        const userInfo = await GetUserInfo(user.id);
 
         if (userInfo === undefined) {
             const noPigsEmbed = new EmbedBuilder()

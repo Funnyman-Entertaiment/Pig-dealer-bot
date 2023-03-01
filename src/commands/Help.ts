@@ -8,6 +8,8 @@ import { client } from "../Bot";
 export const Help = new Command(
     "Help",
     "Shows useful information about every command",
+    true,
+    false,
     new SlashCommandBuilder()
     .setName("help")
     .addStringOption(option =>

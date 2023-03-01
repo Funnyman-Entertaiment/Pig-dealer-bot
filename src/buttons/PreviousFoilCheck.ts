@@ -5,8 +5,14 @@ import { MakeErrorEmbed } from "../Utils/Errors";
 import { LogError, PrintChannel, PrintServer } from "../Utils/Log";
 import { AddFoilChecksToEmbed } from "../Utils/PigRenderer";
 
-export const PreviousFoilCheck = new Button("PreviousFoilCheck",
-    async (interaction) => {
+export const PreviousFoilCheck = new Button(
+    "PreviousFoilCheck",
+    true,
+    true,
+    false,
+    async (interaction, _serverInfo, messageInfo) => {
+        if(messageInfo === undefined){ return; }
+
         await interaction.deferUpdate();
 
         const server = interaction.guild;
@@ -24,39 +30,8 @@ export const PreviousFoilCheck = new Button("PreviousFoilCheck",
         }
 
         const message = interaction.message;
-        const msgInfo = GetMessageInfo(server.id, message.id) as FoilChecksMessage;
-
-        if(msgInfo === undefined){
-            const errorEmbed = new EmbedBuilder()
-                .setTitle("This message has expired")
-                .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
-                .setColor(Colors.Red);
-            
-            await interaction.followUp({
-                embeds: [errorEmbed],
-                ephemeral: true
-            });
-    
-            return;
-        }
-
-        if(msgInfo.Type !== "FoilChecks"){ return; }
-
-        if(msgInfo.User === undefined){
-            const errorEmbed = MakeErrorEmbed(
-                "This message doesn't have an associated user",
-                `Server: ${server.id}`,
-                `Message: ${message.id}`
-            );
-
-            await interaction.followUp({
-                embeds: [errorEmbed]
-            });
-
-            return;
-        }
-
-        if(interaction.user.id !== msgInfo.User){ return; }
+        const msgInfo = messageInfo as FoilChecksMessage;
+        if(msgInfo === undefined){ return; }
 
         let newPage = msgInfo.CurrentPage - 1;
         let setsNum = 0;

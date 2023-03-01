@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FoilPigs = void 0;
 const discord_js_1 = require("discord.js");
 const Command_1 = require("../Command");
-const UserInfo_1 = require("../database/UserInfo");
 const GetAuthor_1 = require("../Utils/GetAuthor");
 const Pigs_1 = require("../database/Pigs");
 const PigsPerFoilRarity_1 = require("../Constants/PigsPerFoilRarity");
@@ -82,7 +81,7 @@ function GetFieldDescriptionFromPigAmounts(pigAmounts) {
     }
     return descriptionLines.join("\n");
 }
-exports.FoilPigs = new Command_1.Command("FoilPigs", "Attempts to craft a foil pig with the given pigs.", new discord_js_1.SlashCommandBuilder()
+exports.FoilPigs = new Command_1.Command("FoilPigs", "Attempts to craft a foil pig with the given pigs.", true, false, new discord_js_1.SlashCommandBuilder()
     .setName("foilpigs")
     .addStringOption(new discord_js_1.SlashCommandStringOption()
     .setName("set")
@@ -110,24 +109,15 @@ exports.FoilPigs = new Command_1.Command("FoilPigs", "Attempts to craft a foil p
     .setDescription("Pigs used to craft. Put their ids separated by commas.")
     .setRequired(true))
     .setDescription("Attempt to craft a foil pig using other random pigs for a set and rarity.")
-    .setDMPermission(false), async function (interaction) {
+    .setDMPermission(false), async function (interaction, _serverInfo, userInfo) {
+    if (userInfo === undefined) {
+        return;
+    }
     const server = interaction.guild;
     if (server === null) {
         return;
     }
     const user = interaction.user;
-    const userInfo = await (0, UserInfo_1.GetUserInfo)(user.id);
-    if (userInfo === undefined) {
-        const emptyEmbed = new discord_js_1.EmbedBuilder()
-            .setAuthor((0, GetAuthor_1.GetAuthor)(interaction))
-            .setColor(discord_js_1.Colors.DarkRed)
-            .setTitle("You have no pigs!")
-            .setDescription("Open some packs, you'll need a lot of them.");
-        await interaction.reply({
-            embeds: [emptyEmbed]
-        });
-        return;
-    }
     const options = interaction.options;
     let targetSet = options.getString("set", true).toLowerCase();
     const targetRarity = options.getString("rarity", true);
