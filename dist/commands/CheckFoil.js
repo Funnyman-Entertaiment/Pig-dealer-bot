@@ -3,22 +3,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CheckFoils = void 0;
 const discord_js_1 = require("discord.js");
 const Command_1 = require("../Command");
-const UserInfo_1 = require("../database/UserInfo");
 const Pigs_1 = require("../database/Pigs");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const MessageInfo_1 = require("../database/MessageInfo");
 const FOILED_RARITIES = ["Common", "Rare", "Epic", "Legendary"];
-exports.CheckFoils = new Command_1.Command("CheckFoils", "Shows you a list of all the foils you are able to craft.", new discord_js_1.SlashCommandBuilder()
+exports.CheckFoils = new Command_1.Command("CheckFoils", "Shows you a list of all the foils you are able to craft.", true, true, new discord_js_1.SlashCommandBuilder()
     .setName("checkfoils")
     .setDescription("Gives you a list of all foils you can craft.")
     .addBooleanOption(new discord_js_1.SlashCommandBooleanOption()
     .setName("onlydupes")
     .setDescription("Whether to only count dupe pigs or not. Default is true."))
-    .setDMPermission(false), async function (interaction) {
+    .setDMPermission(false), async function (interaction, _serverInfo, userInfo) {
+    if (userInfo === undefined) {
+        return;
+    }
     const options = interaction.options;
     const onlydupes = options.getBoolean("onlydupes") ?? true;
     const user = interaction.user;
-    const userInfo = await (0, UserInfo_1.GetUserInfo)(user.id);
     if (userInfo === undefined) {
         const noPigsEmbed = new discord_js_1.EmbedBuilder()
             .setTitle("You have no pigs!")

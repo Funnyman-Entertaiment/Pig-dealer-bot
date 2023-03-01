@@ -5,6 +5,8 @@ import { GetUserInfo } from "../database/UserInfo";
 export const ClearCooldown = new Command(
     "",
     "",
+    false,
+    false,
     new SlashCommandBuilder()
         .setName("clearcooldown")
         .addStringOption(option =>

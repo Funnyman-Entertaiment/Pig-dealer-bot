@@ -171,7 +171,7 @@ async function SendAnnouncement(interaction) {
         embeds: [successEmbed]
     });
 }
-exports.Announcement = new Command_1.Command("", "", new discord_js_1.SlashCommandBuilder()
+exports.Announcement = new Command_1.Command("", "", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("announcement")
     .addSubcommand(subcommand => subcommand
     .setName("new")

@@ -8,12 +8,19 @@ const PigRenderer_1 = require("../Utils/PigRenderer");
 const UserInfo_1 = require("../database/UserInfo");
 const GetAuthor_1 = require("../Utils/GetAuthor");
 const Log_1 = require("../Utils/Log");
-exports.CheckPig = new Command_1.Command("CheckPig", "Shows a single pig in your collection", new discord_js_1.SlashCommandBuilder()
+exports.CheckPig = new Command_1.Command("CheckPig", "Shows a single pig in your collection", true, true, new discord_js_1.SlashCommandBuilder()
     .setName("checkpig")
     .addStringOption(option => option.setName('id')
     .setDescription('ID of the pig you wanna check.')
     .setRequired(true))
-    .setDescription("Shows you a single pig you own."), async function (interaction) {
+    .setDescription("Shows you a single pig you own.")
+    .setDMPermission(false), async function (interaction, serverInfo, userInfo) {
+    if (serverInfo === undefined) {
+        return;
+    }
+    if (userInfo === undefined) {
+        return;
+    }
     const pigID = interaction.options.getString('id', true);
     const pig = (0, Pigs_1.GetPig)(pigID);
     if (pig === undefined) {
@@ -26,7 +33,10 @@ exports.CheckPig = new Command_1.Command("CheckPig", "Shows a single pig in your
         });
         return;
     }
-    const userInfo = await (0, UserInfo_1.GetUserInfo)(interaction.user.id);
+    const server = interaction.guild;
+    if (server === null) {
+        return;
+    }
     const userPigs = (0, UserInfo_1.GetUserPigIDs)(userInfo);
     if (!userPigs.includes(pigID)) {
         const errorEmbed = new discord_js_1.EmbedBuilder()
@@ -44,6 +54,7 @@ exports.CheckPig = new Command_1.Command("CheckPig", "Shows a single pig in your
         .setAuthor((0, GetAuthor_1.GetAuthor)(interaction));
     const img = (0, PigRenderer_1.AddPigRenderToEmbed)(pigEmbed, {
         pig: pig,
+        safe: serverInfo.SafeMode,
         favourite: userInfo?.FavouritePigs.includes(pigID),
         count: userInfo?.Pigs[pigID]
     });

@@ -6,9 +6,14 @@ const Button_1 = require("../Button");
 const Errors_1 = require("../Utils/Errors");
 const Log_1 = require("../Utils/Log");
 const PigRenderer_1 = require("../Utils/PigRenderer");
-const MessageInfo_1 = require("../database/MessageInfo");
 const Pigs_1 = require("../database/Pigs");
-exports.PreviousList = new Button_1.Button("ListPrevious", async (interaction) => {
+exports.PreviousList = new Button_1.Button("ListPrevious", true, true, false, async (interaction, serverInfo, messageInfo) => {
+    if (serverInfo === undefined) {
+        return;
+    }
+    if (messageInfo === undefined) {
+        return;
+    }
     await interaction.deferUpdate();
     const server = interaction.guild;
     if (server === null) {
@@ -19,29 +24,8 @@ exports.PreviousList = new Button_1.Button("ListPrevious", async (interaction) =
         return;
     }
     const message = interaction.message;
-    const msgInfo = (0, MessageInfo_1.GetMessageInfo)(server.id, message.id);
+    const msgInfo = messageInfo;
     if (msgInfo === undefined) {
-        const errorEmbed = new discord_js_1.EmbedBuilder()
-            .setTitle("This message has expired")
-            .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
-            .setColor(discord_js_1.Colors.Red);
-        interaction.reply({
-            embeds: [errorEmbed],
-            ephemeral: true
-        });
-        return;
-    }
-    if (msgInfo.Type !== "PigList") {
-        return;
-    }
-    if (msgInfo.User === undefined) {
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("This message doesn't have an associated user", `Server: ${server.id}`, `Message: ${message.id}`);
-        await interaction.followUp({
-            embeds: [errorEmbed]
-        });
-        return;
-    }
-    if (interaction.user.id !== msgInfo.User) {
         return;
     }
     if (message.embeds[0] === undefined) {
@@ -64,6 +48,7 @@ exports.PreviousList = new Button_1.Button("ListPrevious", async (interaction) =
     const firstPigsPage = pigList.slice(pageStart, pageEnd);
     (0, PigRenderer_1.AddPigListRenderToEmbed)(editedEmbed, {
         pigs: firstPigsPage.map(id => (0, Pigs_1.GetPig)(id)).filter(pig => pig !== undefined),
+        safe: serverInfo.SafeMode,
         pigCounts: msgInfo.PigCounts,
         sharedPigs: msgInfo.SharedPigs,
         favouritePigs: msgInfo.FavouritePigs

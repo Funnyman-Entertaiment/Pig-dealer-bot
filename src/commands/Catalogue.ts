@@ -8,6 +8,8 @@ import { LogInfo, PrintUser } from "../Utils/Log";
 export const Catalogue = new Command(
     "catalogue",
     "Allows you to see all the pigs. Cool.",
+    true,
+    false,
     new SlashCommandBuilder()
         .setName("catalogue")
         .addStringOption(option =>
@@ -16,7 +18,9 @@ export const Catalogue = new Command(
         .setDescription("Shows all pigs in the bot sorted by set")
         .setDMPermission(false),
 
-    async (interaction: CommandInteraction) => {
+    async (interaction, serverInfo) => {
+        if(serverInfo === undefined){ return; }
+
         await interaction.deferReply();
 
         const serverId = interaction.guild?.id;
@@ -82,7 +86,8 @@ export const Catalogue = new Command(
         const firstPigsPage = pigsBySet[firstSet].slice(0, Math.min(pigsBySet[firstSet].length, 9));
         AddPigListRenderToEmbed(catalogueEmbed, {
             pigs: firstPigsPage.map(id => GetPig(id)).filter(pig => pig !== undefined) as any as Pig[],
-            pigCounts: {}
+            pigCounts: {},
+            safe: serverInfo.SafeMode
         });
 
         const row = new ActionRowBuilder<ButtonBuilder>()

@@ -74,6 +74,8 @@ async function RemoveTradeBulletin(interaction: CommandInteraction, userInfo: Us
 export const TradeBulletin = new Command(
     "TradeBulletin",
     "Sends a message in the trade bulletin board.",
+    true,
+    false,
     new SlashCommandBuilder()
         .setName("tradebulletin")
         .addSubcommand(new SlashCommandSubcommandBuilder()

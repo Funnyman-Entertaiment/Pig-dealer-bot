@@ -45,31 +45,20 @@ function AddOfferedPigsToUser(userInfo: UserInfo, pigOffer: {[key: string]: numb
     return pigsAdded;
 } 
 
-export const AcceptTrade = new Button("AcceptTrade",
-    async (interaction) => {
+export const AcceptTrade = new Button(
+    "AcceptTrade",
+    true,
+    true,
+    false,
+    async (interaction, serverInfo, messageInfo) => {
+        if(serverInfo === undefined){ return; }
+        if(messageInfo === undefined){ return; }
         const server = interaction.guild;
         if(server === null){return;}
         const message = interaction.message;
-        const user = interaction.user;
 
-        const msgInfo = GetMessageInfo(server.id, message.id) as PigTradeMessage | undefined;
-
-        if(msgInfo === undefined){
-            const errorEmbed = new EmbedBuilder()
-                .setTitle("This message has expired")
-                .setDescription("Trade messages expire after ~15 minutes of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
-                .setColor(Colors.Red);
-            
-            interaction.reply({
-                embeds: [errorEmbed],
-                ephemeral: true
-            });
-    
-            return;
-        }
-
-        if(msgInfo.Type !== "PigTrade"){ return; }
-        if(msgInfo.User !== user.id){ return; }
+        const msgInfo = messageInfo as PigTradeMessage;
+        if(msgInfo === undefined){ return; }
 
         const starterInfo = await GetUserInfo(msgInfo.TradeStarterID) ?? new UserInfo(
             msgInfo.TradeStarterID,

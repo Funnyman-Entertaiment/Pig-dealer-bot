@@ -4,6 +4,8 @@ import { Command } from "../Command";
 export const Sex = new Command(
     "Ping",
     "Pings the bot to see if it's online.",
+    false,
+    false,
     new SlashCommandBuilder()
     .setName("ping")
     .setDescription("pong"),

@@ -4,7 +4,7 @@ exports.ChangeFoilRequirements = void 0;
 const discord_js_1 = require("discord.js");
 const Command_1 = require("../Command");
 const PigsPerFoilRarity_1 = require("../Constants/PigsPerFoilRarity");
-exports.ChangeFoilRequirements = new Command_1.Command("", "", new discord_js_1.SlashCommandBuilder()
+exports.ChangeFoilRequirements = new Command_1.Command("", "", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("changefoilrequiredpigs")
     .addIntegerOption(new discord_js_1.SlashCommandIntegerOption()
     .setName("newamount")

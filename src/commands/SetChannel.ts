@@ -6,6 +6,8 @@ import { LogInfo, PrintUser, PrintChannel, PrintServer } from "../Utils/Log";
 export const SetBotChannel = new Command(
     "SetChannel",
     "Sets the channel Pig Dealer will send packs to.",
+    true,
+    false,
     new SlashCommandBuilder()
         .setName("setchannel")
         .addChannelOption(option =>
@@ -17,7 +19,8 @@ export const SetBotChannel = new Command(
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .setDMPermission(false),
 
-    async (interaction) => {
+    async (interaction, serverInfo) => {
+        if(serverInfo === undefined){ return; }
         const channel = (interaction.options as CommandInteractionOptionResolver).getChannel('channel')
 
         if (channel === null) {
@@ -52,22 +55,8 @@ export const SetBotChannel = new Command(
 
         LogInfo(`User ${PrintUser(interaction.user)} is setting the dropping channel to ${PrintChannel(channel as any as GuildChannel)} in server ${PrintServer(interaction.guild as any as Guild)}`);
 
-        let serverInfo = await GetServerInfo(interaction.guildId);
 
-        if(serverInfo === undefined){
-            serverInfo = new ServerInfo(
-                interaction.guildId,
-                channel.id,
-                undefined,
-                channel.id,
-                false,
-                [],
-                [],
-                true
-            );
-        }else{
-            serverInfo.Channel = channel.id;
-        }
+        serverInfo.Channel = channel.id;
 
         await AddServerInfoToCache(serverInfo);
 

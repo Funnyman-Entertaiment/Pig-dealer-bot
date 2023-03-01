@@ -5,6 +5,8 @@ import { Cooldowns } from "../Constants/Variables";
 export const ChangeOpeningCooldown = new Command(
     "",
     "",
+    false,
+    false,
     new SlashCommandBuilder()
         .setName("setopeningcooldown")
         .addIntegerOption(new SlashCommandIntegerOption()
@@ -33,6 +35,8 @@ export const ChangeOpeningCooldown = new Command(
 export const ChangePackCooldown = new Command(
     "",
     "",
+    false,
+    false,
     new SlashCommandBuilder()
         .setName("setpackcooldown")
         .addIntegerOption(new SlashCommandIntegerOption()
@@ -61,6 +65,8 @@ export const ChangePackCooldown = new Command(
 export const Change5PackCooldown = new Command(
     "",
     "",
+    false,
+    false,
     new SlashCommandBuilder()
         .setName("set5packinterval")
         .addIntegerOption(new SlashCommandIntegerOption()
@@ -89,6 +95,8 @@ export const Change5PackCooldown = new Command(
 export const Change12PackCooldown = new Command(
     "",
     "",
+    false,
+    false,
     new SlashCommandBuilder()
         .setName("set12packinterval")
         .addIntegerOption(new SlashCommandIntegerOption()

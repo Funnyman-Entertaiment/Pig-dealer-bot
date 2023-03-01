@@ -1,10 +1,12 @@
 import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, Colors, PermissionFlagsBits } from "discord.js";
-import { AddServerInfoToCache, GetServerInfo, SaveAllServerInfo, ServerInfo } from "../database/ServerInfo";
+import { AddServerInfoToCache, SaveAllServerInfo } from "../database/ServerInfo";
 import { Command } from "../Command";
 
 export const SetBotRole = new Command(
     "SetRole",
     "Sets the role Pig Dealer will ping whenever a pack drops or a it sends a new announcement.",
+    true,
+    false,
     new SlashCommandBuilder()
         .setName("setrole")
         .addRoleOption(option =>
@@ -15,12 +17,9 @@ export const SetBotRole = new Command(
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .setDMPermission(false),
 
-    async (interaction) => {
-        const role = (interaction.options as CommandInteractionOptionResolver).getRole('role')
-
-        if (role === null) {
-            return;
-        }
+    async (interaction, serverInfo) => {
+        if(serverInfo === undefined){ return; }
+        const role = (interaction.options as CommandInteractionOptionResolver).getRole('role', true)
 
         if (interaction.guildId === null) {
             const errorEmbed = new EmbedBuilder()
@@ -35,22 +34,7 @@ export const SetBotRole = new Command(
             return;
         }
 
-        let serverInfo = await GetServerInfo(interaction.guildId);
-
-        if(serverInfo === undefined){
-            serverInfo = new ServerInfo(
-                interaction.guildId,
-                undefined,
-                role.id,
-                undefined,
-                false,
-                [],
-                [],
-                true
-            );
-        }else{
-            serverInfo.Role = role.id;
-        }
+        serverInfo.Role = role.id;
 
         await AddServerInfoToCache(serverInfo);
 

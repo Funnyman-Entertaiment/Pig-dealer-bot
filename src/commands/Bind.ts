@@ -6,10 +6,14 @@ import { AddMessageInfoToCache, PigGalleryMessage } from "../database/MessageInf
 import { LogError, LogInfo, PrintUser } from "../Utils/Log";
 import { GetUserInfo, GetUserPigIDs } from "../database/UserInfo";
 import { GetAuthor } from "../Utils/GetAuthor";
+import { GetServerInfo } from "src/database/ServerInfo";
+import { MakeErrorEmbed } from "src/Utils/Errors";
 
 export const ShowBinder = new Command(
     "binder",
     "Allows you to check your binder in gallery view, one pig at a time.",
+    true,
+    true,
     new SlashCommandBuilder()
         .setName("binder")
         .addUserOption(option =>
@@ -24,7 +28,9 @@ export const ShowBinder = new Command(
         .setDescription("Let's you check your own or someone else's pig binder")
         .setDMPermission(false),
 
-    async (interaction) => {
+    async (interaction, serverInfo, userInfo) => {
+        if(serverInfo === undefined){ return; }
+        if(userInfo === undefined){ return; }
         await interaction.deferReply();
 
         const server = interaction.guild;
@@ -58,7 +64,6 @@ export const ShowBinder = new Command(
             .map(rarity => rarity.trim().toLowerCase())
             .filter(rarity => rarity.length > 0);
 
-        const userInfo = await GetUserInfo(userId);
         let pigs = GetUserPigIDs(userInfo);
 
         if (userInfo === undefined) {
@@ -133,6 +138,7 @@ export const ShowBinder = new Command(
 
         const imgPath = AddPigRenderToEmbed(openedPackEmbed, {
             pig: firstPig,
+            safe: serverInfo.SafeMode,
             count: userInfo?.Pigs[firstPig.ID] ?? 1,
             favourite: favouritePigs.includes(firstPig.ID),
             shared: userInfo.ID === interaction.user.id ? false : sharedPigs.includes(firstPig.ID)

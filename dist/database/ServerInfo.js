@@ -12,8 +12,9 @@ class ServerInfo extends DatabaseElement_1.DatabaseElement {
     HasSpawnedGoldenPig;
     YearsSpawnedAllNewYearDeco;
     YearsSpawnedLeprechaun;
+    SafeMode;
     Enabled;
-    constructor(id, channel, role, announcementChannel, hasSpawnedGoldenPig, yearsSpawnedAllNewYearDeco, yearsSpawnedLeprechaun, enabled) {
+    constructor(id, channel, role, announcementChannel, hasSpawnedGoldenPig, yearsSpawnedAllNewYearDeco, yearsSpawnedLeprechaun, safeMode, enabled) {
         super(id);
         this.Channel = channel;
         this.Role = role;
@@ -21,6 +22,7 @@ class ServerInfo extends DatabaseElement_1.DatabaseElement {
         this.HasSpawnedGoldenPig = hasSpawnedGoldenPig;
         this.YearsSpawnedAllNewYearDeco = yearsSpawnedAllNewYearDeco;
         this.YearsSpawnedLeprechaun = yearsSpawnedLeprechaun;
+        this.SafeMode = safeMode;
         this.Enabled = enabled;
     }
     GetData() {
@@ -28,7 +30,8 @@ class ServerInfo extends DatabaseElement_1.DatabaseElement {
             HasSpawnedGoldenPig: this.HasSpawnedGoldenPig,
             YearsSpawnedAllNewYearDeco: this.YearsSpawnedAllNewYearDeco,
             YearsSpawnedLeprechaun: this.YearsSpawnedLeprechaun,
-            Enabled: this.Enabled
+            Enabled: this.Enabled,
+            SafeMode: this.SafeMode
         };
         if (this.Channel !== undefined) {
             data.Channel = this.Channel;
@@ -54,7 +57,7 @@ function SaveAllServerInfo() {
 }
 exports.SaveAllServerInfo = SaveAllServerInfo;
 function CreateServerInfoFromData(id, serverInfoData) {
-    const newPack = new ServerInfo(id, serverInfoData.Channel, serverInfoData.Role, serverInfoData.AnnouncementChannel ?? serverInfoData.Channel, serverInfoData.HasSpawnedGoldenPig ?? false, serverInfoData.YearsSpawnedAllNewYearDeco ?? [], serverInfoData.YearsSpawnedLeprechaun ?? [], serverInfoData.Enabled ?? true);
+    const newPack = new ServerInfo(id, serverInfoData.Channel, serverInfoData.Role, serverInfoData.AnnouncementChannel ?? serverInfoData.Channel, serverInfoData.HasSpawnedGoldenPig ?? false, serverInfoData.YearsSpawnedAllNewYearDeco ?? [], serverInfoData.YearsSpawnedLeprechaun ?? [], serverInfoData.SafeMode ?? false, serverInfoData.Enabled ?? true);
     return newPack;
 }
 exports.CreateServerInfoFromData = CreateServerInfoFromData;

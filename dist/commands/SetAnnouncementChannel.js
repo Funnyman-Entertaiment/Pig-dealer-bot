@@ -5,7 +5,7 @@ const discord_js_1 = require("discord.js");
 const ServerInfo_1 = require("../database/ServerInfo");
 const Command_1 = require("../Command");
 const Log_1 = require("../Utils/Log");
-exports.SetAnnouncementChannel = new Command_1.Command("SetAnnouncementChannel", "Sets the channel the bot will send announcements to.", new discord_js_1.SlashCommandBuilder()
+exports.SetAnnouncementChannel = new Command_1.Command("SetAnnouncementChannel", "Sets the channel the bot will send announcements to.", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("setannouncementchannel")
     .addChannelOption(option => option.setName('channel')
     .setDescription('channel to send announcements')
@@ -13,7 +13,10 @@ exports.SetAnnouncementChannel = new Command_1.Command("SetAnnouncementChannel",
     .setRequired(true))
     .setDescription("Let's you choose what channel the bot sends announcements to")
     .setDefaultMemberPermissions(discord_js_1.PermissionFlagsBits.Administrator)
-    .setDMPermission(false), async (interaction) => {
+    .setDMPermission(false), async (interaction, serverInfo) => {
+    if (serverInfo === undefined) {
+        return;
+    }
     const channel = interaction.options.getChannel('channel', true);
     if (channel.type !== discord_js_1.ChannelType.GuildText) {
         const errorEmbed = new discord_js_1.EmbedBuilder()
@@ -36,13 +39,7 @@ exports.SetAnnouncementChannel = new Command_1.Command("SetAnnouncementChannel",
         return;
     }
     (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} is setting the annoucement channel to ${(0, Log_1.PrintChannel)(channel)} in server ${(0, Log_1.PrintServer)(interaction.guild)}`);
-    let serverInfo = await (0, ServerInfo_1.GetServerInfo)(interaction.guildId);
-    if (serverInfo === undefined) {
-        serverInfo = new ServerInfo_1.ServerInfo(interaction.guildId, undefined, undefined, channel.id, false, [], [], true);
-    }
-    else {
-        serverInfo.AnnouncementChannel = channel.id;
-    }
+    serverInfo.AnnouncementChannel = channel.id;
     await (0, ServerInfo_1.AddServerInfoToCache)(serverInfo);
     (0, ServerInfo_1.SaveAllServerInfo)();
     const successEmbed = new discord_js_1.EmbedBuilder()

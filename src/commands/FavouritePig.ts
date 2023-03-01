@@ -9,6 +9,8 @@ import { LogInfo, PrintUser } from "../Utils/Log";
 export const FavouritePigCmd = new Command(
     "Favourite",
     "Favourites a single pig in your collection. If the pig was already a favourite, it unfavourites it.",
+    true,
+    true,
     new SlashCommandBuilder()
         .setName("favourite")
         .addStringOption(option =>
@@ -17,7 +19,8 @@ export const FavouritePigCmd = new Command(
                 .setRequired(true))
         .setDescription("Favourites a pig. If the pig was already favourite, it unfavourites it"),
 
-    async function (interaction) {
+    async function (interaction, _serverInfo, userInfo) {
+        if(userInfo === undefined){ return; }
         const pigID = (interaction.options as CommandInteractionOptionResolver).getString('id', true);
 
         const pig = GetPig(pigID);
@@ -34,8 +37,6 @@ export const FavouritePigCmd = new Command(
 
             return;
         }
-
-        const userInfo = await GetUserInfo(interaction.user.id);
 
         const userPigs = GetUserPigIDs(userInfo);
 

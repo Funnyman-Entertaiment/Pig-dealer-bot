@@ -4,56 +4,30 @@ exports.FavouritePig = void 0;
 const discord_js_1 = require("discord.js");
 const Button_1 = require("../Button");
 const Errors_1 = require("../Utils/Errors");
-const MessageInfo_1 = require("../database/MessageInfo");
-const UserInfo_1 = require("../database/UserInfo");
 const Log_1 = require("../Utils/Log");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const Pigs_1 = require("../database/Pigs");
 const UniquePigEvents_1 = require("../uniquePigEvents/UniquePigEvents");
-exports.FavouritePig = new Button_1.Button("FavouritePig", async function (interaction) {
-    await interaction.deferUpdate();
+exports.FavouritePig = new Button_1.Button("FavouritePig", true, true, true, async function (interaction, serverInfo, messageInfo, userInfo) {
+    if (serverInfo === undefined) {
+        return;
+    }
+    if (messageInfo === undefined) {
+        return;
+    }
+    if (userInfo === undefined) {
+        return;
+    }
     const server = interaction.guild;
     if (server === null) {
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Error fetching server from interaction", "Where did you find this message?");
-        await interaction.followUp({
-            embeds: [errorEmbed]
-        });
         return;
     }
     const message = interaction.message;
-    const msgInfo = (0, MessageInfo_1.GetMessageInfo)(server.id, message.id);
+    const msgInfo = messageInfo;
     if (msgInfo === undefined) {
-        const errorEmbed = new discord_js_1.EmbedBuilder()
-            .setTitle("This message has expired")
-            .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
-            .setColor(discord_js_1.Colors.Red);
-        interaction.reply({
-            embeds: [errorEmbed],
-            ephemeral: true
-        });
         return;
     }
-    if (msgInfo === undefined || msgInfo.Type !== "PigGallery") {
-        return;
-    }
-    if (msgInfo.User === undefined) {
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("This message doesn't have an associated user", `Server: ${server.id}`, `Message: ${message.id}`);
-        await interaction.followUp({
-            embeds: [errorEmbed]
-        });
-        return;
-    }
-    if (interaction.user.id !== msgInfo.User) {
-        return;
-    }
-    const userInfo = await (0, UserInfo_1.GetUserInfo)(interaction.user.id);
-    if (userInfo === undefined) {
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("This user has no information stored", `User: ${userInfo}`);
-        await interaction.followUp({
-            embeds: [errorEmbed]
-        });
-        return;
-    }
+    await interaction.deferUpdate();
     const currentPigID = msgInfo.Pigs[msgInfo.CurrentPig];
     if (!msgInfo.FavouritePigs.includes(currentPigID)) {
         msgInfo.FavouritePigs.push(currentPigID);
@@ -80,6 +54,7 @@ exports.FavouritePig = new Button_1.Button("FavouritePig", async function (inter
     }
     const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(editedEmbed, {
         pig: pig,
+        safe: serverInfo.SafeMode,
         new: msgInfo.NewPigs.includes(pig.ID),
         showId: !(0, UniquePigEvents_1.DoesPigIdHaveUniqueEvent)(currentPigID),
         count: msgInfo.PigCounts[pig.ID],
