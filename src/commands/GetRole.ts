@@ -5,8 +5,8 @@ import { GetServerInfo } from "../database/ServerInfo";
 import { LogError, LogInfo, LogWarn, PrintServer, PrintUser } from "../Utils/Log";
 
 export const GetRole = new Command(
-    "GetRole",
-    "Gives yourself the pig collector role for this server.",
+    "Get Role",
+    "Gives you the role the bot pings when a pack drops or an announcement is made. It can be removed with `/removerole`.",
     true,
     false,
     new SlashCommandBuilder()

@@ -6,12 +6,10 @@ import { AddMessageInfoToCache, PigGalleryMessage } from "../database/MessageInf
 import { LogError, LogInfo, PrintUser } from "../Utils/Log";
 import { GetUserInfo, GetUserPigIDs } from "../database/UserInfo";
 import { GetAuthor } from "../Utils/GetAuthor";
-import { GetServerInfo } from "src/database/ServerInfo";
-import { MakeErrorEmbed } from "src/Utils/Errors";
 
 export const ShowBinder = new Command(
-    "binder",
-    "Allows you to check your binder in gallery view, one pig at a time.",
+    "Binder",
+    "Shows you the pigs you own, with an image for each. You can define a user to see someone else's binder, rarity, to only see pigs of a certain rarity. You can also set favourites to True to only see pigs you've favourited.\nWhen viewing someone else's binder, a checkmark will signify if you already own a pig from their collection.",
     true,
     true,
     new SlashCommandBuilder()

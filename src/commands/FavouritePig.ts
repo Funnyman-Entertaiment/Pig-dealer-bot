@@ -1,14 +1,14 @@
 import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, Colors } from "discord.js";
 import { Command } from "../Command";
 import { GetPig } from "../database/Pigs";
-import { GetUserInfo, GetUserPigIDs } from "../database/UserInfo";
+import { GetUserPigIDs } from "../database/UserInfo";
 import { GetAuthor } from "../Utils/GetAuthor";
 import { LogInfo, PrintUser } from "../Utils/Log";
 
 
 export const FavouritePigCmd = new Command(
     "Favourite",
-    "Favourites a single pig in your collection. If the pig was already a favourite, it unfavourites it.",
+    "Favourites a pig you own, defined by ID or by pressing the \"Favorite⭐\" button on them when viewing your binder in image view.\nFavourited pigs will have a star after their name in your binder and can be specifically searched for by setting \"Favourites\" when typing in a binder viewing command.",
     true,
     true,
     new SlashCommandBuilder()

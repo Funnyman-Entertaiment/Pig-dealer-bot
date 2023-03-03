@@ -7,7 +7,7 @@ const Pigs_1 = require("../database/Pigs");
 const UserInfo_1 = require("../database/UserInfo");
 const GetAuthor_1 = require("../Utils/GetAuthor");
 const Log_1 = require("../Utils/Log");
-exports.FavouritePigCmd = new Command_1.Command("Favourite", "Favourites a single pig in your collection. If the pig was already a favourite, it unfavourites it.", true, true, new discord_js_1.SlashCommandBuilder()
+exports.FavouritePigCmd = new Command_1.Command("Favourite", "Favourites a pig you own, defined by ID or by pressing the \"Favorite⭐\" button on them when viewing your binder in image view.\nFavourited pigs will have a star after their name in your binder and can be specifically searched for by setting \"Favourites\" when typing in a binder viewing command.", true, true, new discord_js_1.SlashCommandBuilder()
     .setName("favourite")
     .addStringOption(option => option.setName('id')
     .setDescription('ID of the pig you wanna favourite.')

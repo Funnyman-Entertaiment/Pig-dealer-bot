@@ -1,10 +1,10 @@
-import { SlashCommandBuilder, ChannelType, PermissionFlagsBits, CommandInteractionOptionResolver, Colors, EmbedBuilder } from "discord.js";
+import { SlashCommandBuilder, PermissionFlagsBits, CommandInteractionOptionResolver, Colors, EmbedBuilder } from "discord.js";
 import { Command } from "src/Command";
 import { GetServerInfo, AddServerInfoToCache, SaveAllServerInfo, ServerInfo } from "src/database/ServerInfo";
 
 export const SetSafeMode = new Command(
-    "SetSafeMode",
-    "Sets the safe mode for this server.",
+    "Set Safe Mode",
+    "Only available to users with administrative access to the server. Sets the safe mode for the server. Must be used before any other command.\nIf safe mode is on, some pig pictures and descriptions will be censored.",
     false,
     false,
     new SlashCommandBuilder()

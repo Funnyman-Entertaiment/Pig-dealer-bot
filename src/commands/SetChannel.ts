@@ -1,11 +1,11 @@
 import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, ChannelType, Colors, PermissionFlagsBits, Guild, GuildChannel } from "discord.js";
-import { AddServerInfoToCache, GetServerInfo, SaveAllServerInfo, ServerInfo } from "../database/ServerInfo";
+import { AddServerInfoToCache, SaveAllServerInfo } from "../database/ServerInfo";
 import { Command } from "../Command";
 import { LogInfo, PrintUser, PrintChannel, PrintServer } from "../Utils/Log";
 
 export const SetBotChannel = new Command(
-    "SetChannel",
-    "Sets the channel Pig Dealer will send packs to.",
+    "Set Channel",
+    "Only available to users with administrative access to the server. It will define what channel the bot sends packs to.",
     true,
     false,
     new SlashCommandBuilder()

@@ -442,7 +442,7 @@ async function CounterOfferTrade(interaction: CommandInteraction, options: Comma
 
 export const Trade = new Command(
     "Trade",
-    "Starts trade with a user.",
+    "Use `/trade start` to start a trade with another user. Define a user and the pigs you're offering (using the syntax pigs:1,2,3,4, for IDs).\nAfter it's sent, they can respond with /trade offer to offer you pigs in exchange. Once that transpires, you will have the chance to accept or decline the final trade proposition.\nNote that the 0 digits at the start of lower digit IDs are purely cosmetic and are not needed when searching by ID. E.G. ACAB Pig (001) becomes only 1 when putting it into a command.",
     true,
     false,
     new SlashCommandBuilder()

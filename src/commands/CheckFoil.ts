@@ -8,8 +8,8 @@ import { AddMessageInfoToCache, FoilChecksMessage } from "../database/MessageInf
 const FOILED_RARITIES = ["Common", "Rare", "Epic", "Legendary"];
 
 export const CheckFoils = new Command(
-    "CheckFoils",
-    "Shows you a list of all the foils you are able to craft.",
+    "Check Foils",
+    "Shows you your progress on your eligibility for crafting a foil from every rarity of every set.",
     true,
     true,
     new SlashCommandBuilder()

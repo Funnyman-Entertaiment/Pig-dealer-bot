@@ -9,8 +9,8 @@ import { PigListMessage, AddMessageInfoToCache } from "../database/MessageInfo";
 
 
 export const ShowBinderList = new Command(
-    "binderlist",
-    "Allows you to check your binder in list view, nine pigs at a time. Also allows you to sort by set.",
+    "Binder List",
+    "Shows you the pigs you own in list view. By default, it sorts them by set, but by setting that value to false it will sort them by ID.\nYou can also define a rarity and/or a user to only see pigs from only one rarity or another user, respectively.\nWhen viewing someone else's binder, a checkmark will signify if you already own a pig from their collection.",
     true,
     true,
     new SlashCommandBuilder()

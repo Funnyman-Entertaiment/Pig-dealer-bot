@@ -5,7 +5,7 @@ const discord_js_1 = require("discord.js");
 const ServerInfo_1 = require("../database/ServerInfo");
 const Command_1 = require("../Command");
 const Log_1 = require("../Utils/Log");
-exports.SetAnnouncementChannel = new Command_1.Command("SetAnnouncementChannel", "Sets the channel the bot will send announcements to.", false, false, new discord_js_1.SlashCommandBuilder()
+exports.SetAnnouncementChannel = new Command_1.Command("Set Announcement Channel", "Only available to users with administrative access to the server. Defines what channel the bot will send announcements to. By default it is the same one as the one it drops packs in.", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("setannouncementchannel")
     .addChannelOption(option => option.setName('channel')
     .setDescription('channel to send announcements')

@@ -7,7 +7,7 @@ const Pigs_1 = require("../database/Pigs");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const MessageInfo_1 = require("../database/MessageInfo");
 const Log_1 = require("../Utils/Log");
-exports.Catalogue = new Command_1.Command("catalogue", "Allows you to see all the pigs. Cool.", true, false, new discord_js_1.SlashCommandBuilder()
+exports.Catalogue = new Command_1.Command("catalogue", "Shows you all pigs the bot has to offer, sorted by set. You can define a rarity to only show pigs of that rarity.\nWhen viewing the catalogue, a checkmark will signify pigs you already own.", true, false, new discord_js_1.SlashCommandBuilder()
     .setName("catalogue")
     .addStringOption(option => option.setName("rarity")
     .setDescription("Filter pigs by rarity. Multiple rarities separated by commas."))

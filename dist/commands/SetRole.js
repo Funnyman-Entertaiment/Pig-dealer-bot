@@ -4,7 +4,7 @@ exports.SetBotRole = void 0;
 const discord_js_1 = require("discord.js");
 const ServerInfo_1 = require("../database/ServerInfo");
 const Command_1 = require("../Command");
-exports.SetBotRole = new Command_1.Command("SetRole", "Sets the role Pig Dealer will ping whenever a pack drops or a it sends a new announcement.", true, false, new discord_js_1.SlashCommandBuilder()
+exports.SetBotRole = new Command_1.Command("Set Role", "Only available to users with administrative access to the server. It will define what role the bot pings when a new pack drops, or when an announcement is made.", true, false, new discord_js_1.SlashCommandBuilder()
     .setName("setrole")
     .addRoleOption(option => option.setName('role')
     .setDescription('role that will get pinged when the bot drops a pack')
