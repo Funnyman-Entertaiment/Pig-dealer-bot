@@ -5,7 +5,7 @@ const discord_js_1 = require("discord.js");
 const Command_1 = require("../Command");
 const Bot_1 = require("../Bot");
 const Log_1 = require("../Utils/Log");
-exports.Information = new Command_1.Command("Information", "Sends a message that contains some general information about Pig Dealer.", false, false, new discord_js_1.SlashCommandBuilder()
+exports.Information = new Command_1.Command("Information", "gives you a description of the bot as well as a link to our discord server and an invite for you to get this bot in your own server. (note that using this bot in a server with less than 6 members is heavily discouraged and indeed punished.)", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("information")
     .setDescription("Sends a message that contains some general information about Pig Dealer."), async (interaction) => {
     const botUser = Bot_1.client.user;

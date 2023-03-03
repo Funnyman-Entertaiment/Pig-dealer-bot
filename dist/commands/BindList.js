@@ -9,7 +9,7 @@ const Pigs_1 = require("../database/Pigs");
 const UserInfo_1 = require("../database/UserInfo");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const MessageInfo_1 = require("../database/MessageInfo");
-exports.ShowBinderList = new Command_1.Command("binderlist", "Allows you to check your binder in list view, nine pigs at a time. Also allows you to sort by set.", true, true, new discord_js_1.SlashCommandBuilder()
+exports.ShowBinderList = new Command_1.Command("Binder List", "Shows you the pigs you own in list view. By default, it sorts them by set, but by setting that value to false it will sort them by ID.\nYou can also define a rarity and/or a user to only see pigs from only one rarity or another user, respectively.\nWhen viewing someone else's binder, a checkmark will signify if you already own a pig from their collection.", true, true, new discord_js_1.SlashCommandBuilder()
     .setName("binderlist")
     .addBooleanOption(option => option.setName('set')
     .setDescription('Whether to order the pigs by set or not.'))

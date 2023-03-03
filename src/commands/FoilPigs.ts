@@ -1,8 +1,7 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder, SlashCommandBooleanOption, SlashCommandBuilder, SlashCommandStringOption } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder, SlashCommandBuilder, SlashCommandStringOption } from "discord.js";
 import { Command } from "../Command";
-import { GetUserInfo } from "../database/UserInfo";
 import { GetAuthor } from "../Utils/GetAuthor";
-import { GetAllPigs, GetPig, GetPigsBySet } from "../database/Pigs";
+import { GetAllPigs, GetPig } from "../database/Pigs";
 import { PIGS_PER_FOIL_RARITY } from "../Constants/PigsPerFoilRarity";
 import { AddMessageInfoToCache, PigFoilMessage } from "../database/MessageInfo";
 
@@ -97,8 +96,8 @@ function GetFieldDescriptionFromPigAmounts(pigAmounts: { [key: string]: number }
 }
 
 export const FoilPigs = new Command(
-    "FoilPigs",
-    "Attempts to craft a foil pig with the given pigs.",
+    "Foil Pigs",
+    "Used to craft a foil pig, using 100 common, 50 rare, 15 epic or 5 legendary pigs from the same set.\nAllows you to manually input the IDs of the selected pigs, following the same syntax as all other ID defining commands: pigs:1,2,3,4.\nNote that the 0 digits at the start of lower digit IDs are purely cosmetic and are not needed when searching by ID. E.G. ACAB Pig (001) becomes only 1 when putting it into a command.",
     true,
     false,
     new SlashCommandBuilder()

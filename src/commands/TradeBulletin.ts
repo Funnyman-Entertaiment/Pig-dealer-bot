@@ -72,8 +72,8 @@ async function RemoveTradeBulletin(interaction: CommandInteraction, userInfo: Us
 }
 
 export const TradeBulletin = new Command(
-    "TradeBulletin",
-    "Sends a message in the trade bulletin board.",
+    "Trade Bulletin",
+    "Only available on the Pig Dealer Trading Forum.\n Use `/tradebulletin add` to post a text embed to the dedicated channel, used for finding trade partners.\nIf you wish to remove a bulletin, use `/tradebulletin` remove.",
     true,
     false,
     new SlashCommandBuilder()

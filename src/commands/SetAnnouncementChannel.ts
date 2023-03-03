@@ -1,11 +1,11 @@
 import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, ChannelType, Colors, PermissionFlagsBits, GuildChannel, Guild } from "discord.js";
-import { AddServerInfoToCache, GetServerInfo, SaveAllServerInfo, ServerInfo } from "../database/ServerInfo";
+import { AddServerInfoToCache, SaveAllServerInfo } from "../database/ServerInfo";
 import { Command } from "../Command";
 import { LogInfo, PrintChannel, PrintServer, PrintUser } from "../Utils/Log";
 
 export const SetAnnouncementChannel = new Command(
-    "SetAnnouncementChannel",
-    "Sets the channel the bot will send announcements to.",
+    "Set Announcement Channel",
+    "Only available to users with administrative access to the server. Defines what channel the bot will send announcements to. By default it is the same one as the one it drops packs in.",
     false,
     false,
     new SlashCommandBuilder()

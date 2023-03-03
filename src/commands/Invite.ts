@@ -4,7 +4,7 @@ import { LogInfo, PrintUser } from "../Utils/Log";
 
 export const Invite = new Command(
     "Invite",
-    "Sends you a link so you can invite Pig Dealer to your own server.",
+    "Gives you the bot invite link.",
     false,
     false,
     new SlashCommandBuilder()

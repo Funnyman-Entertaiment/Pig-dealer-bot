@@ -6,7 +6,7 @@ const Command_1 = require("../Command");
 const Errors_1 = require("../Utils/Errors");
 const ServerInfo_1 = require("../database/ServerInfo");
 const Log_1 = require("../Utils/Log");
-exports.RemoveRole = new Command_1.Command("RemoveRole", "Takes away the pig collector role from you.", true, false, new discord_js_1.SlashCommandBuilder()
+exports.RemoveRole = new Command_1.Command("Remove Role", "Removes the role the bot pings when a pack drops or an announcement is made from you.", true, false, new discord_js_1.SlashCommandBuilder()
     .setName("removerole")
     .setDescription("Remove the pig collector role from you in this server")
     .setDMPermission(false), async function (interaction) {

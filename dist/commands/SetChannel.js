@@ -5,7 +5,7 @@ const discord_js_1 = require("discord.js");
 const ServerInfo_1 = require("../database/ServerInfo");
 const Command_1 = require("../Command");
 const Log_1 = require("../Utils/Log");
-exports.SetBotChannel = new Command_1.Command("SetChannel", "Sets the channel Pig Dealer will send packs to.", true, false, new discord_js_1.SlashCommandBuilder()
+exports.SetBotChannel = new Command_1.Command("Set Channel", "Only available to users with administrative access to the server. It will define what channel the bot sends packs to.", true, false, new discord_js_1.SlashCommandBuilder()
     .setName("setchannel")
     .addChannelOption(option => option.setName('channel')
     .setDescription('channel to send packs')

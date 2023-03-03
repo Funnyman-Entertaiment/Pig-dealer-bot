@@ -5,7 +5,7 @@ import { LogInfo, PrintUser } from "../Utils/Log";
 
 export const Information = new Command(
     "Information",
-    "Sends a message that contains some general information about Pig Dealer.",
+    "gives you a description of the bot as well as a link to our discord server and an invite for you to get this bot in your own server. (note that using this bot in a server with less than 6 members is heavily discouraged and indeed punished.)",
     false,
     false,
     new SlashCommandBuilder()

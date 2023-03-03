@@ -7,7 +7,7 @@ import { LogInfo, PrintUser } from "../Utils/Log";
 
 export const Catalogue = new Command(
     "catalogue",
-    "Allows you to see all the pigs. Cool.",
+    "Shows you all pigs the bot has to offer, sorted by set. You can define a rarity to only show pigs of that rarity.\nWhen viewing the catalogue, a checkmark will signify pigs you already own.",
     true,
     false,
     new SlashCommandBuilder()

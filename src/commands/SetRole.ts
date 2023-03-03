@@ -3,8 +3,8 @@ import { AddServerInfoToCache, SaveAllServerInfo } from "../database/ServerInfo"
 import { Command } from "../Command";
 
 export const SetBotRole = new Command(
-    "SetRole",
-    "Sets the role Pig Dealer will ping whenever a pack drops or a it sends a new announcement.",
+    "Set Role",
+    "Only available to users with administrative access to the server. It will define what role the bot pings when a new pack drops, or when an announcement is made.",
     true,
     false,
     new SlashCommandBuilder()

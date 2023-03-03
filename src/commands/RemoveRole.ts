@@ -5,8 +5,8 @@ import { GetServerInfo } from "../database/ServerInfo";
 import { LogError, LogWarn, PrintServer } from "../Utils/Log";
 
 export const RemoveRole = new Command(
-    "RemoveRole",
-    "Takes away the pig collector role from you.",
+    "Remove Role",
+    "Removes the role the bot pings when a pack drops or an announcement is made from you.",
     true,
     false,
     new SlashCommandBuilder()

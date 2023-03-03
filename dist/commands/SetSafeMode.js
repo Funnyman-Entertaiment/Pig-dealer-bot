@@ -4,7 +4,7 @@ exports.SetSafeMode = void 0;
 const discord_js_1 = require("discord.js");
 const Command_1 = require("src/Command");
 const ServerInfo_1 = require("src/database/ServerInfo");
-exports.SetSafeMode = new Command_1.Command("SetSafeMode", "Sets the safe mode for this server.", false, false, new discord_js_1.SlashCommandBuilder()
+exports.SetSafeMode = new Command_1.Command("Set Safe Mode", "Only available to users with administrative access to the server. Sets the safe mode for the server. Must be used before any other command.\nIf safe mode is on, some pig pictures and descriptions will be censored.", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("setsafemode")
     .addBooleanOption(option => option.setName('safe')
     .setDescription('Whether to set safe mode or not')
