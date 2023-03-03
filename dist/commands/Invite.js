@@ -4,7 +4,7 @@ exports.Invite = void 0;
 const discord_js_1 = require("discord.js");
 const Command_1 = require("../Command");
 const Log_1 = require("../Utils/Log");
-const Links_1 = require("src/Constants/Links");
+const Links_1 = require("../Constants/Links");
 exports.Invite = new Command_1.Command("Invite", "Gives you the bot invite link.", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("invite")
     .setDescription("Sends you an invitation link so you can have Pig Dealer in your own server."), async (interaction) => {

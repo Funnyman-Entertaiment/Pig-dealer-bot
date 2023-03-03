@@ -78,7 +78,7 @@ exports.TradeBulletin = new Command_1.Command("Trade Bulletin", "Only available 
     if (subcommand === undefined) {
         return;
     }
-    const userInfo = await (0, UserInfo_1.GetUserInfo)(interaction.user.id) ?? new UserInfo_1.UserInfo(interaction.user.id, [], {}, false, []);
+    const userInfo = await (0, UserInfo_1.GetUserInfo)(interaction.user.id) ?? (0, UserInfo_1.CreateNewDefaultUserInfo)(interaction.user.id);
     switch (subcommand) {
         case ("add"):
             AddTradeBulletin(interaction, userInfo, options);

@@ -9,10 +9,7 @@ const Pigs_1 = require("../database/Pigs");
 function ChooseRandomPigFromList(pigs) {
     return pigs[Math.floor(Math.random() * pigs.length)];
 }
-exports.AcceptFoil = new Button_1.Button("AcceptFoil", true, true, true, async (interaction, serverInfo, messageInfo, userInfo) => {
-    if (serverInfo === undefined) {
-        return;
-    }
+exports.AcceptFoil = new Button_1.Button("AcceptFoil", false, true, true, async (interaction, _serverInfo, messageInfo, userInfo) => {
     if (messageInfo === undefined) {
         return;
     }

@@ -5,7 +5,7 @@ const discord_js_1 = require("discord.js");
 const Command_1 = require("../Command");
 const lite_1 = require("firebase/firestore/lite");
 const Bot_1 = require("../Bot");
-const Links_1 = require("src/Constants/Links");
+const Links_1 = require("../Constants/Links");
 let announcementEmbed;
 let annoucementFields = [];
 function NewAnnouncement(interaction, options) {

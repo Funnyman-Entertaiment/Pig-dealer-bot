@@ -7,10 +7,7 @@ const Errors_1 = require("../Utils/Errors");
 const Log_1 = require("../Utils/Log");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const Pigs_1 = require("../database/Pigs");
-exports.NextSet = new Button_1.Button("SetNext", true, true, false, async (interaction, serverInfo, messageInfo) => {
-    if (serverInfo === undefined) {
-        return;
-    }
+exports.NextSet = new Button_1.Button("SetNext", false, true, false, async (interaction, _serverInfo, messageInfo) => {
     if (messageInfo === undefined) {
         return;
     }

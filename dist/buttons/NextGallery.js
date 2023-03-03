@@ -9,10 +9,7 @@ const Button_1 = require("../Button");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const UniquePigEvents_1 = require("../uniquePigEvents/UniquePigEvents");
 const Log_1 = require("../Utils/Log");
-exports.NextGallery = new Button_1.Button("GalleryNext", true, true, false, async (interaction, serverInfo, messageInfo) => {
-    if (serverInfo === undefined) {
-        return;
-    }
+exports.NextGallery = new Button_1.Button("GalleryNext", false, true, false, async (interaction, _serverInfo, messageInfo) => {
     if (messageInfo === undefined) {
         return;
     }

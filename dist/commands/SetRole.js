@@ -4,7 +4,7 @@ exports.SetBotRole = void 0;
 const discord_js_1 = require("discord.js");
 const ServerInfo_1 = require("../database/ServerInfo");
 const Command_1 = require("../Command");
-const Log_1 = require("src/Utils/Log");
+const Log_1 = require("../Utils/Log");
 exports.SetBotRole = new Command_1.Command("Set Role", "Only available to users with administrative access to the server. It will define what role the bot pings when a new pack drops, or when an announcement is made.", true, false, new discord_js_1.SlashCommandBuilder()
     .setName("setrole")
     .addRoleOption(option => option.setName('role')

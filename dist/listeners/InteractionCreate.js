@@ -44,7 +44,7 @@ const handleSlashCommand = async (interaction) => {
         if (serverInfo === undefined) {
             const errorEmbed = new discord_js_1.EmbedBuilder()
                 .setTitle("This server is not properly set up")
-                .setDescription("An admin needs to use the /setsafemode command before the bot can work properly")
+                .setDescription("An admin may need to use /setchannel before this feature can work properly")
                 .setColor(discord_js_1.Colors.DarkRed);
             await interaction.reply({
                 embeds: [errorEmbed]
@@ -89,7 +89,7 @@ const handleButtonCommand = async (interaction) => {
         if (serverInfo === undefined) {
             const errorEmbed = new discord_js_1.EmbedBuilder()
                 .setTitle("This server is not properly set up")
-                .setDescription("An admin needs to use the /setsafemode command before the bot can work properly")
+                .setDescription("An admin may need to use /setchannel before this command can work properly")
                 .setColor(discord_js_1.Colors.DarkRed);
             await interaction.reply({
                 embeds: [errorEmbed]

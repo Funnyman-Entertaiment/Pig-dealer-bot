@@ -8,10 +8,7 @@ const Log_1 = require("../Utils/Log");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const Pigs_1 = require("../database/Pigs");
 const UniquePigEvents_1 = require("../uniquePigEvents/UniquePigEvents");
-exports.UnfavouritePig = new Button_1.Button("UnfavouritePig", true, true, true, async function (interaction, serverInfo, messageInfo, userInfo) {
-    if (serverInfo === undefined) {
-        return;
-    }
+exports.UnfavouritePig = new Button_1.Button("UnfavouritePig", false, true, true, async function (interaction, _serverInfo, messageInfo, userInfo) {
     if (messageInfo === undefined) {
         return;
     }

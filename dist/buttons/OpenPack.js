@@ -339,7 +339,7 @@ exports.OpenPack = new Button_1.Button("OpenPack", true, true, false, async (int
     const message = interaction.message;
     const serverID = server.id;
     const userID = user.id;
-    const userInfo = await (0, UserInfo_1.GetUserInfo)(userID) ?? new UserInfo_1.UserInfo(userID, [], {}, false, []);
+    const userInfo = await (0, UserInfo_1.GetUserInfo)(userID) ?? (0, UserInfo_1.CreateNewDefaultUserInfo)(userID);
     (0, UserInfo_1.AddUserInfoToCache)(userInfo);
     const msgInfo = messageInfo;
     if (msgInfo === undefined) {
@@ -377,7 +377,7 @@ exports.OpenPack = new Button_1.Button("OpenPack", true, true, false, async (int
     if (embed === undefined) {
         (0, Log_1.LogError)(`Couldn't get embed from message in channel ${(0, Log_1.PrintChannel)(interaction.channel)} in server ${(0, Log_1.PrintServer)(server)}`);
         const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`Couldn't get embed from message`, `Make sure the bot is able to send embeds`);
-        interaction.reply({
+        interaction.followUp({
             ephemeral: true,
             embeds: [errorEmbed]
         });
