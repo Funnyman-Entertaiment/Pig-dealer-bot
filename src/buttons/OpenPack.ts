@@ -8,7 +8,7 @@ import { RARITIES_PER_PIG_COUNT } from "../Constants/RaritiesPerPigCount";
 import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
 import { GOLDEN_PIG_CHANCE_PER_RARITY } from "../Constants/GoldenPigChancePerRarity";
 import { MakeErrorEmbed } from "../Utils/Errors";
-import { AddUserInfoToCache, GetUserInfo, GetUserPigIDs, UserInfo } from "../database/UserInfo";
+import { AddUserInfoToCache, CreateNewDefaultUserInfo, GetUserInfo, GetUserPigIDs, UserInfo } from "../database/UserInfo";
 import { AddMessageInfoToCache, GetMessageInfo, MessageInfo, PigGalleryMessage, RandomPackMessage } from "../database/MessageInfo";
 import { GetAllPigs, GetPig, GetPigsBySet, GetPigsWithTag, Pig } from "../database/Pigs";
 import { GetServerInfo, ServerInfo } from "../database/ServerInfo";
@@ -21,7 +21,7 @@ import { GetAuthor } from "../Utils/GetAuthor";
 import { Cooldowns } from "../Constants/Variables";
 import { RunPostAssembledPigs, RunPostPackOpened } from "../seasonalEvents/SeasonalEvents";
 import { ChooseRandomElementFromList } from "../Utils/ExtraRandom";
-import { EGG_PACK } from "../Constants/SignificantPackIDs";
+import { EGG_PACK, PACK_2 } from "../Constants/SignificantPackIDs";
 
 function GetEditedEmbed(embed: EmbedBuilder, pack: Pack) {
     let openedImg = `./img/packs/opened/${pack.ID}.png`;
@@ -63,7 +63,10 @@ function CanUserOpenPack(interaction: ButtonInteraction, userInfo: UserInfo, msg
         return false;
     }
 
-    const lastTimeOpened = userInfo.LastTimeOpened;
+    let lastTimeOpened = userInfo.LastTimeOpened;
+    if(msgInfo.Pack === PACK_2){
+        lastTimeOpened = userInfo.LastTimeOpened2Pack;
+    }
     const currentTime = Timestamp.now();
 
     if (
@@ -97,7 +100,11 @@ function CanUserOpenPack(interaction: ButtonInteraction, userInfo: UserInfo, msg
 function SetUserCooldown(msgInfo: RandomPackMessage, userInfo: UserInfo, server: Guild, interaction: ButtonInteraction) {
     if (msgInfo.IgnoreCooldown) { return; }
 
-    userInfo.LastTimeOpened = Timestamp.now();
+    if(msgInfo.Pack === PACK_2){
+        userInfo.LastTimeOpened2Pack = Timestamp.now();
+    }else{
+        userInfo.LastTimeOpened = Timestamp.now();
+    }
 
     if (server.memberCount > 5) { return; }
 
@@ -111,7 +118,9 @@ function SetUserCooldown(msgInfo: RandomPackMessage, userInfo: UserInfo, server:
     });
 
     if (userInfo.WarnedAboutCooldown) {
-        userInfo.LastTimeOpened = Timestamp.fromMillis(userInfo.LastTimeOpened.toMillis() + 1000 * 60 * 60 * 96);
+        const longTime = Timestamp.fromMillis(Timestamp.now().toMillis() + 1000 * 60 * 60 * 96)
+        userInfo.LastTimeOpened2Pack = longTime;
+        userInfo.LastTimeOpened = longTime;
     }
 
     userInfo.WarnedAboutCooldown = true;
@@ -399,8 +408,15 @@ function GetEasterStagePack(msgInfo: MessageInfo, pack: Pack): Pack {
     return newPack;
 }
 
-export const OpenPack = new Button("OpenPack",
-    async (interaction) => {
+export const OpenPack = new Button(
+    "OpenPack",
+    true,
+    true,
+    false,
+    async (interaction, serverInfo, messageInfo) => {
+        if(serverInfo === undefined){ return; }
+        if(messageInfo === undefined){ return; }
+
         if (interaction.guild === null) {
             return;
         }
@@ -411,32 +427,11 @@ export const OpenPack = new Button("OpenPack",
 
         const serverID = server.id;
         const userID = user.id;
-        const msgID = message.id;
 
-        const serverInfo = await GetServerInfo(serverID) as any as ServerInfo;
-        const userInfo = await GetUserInfo(userID) ?? new UserInfo(
-            userID,
-            [],
-            {},
-            false,
-            []
-        );
+        const userInfo = await GetUserInfo(userID) ?? CreateNewDefaultUserInfo(userID);
         AddUserInfoToCache(userInfo);
-        const msgInfo = GetMessageInfo(serverID, msgID) as RandomPackMessage | undefined;
-
-        if (msgInfo === undefined) {
-            const errorEmbed = new EmbedBuilder()
-                .setTitle("This message has expired")
-                .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
-                .setColor(Colors.Red);
-
-            interaction.reply({
-                embeds: [errorEmbed],
-                ephemeral: true
-            });
-
-            return;
-        }
+        const msgInfo = messageInfo as RandomPackMessage;
+        if(msgInfo === undefined){return;}
 
         if (msgInfo.BeingOpenedBy !== undefined){
             const errorEmbed = new EmbedBuilder()
@@ -482,7 +477,7 @@ export const OpenPack = new Button("OpenPack",
         if (embed === undefined) {
             LogError(`Couldn't get embed from message in channel ${PrintChannel(interaction.channel as any as GuildChannel)} in server ${PrintServer(server)}`)
             const errorEmbed = MakeErrorEmbed(`Couldn't get embed from message`, `Make sure the bot is able to send embeds`);
-            interaction.reply({
+            interaction.followUp({
                 ephemeral: true,
                 embeds: [errorEmbed]
             });

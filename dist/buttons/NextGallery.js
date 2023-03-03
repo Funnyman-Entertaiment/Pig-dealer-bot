@@ -3,47 +3,24 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.NextGallery = void 0;
 const builders_1 = require("@discordjs/builders");
 const discord_js_1 = require("discord.js");
-const MessageInfo_1 = require("../database/MessageInfo");
 const Pigs_1 = require("../database/Pigs");
 const Errors_1 = require("../Utils/Errors");
 const Button_1 = require("../Button");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const UniquePigEvents_1 = require("../uniquePigEvents/UniquePigEvents");
 const Log_1 = require("../Utils/Log");
-exports.NextGallery = new Button_1.Button("GalleryNext", async (interaction) => {
+exports.NextGallery = new Button_1.Button("GalleryNext", false, true, false, async (interaction, _serverInfo, messageInfo) => {
+    if (messageInfo === undefined) {
+        return;
+    }
     await interaction.deferUpdate();
     const server = interaction.guild;
     if (server === null) {
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Error fetching server from interaction", "Where did you find this message?");
-        await interaction.followUp({
-            embeds: [errorEmbed]
-        });
         return;
     }
     const message = interaction.message;
-    const msgInfo = (0, MessageInfo_1.GetMessageInfo)(server.id, message.id);
+    const msgInfo = messageInfo;
     if (msgInfo === undefined) {
-        const errorEmbed = new builders_1.EmbedBuilder()
-            .setTitle("This message has expired")
-            .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
-            .setColor(discord_js_1.Colors.Red);
-        interaction.reply({
-            embeds: [errorEmbed],
-            ephemeral: true
-        });
-        return;
-    }
-    if (msgInfo.Type !== "PigGallery") {
-        return;
-    }
-    if (msgInfo.User === undefined) {
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("This message doesn't have an associated user", `Server: ${server.id}`, `Message: ${message.id}`);
-        await interaction.followUp({
-            embeds: [errorEmbed]
-        });
-        return;
-    }
-    if (interaction.user.id !== msgInfo.User) {
         return;
     }
     if (msgInfo.CurrentPig == msgInfo.Pigs.length - 1) {

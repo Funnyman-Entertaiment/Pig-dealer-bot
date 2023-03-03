@@ -3,6 +3,10 @@ import { Command } from "../Command";
 import { GetUserInfo } from "../database/UserInfo";
 
 export const ClearCooldown = new Command(
+    "",
+    "",
+    false,
+    false,
     new SlashCommandBuilder()
         .setName("clearcooldown")
         .addStringOption(option =>
@@ -31,6 +35,7 @@ export const ClearCooldown = new Command(
         }
 
         userInfo.LastTimeOpened = undefined;
+        userInfo.LastTimeOpened2Pack = undefined;
 
         const successEmbed = new EmbedBuilder()
             .setTitle("User's cooldown has been reset")

@@ -5,6 +5,10 @@ import { DevSpace } from "../Constants/Variables";
 import { PrintUser } from "../Utils/Log";
 
 export const Report = new Command(
+    "Report",
+    "Sends a report message to the devs.",
+    false,
+    false,
     new SlashCommandBuilder()
     .setName("report")
     .addStringOption(new SlashCommandStringOption()

@@ -9,6 +9,10 @@ import { LogInfo, PrintServer, PrintUser } from "../Utils/Log";
 
 
 export const SearchPig = new Command(
+    "Search Pig",
+    "Tells you which users own a certain pig, searched by ID.\nNote that the 0 digits at the start of lower digit IDs are purely cosmetic and are not needed when searching by ID. E.G. ACAB Pig (001) becomes only 1 when putting it into a command.",
+    false,
+    false,
     new SlashCommandBuilder()
         .setName("searchpig")
         .addStringOption(option =>

@@ -2,7 +2,7 @@ import { SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandStringO
 import { Command } from "../Command";
 import { TradeServerSpace } from "../Constants/Variables";
 import { GetAuthor } from "../Utils/GetAuthor";
-import { GetUserInfo, UserInfo } from "../database/UserInfo";
+import { CreateNewDefaultUserInfo, GetUserInfo, UserInfo } from "../database/UserInfo";
 
 async function AddTradeBulletin(interaction: CommandInteraction, userInfo: UserInfo, options: CommandInteractionOptionResolver){
     if (userInfo.BulletinMsgId !== undefined){
@@ -72,6 +72,10 @@ async function RemoveTradeBulletin(interaction: CommandInteraction, userInfo: Us
 }
 
 export const TradeBulletin = new Command(
+    "Trade Bulletin",
+    "Only available on the Pig Dealer Trading Forum.\n Use `/tradebulletin add` to post a text embed to the dedicated channel, used for finding trade partners.\nIf you wish to remove a bulletin, use `/tradebulletin` remove.",
+    false,
+    false,
     new SlashCommandBuilder()
         .setName("tradebulletin")
         .addSubcommand(new SlashCommandSubcommandBuilder()
@@ -95,13 +99,7 @@ export const TradeBulletin = new Command(
             return;
         }
     
-        const userInfo = await GetUserInfo(interaction.user.id) ?? new UserInfo(
-            interaction.user.id,
-            [],
-            {},
-            false,
-            []
-        )
+        const userInfo = await GetUserInfo(interaction.user.id) ?? CreateNewDefaultUserInfo(interaction.user.id);
 
         switch (subcommand) {
             case ("add"):

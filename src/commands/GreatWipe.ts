@@ -3,9 +3,13 @@ import { collection, getDocs, query } from "firebase/firestore/lite";
 import { client, db } from "../Bot";
 import { Command } from "../Command";
 import { TrySendMessageToChannel } from "../Utils/SendMessage";
-import { AddUserInfoToCache, GetUserInfo, SaveAllUserInfo, UserInfo } from "../database/UserInfo";
+import { AddUserInfoToCache, CreateNewDefaultUserInfo, GetUserInfo, SaveAllUserInfo, UserInfo } from "../database/UserInfo";
 
 export const GreatWipe = new Command(
+    "",
+    "",
+    false,
+    false,
     new SlashCommandBuilder()
         .setName("order66")
         .setDescription("Kill all the pigs"),
@@ -150,13 +154,7 @@ export const GreatWipe = new Command(
                 pigsToAdd.push("403");
             }
 
-            const userInfo = await GetUserInfo(userID)?? new UserInfo(
-                userID,
-                [],
-                {},
-                false,
-                []
-            );
+            const userInfo = await GetUserInfo(userID)?? CreateNewDefaultUserInfo(userID);
             AddUserInfoToCache(userInfo);
 
             pigsToAdd.forEach(pigToAdd =>{

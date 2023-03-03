@@ -8,6 +8,10 @@ import { GetUserInfo, GetUserPigIDs } from "../database/UserInfo";
 import { GetAuthor } from "../Utils/GetAuthor";
 
 export const ShowBinder = new Command(
+    "Binder",
+    "Shows you the pigs you own, with an image for each. You can define a user to see someone else's binder, rarity, to only see pigs of a certain rarity. You can also set favourites to True to only see pigs you've favourited.\nWhen viewing someone else's binder, a checkmark will signify if you already own a pig from their collection.",
+    false,
+    true,
     new SlashCommandBuilder()
         .setName("binder")
         .addUserOption(option =>
@@ -22,7 +26,8 @@ export const ShowBinder = new Command(
         .setDescription("Let's you check your own or someone else's pig binder")
         .setDMPermission(false),
 
-    async (interaction) => {
+    async (interaction, _serverInfo, userInfo) => {
+        if(userInfo === undefined){ return; }
         await interaction.deferReply();
 
         const server = interaction.guild;
@@ -56,7 +61,6 @@ export const ShowBinder = new Command(
             .map(rarity => rarity.trim().toLowerCase())
             .filter(rarity => rarity.length > 0);
 
-        const userInfo = await GetUserInfo(userId);
         let pigs = GetUserPigIDs(userInfo);
 
         if (userInfo === undefined) {

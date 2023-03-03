@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Foil = void 0;
 const discord_js_1 = require("discord.js");
 const Command_1 = require("../Command");
-const UserInfo_1 = require("../database/UserInfo");
 const GetAuthor_1 = require("../Utils/GetAuthor");
 const Pigs_1 = require("../database/Pigs");
 const PigsPerFoilRarity_1 = require("../Constants/PigsPerFoilRarity");
@@ -23,7 +22,7 @@ function GetFieldDescriptionFromPigAmounts(pigAmounts) {
     }
     return descriptionLines.join("\n");
 }
-exports.Foil = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.Foil = new Command_1.Command("Foil", "Used to craft a foil pig, using 100 common, 50 rare, 15 epic or 5 legendary pigs from the same set.\n`onlydupes` defines whether the bot only uses duped pigs for the process.\nYou will have the chance to review the pigs the bot has selected to use in the craft before it happens.\nIf you wish to manually select which pigs to use when crafting a foil pig, use `/foilpigs`", false, true, new discord_js_1.SlashCommandBuilder()
     .setName("foil")
     .addStringOption(new discord_js_1.SlashCommandStringOption()
     .setName("set")
@@ -50,24 +49,15 @@ exports.Foil = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     .setName("onlydupes")
     .setDescription("Whether to only use dupe pigs or not. Default is true."))
     .setDescription("Attempt to craft a foil pig using other random pigs for a set and rarity.")
-    .setDMPermission(false), async function (interaction) {
+    .setDMPermission(false), async function (interaction, _serverInfo, userInfo) {
+    if (userInfo === undefined) {
+        return;
+    }
     const server = interaction.guild;
     if (server === null) {
         return;
     }
     const user = interaction.user;
-    const userInfo = await (0, UserInfo_1.GetUserInfo)(user.id);
-    if (userInfo === undefined) {
-        const emptyEmbed = new discord_js_1.EmbedBuilder()
-            .setAuthor((0, GetAuthor_1.GetAuthor)(interaction))
-            .setColor(discord_js_1.Colors.DarkRed)
-            .setTitle("You have no pigs!")
-            .setDescription("Open some packs, you'll need a lot of them.");
-        await interaction.reply({
-            embeds: [emptyEmbed]
-        });
-        return;
-    }
     const options = interaction.options;
     let targetSet = options.getString("set", true).toLowerCase();
     const targetRarity = options.getString("rarity", true);

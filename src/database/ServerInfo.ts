@@ -9,15 +9,17 @@ export class ServerInfo extends DatabaseElement {
     Role: string | undefined
     HasSpawnedGoldenPig: boolean;
     YearsSpawnedAllNewYearDeco: number[];
+    YearsSpawnedLeprechaun: number[];
     Enabled: boolean;
 
-    constructor(id: string, channel: string | undefined, role: string | undefined, announcementChannel: string | undefined, hasSpawnedGoldenPig: boolean, yearsSpawnedAllNewYearDeco: number[], enabled: boolean) {
+    constructor(id: string, channel: string | undefined, role: string | undefined, announcementChannel: string | undefined, hasSpawnedGoldenPig: boolean, yearsSpawnedAllNewYearDeco: number[], yearsSpawnedLeprechaun: number[], enabled: boolean) {
         super(id);
         this.Channel = channel;
         this.Role = role;
         this.AnnouncementChannel = announcementChannel;
         this.HasSpawnedGoldenPig = hasSpawnedGoldenPig;
         this.YearsSpawnedAllNewYearDeco = yearsSpawnedAllNewYearDeco;
+        this.YearsSpawnedLeprechaun = yearsSpawnedLeprechaun;
         this.Enabled = enabled;
     }
 
@@ -25,6 +27,7 @@ export class ServerInfo extends DatabaseElement {
         const data: {[key: string]: any} = {
             HasSpawnedGoldenPig: this.HasSpawnedGoldenPig,
             YearsSpawnedAllNewYearDeco: this.YearsSpawnedAllNewYearDeco,
+            YearsSpawnedLeprechaun: this.YearsSpawnedLeprechaun,
             Enabled: this.Enabled
         }
 
@@ -46,6 +49,20 @@ export class ServerInfo extends DatabaseElement {
 
 
 export let CachedServerInfos: DatabaseElementList<ServerInfo> | undefined;
+
+
+export function CreateNewDefaultServerInfo(id: string){
+    return new ServerInfo(
+        id,
+        undefined,
+        undefined,
+        undefined,
+        false,
+        [],
+        [],
+        true
+    );
+}
 
 
 function GetCachedServerInfos(){
@@ -70,6 +87,7 @@ export function CreateServerInfoFromData(id: string, serverInfoData: DocumentDat
         serverInfoData.AnnouncementChannel ?? serverInfoData.Channel,
         serverInfoData.HasSpawnedGoldenPig ?? false,
         serverInfoData.YearsSpawnedAllNewYearDeco ?? [],
+        serverInfoData.YearsSpawnedLeprechaun ?? [],
         serverInfoData.Enabled ?? true
     )
 

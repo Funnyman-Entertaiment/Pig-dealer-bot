@@ -2,21 +2,28 @@ import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver } f
 import { Command } from "../Command";
 import { GetPig } from "../database/Pigs";
 import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
-import { GetUserInfo, GetUserPigIDs } from "../database/UserInfo";
+import { GetUserPigIDs } from "../database/UserInfo";
 import { GetAuthor } from "../Utils/GetAuthor";
 import { LogInfo, PrintUser } from "../Utils/Log";
 
 
 export const CheckPig = new Command(
+    "CheckPig",
+    "Shows a single pig in your collection",
+    false,
+    true,
     new SlashCommandBuilder()
     .setName("checkpig")
     .addStringOption(option =>
 		option.setName('id')
 			.setDescription('ID of the pig you wanna check.')
 			.setRequired(true))
-    .setDescription("Shows you a single pig you own."),
+    .setDescription("Shows you a single pig you own.")
+    .setDMPermission(false),
 
-    async function(interaction){
+    async function(interaction, _serverInfo, userInfo){
+        if(userInfo === undefined){ return; }
+
         const pigID = (interaction.options as CommandInteractionOptionResolver).getString('id', true);
 
         const pig = GetPig(pigID);
@@ -34,7 +41,8 @@ export const CheckPig = new Command(
             return;
         }
 
-        const userInfo = await GetUserInfo(interaction.user.id);
+        const server = interaction.guild;
+        if(server === null){ return; }
 
         const userPigs = GetUserPigIDs(userInfo);
 

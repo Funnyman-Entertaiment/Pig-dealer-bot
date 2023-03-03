@@ -10,6 +10,10 @@ import { TrySendAutoRemoveMessage } from "../Utils/SendMessage";
 import { PrintServer } from "../Utils/Log";
 
 export const SpawnPackUser = new Command(
+    "",
+    "",
+    false,
+    false,
     new SlashCommandBuilder()
         .setName("spawnpackuser")
         .addStringOption(new SlashCommandStringOption()

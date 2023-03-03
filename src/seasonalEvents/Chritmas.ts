@@ -9,11 +9,12 @@ export const Christmas = new SeasonalEvent(
     "Pigsmas",
     "This is pigsmas",
     () => {
-    const currentDate = Timestamp.now().toDate();
+        const currentDate = Timestamp.now().toDate();
 
-    return currentDate.getUTCMonth() === 11 &&
-        currentDate.getUTCDate() >= 21 && currentDate.getUTCDate() <= 25;
-});
+        return currentDate.getUTCMonth() === 11 &&
+            currentDate.getUTCDate() >= 21 && currentDate.getUTCDate() <= 25;
+    }
+);
 
 Christmas.PostPackOpened = function(pack, _serverInfo, chosenPigs, pigsToShow){
     if (pack.ID === STOCKING_PACK) { return; }

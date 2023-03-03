@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetServerInfo = exports.AddServerInfosToCache = exports.AddServerInfoToCache = exports.CreateServerInfoFromData = exports.SaveAllServerInfo = exports.CachedServerInfos = exports.ServerInfo = void 0;
+exports.GetServerInfo = exports.AddServerInfosToCache = exports.AddServerInfoToCache = exports.CreateServerInfoFromData = exports.SaveAllServerInfo = exports.CreateNewDefaultServerInfo = exports.CachedServerInfos = exports.ServerInfo = void 0;
 const lite_1 = require("firebase/firestore/lite");
 const DatabaseCacheList_1 = require("./DatabaseCacheList");
 const DatabaseElement_1 = require("./DatabaseElement");
@@ -11,20 +11,23 @@ class ServerInfo extends DatabaseElement_1.DatabaseElement {
     Role;
     HasSpawnedGoldenPig;
     YearsSpawnedAllNewYearDeco;
+    YearsSpawnedLeprechaun;
     Enabled;
-    constructor(id, channel, role, announcementChannel, hasSpawnedGoldenPig, yearsSpawnedAllNewYearDeco, enabled) {
+    constructor(id, channel, role, announcementChannel, hasSpawnedGoldenPig, yearsSpawnedAllNewYearDeco, yearsSpawnedLeprechaun, enabled) {
         super(id);
         this.Channel = channel;
         this.Role = role;
         this.AnnouncementChannel = announcementChannel;
         this.HasSpawnedGoldenPig = hasSpawnedGoldenPig;
         this.YearsSpawnedAllNewYearDeco = yearsSpawnedAllNewYearDeco;
+        this.YearsSpawnedLeprechaun = yearsSpawnedLeprechaun;
         this.Enabled = enabled;
     }
     GetData() {
         const data = {
             HasSpawnedGoldenPig: this.HasSpawnedGoldenPig,
             YearsSpawnedAllNewYearDeco: this.YearsSpawnedAllNewYearDeco,
+            YearsSpawnedLeprechaun: this.YearsSpawnedLeprechaun,
             Enabled: this.Enabled
         };
         if (this.Channel !== undefined) {
@@ -40,6 +43,10 @@ class ServerInfo extends DatabaseElement_1.DatabaseElement {
     }
 }
 exports.ServerInfo = ServerInfo;
+function CreateNewDefaultServerInfo(id) {
+    return new ServerInfo(id, undefined, undefined, undefined, false, [], [], true);
+}
+exports.CreateNewDefaultServerInfo = CreateNewDefaultServerInfo;
 function GetCachedServerInfos() {
     if (exports.CachedServerInfos === undefined) {
         exports.CachedServerInfos = new DatabaseCacheList_1.DatabaseElementList();
@@ -51,7 +58,7 @@ function SaveAllServerInfo() {
 }
 exports.SaveAllServerInfo = SaveAllServerInfo;
 function CreateServerInfoFromData(id, serverInfoData) {
-    const newPack = new ServerInfo(id, serverInfoData.Channel, serverInfoData.Role, serverInfoData.AnnouncementChannel ?? serverInfoData.Channel, serverInfoData.HasSpawnedGoldenPig ?? false, serverInfoData.YearsSpawnedAllNewYearDeco ?? [], serverInfoData.Enabled ?? true);
+    const newPack = new ServerInfo(id, serverInfoData.Channel, serverInfoData.Role, serverInfoData.AnnouncementChannel ?? serverInfoData.Channel, serverInfoData.HasSpawnedGoldenPig ?? false, serverInfoData.YearsSpawnedAllNewYearDeco ?? [], serverInfoData.YearsSpawnedLeprechaun ?? [], serverInfoData.Enabled ?? true);
     return newPack;
 }
 exports.CreateServerInfoFromData = CreateServerInfoFromData;

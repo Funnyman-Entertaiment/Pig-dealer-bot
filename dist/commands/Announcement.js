@@ -5,6 +5,7 @@ const discord_js_1 = require("discord.js");
 const Command_1 = require("../Command");
 const lite_1 = require("firebase/firestore/lite");
 const Bot_1 = require("../Bot");
+const Links_1 = require("../Constants/Links");
 let announcementEmbed;
 let annoucementFields = [];
 function NewAnnouncement(interaction, options) {
@@ -120,10 +121,10 @@ async function SendAnnouncement(interaction) {
     const row = new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.ButtonBuilder()
         .setLabel("Invite the bot!")
         .setStyle(discord_js_1.ButtonStyle.Link)
-        .setURL("https://discord.com/api/oauth2/authorize?client_id=1040735137228406884&permissions=268470272&scope=bot%20applications.commands"), new discord_js_1.ButtonBuilder()
+        .setURL(Links_1.BOT_INVITE_LINK), new discord_js_1.ButtonBuilder()
         .setLabel("Join the server!")
         .setStyle(discord_js_1.ButtonStyle.Link)
-        .setURL("https://discord.gg/wnAnhRyKjM"));
+        .setURL(Links_1.TRADE_SERVER_INVITE_LINK));
     const q = (0, lite_1.query)((0, lite_1.collection)(Bot_1.db, "serverInfo"));
     const servers = await (0, lite_1.getDocs)(q);
     servers.forEach(async (server) => {
@@ -171,7 +172,7 @@ async function SendAnnouncement(interaction) {
         embeds: [successEmbed]
     });
 }
-exports.Announcement = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.Announcement = new Command_1.Command("", "", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("announcement")
     .addSubcommand(subcommand => subcommand
     .setName("new")

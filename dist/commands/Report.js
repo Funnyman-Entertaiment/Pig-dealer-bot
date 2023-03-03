@@ -6,7 +6,7 @@ const Command_1 = require("../Command");
 const GetAuthor_1 = require("../Utils/GetAuthor");
 const Variables_1 = require("../Constants/Variables");
 const Log_1 = require("../Utils/Log");
-exports.Report = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.Report = new Command_1.Command("Report", "Sends a report message to the devs.", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("report")
     .addStringOption(new discord_js_1.SlashCommandStringOption()
     .setName("content")

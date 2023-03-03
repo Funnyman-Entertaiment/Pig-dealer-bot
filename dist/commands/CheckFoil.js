@@ -3,17 +3,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CheckFoils = void 0;
 const discord_js_1 = require("discord.js");
 const Command_1 = require("../Command");
-const UserInfo_1 = require("../database/UserInfo");
 const Pigs_1 = require("../database/Pigs");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const MessageInfo_1 = require("../database/MessageInfo");
 const FOILED_RARITIES = ["Common", "Rare", "Epic", "Legendary"];
-exports.CheckFoils = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.CheckFoils = new Command_1.Command("Check Foils", "Shows you your progress on your eligibility for crafting a foil from every rarity of every set.", false, true, new discord_js_1.SlashCommandBuilder()
     .setName("checkfoils")
     .setDescription("Gives you a list of all foils you can craft.")
-    .setDMPermission(false), async function (interaction) {
+    .addBooleanOption(new discord_js_1.SlashCommandBooleanOption()
+    .setName("onlydupes")
+    .setDescription("Whether to only count dupe pigs or not. Default is true."))
+    .setDMPermission(false), async function (interaction, _serverInfo, userInfo) {
+    if (userInfo === undefined) {
+        return;
+    }
+    const options = interaction.options;
+    const onlydupes = options.getBoolean("onlydupes") ?? true;
     const user = interaction.user;
-    const userInfo = await (0, UserInfo_1.GetUserInfo)(user.id);
     if (userInfo === undefined) {
         const noPigsEmbed = new discord_js_1.EmbedBuilder()
             .setTitle("You have no pigs!")
@@ -32,7 +38,11 @@ exports.CheckFoils = new Command_1.Command(new discord_js_1.SlashCommandBuilder(
         if (!FOILED_RARITIES.includes(pig.Rarity)) {
             return;
         }
-        const userAmount = userPigs[pig.ID] ?? 0;
+        let userAmount = userPigs[pig.ID] ?? 0;
+        userAmount = userAmount / 1;
+        if (onlydupes) {
+            userAmount = Math.max(0, userAmount - 1);
+        }
         if (pigAmountsPerSet[pig.Set] === undefined) {
             pigAmountsPerSet[pig.Set] = {};
         }
@@ -40,7 +50,7 @@ exports.CheckFoils = new Command_1.Command(new discord_js_1.SlashCommandBuilder(
         if (pigAmountsPerRarity[pig.Rarity] === undefined) {
             pigAmountsPerRarity[pig.Rarity] = 0;
         }
-        pigAmountsPerRarity[pig.Rarity] += userAmount / 1;
+        pigAmountsPerRarity[pig.Rarity] += userAmount;
     });
     const checkFoilsEmbed = new discord_js_1.EmbedBuilder()
         .setTitle("List of set's you can craft foils of")

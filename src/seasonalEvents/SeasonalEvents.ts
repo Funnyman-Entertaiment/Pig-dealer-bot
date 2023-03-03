@@ -4,12 +4,14 @@ import { ServerInfo } from "../database/ServerInfo";
 import { Christmas } from "./Chritmas";
 import { Easter } from "./Easter";
 import { NewYears } from "./NewYears";
+import { SaintPatricks } from "./SaintPatricks";
 import { SeasonalEvent } from "./SeasonalEvent";
 
 const SeasonalEvents: SeasonalEvent[] = [
     Christmas,
     NewYears,
-    Easter
+    Easter,
+    SaintPatricks
 ];
 
 export function GetActiveEvents(){

@@ -9,7 +9,7 @@ const Pigs_1 = require("../database/Pigs");
 const UserInfo_1 = require("../database/UserInfo");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const MessageInfo_1 = require("../database/MessageInfo");
-exports.ShowBinderList = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.ShowBinderList = new Command_1.Command("Binder List", "Shows you the pigs you own in list view. By default, it sorts them by set, but by setting that value to false it will sort them by ID.\nYou can also define a rarity and/or a user to only see pigs from only one rarity or another user, respectively.\nWhen viewing someone else's binder, a checkmark will signify if you already own a pig from their collection.", false, true, new discord_js_1.SlashCommandBuilder()
     .setName("binderlist")
     .addBooleanOption(option => option.setName('set')
     .setDescription('Whether to order the pigs by set or not.'))
@@ -20,7 +20,10 @@ exports.ShowBinderList = new Command_1.Command(new discord_js_1.SlashCommandBuil
     .addBooleanOption(option => option.setName('favourites')
     .setDescription('show only favourite pigs'))
     .setDescription("Let's you check your own or someone else's pig binder")
-    .setDMPermission(false), async (interaction) => {
+    .setDMPermission(false), async (interaction, _serverInfo, userInfo) => {
+    if (userInfo === undefined) {
+        return;
+    }
     await interaction.deferReply();
     const server = interaction.guild;
     if (server === null) {
@@ -33,7 +36,6 @@ exports.ShowBinderList = new Command_1.Command(new discord_js_1.SlashCommandBuil
     const raritiesToFilter = rarities.split(',')
         .map(rarity => rarity.trim().toLowerCase())
         .filter(rarity => rarity.length > 0);
-    let userId;
     let author;
     if (user === null) {
         (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} is checking its own binder`);
@@ -41,28 +43,14 @@ exports.ShowBinderList = new Command_1.Command(new discord_js_1.SlashCommandBuil
         if (author === null) {
             return;
         }
-        userId = interaction.user.id;
     }
     else {
         (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} is checking the binder of ${(0, Log_1.PrintUser)(user)}`);
-        userId = user.id;
         const username = user.username;
         const avatar = user.avatarURL();
         author = { name: username, iconURL: avatar === null ? "" : avatar };
     }
-    const userInfo = await (0, UserInfo_1.GetUserInfo)(userId);
     let pigs = (0, UserInfo_1.GetUserPigs)(userInfo);
-    if (userInfo === undefined) {
-        const emptyEmbed = new discord_js_1.EmbedBuilder()
-            .setAuthor(author)
-            .setColor(discord_js_1.Colors.DarkRed)
-            .setTitle("This user has no pigs!")
-            .setDescription("Open some packs, loser");
-        await interaction.followUp({
-            embeds: [emptyEmbed]
-        });
-        return;
-    }
     if (raritiesToFilter.length > 0) {
         pigs = pigs.filter(pig => {
             return raritiesToFilter.includes(pig.Rarity.toLowerCase());

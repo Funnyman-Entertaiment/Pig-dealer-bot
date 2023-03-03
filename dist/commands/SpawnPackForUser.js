@@ -11,7 +11,7 @@ const DropPack_1 = require("../Utils/DropPack");
 const Errors_1 = require("../Utils/Errors");
 const SendMessage_1 = require("../Utils/SendMessage");
 const Log_1 = require("../Utils/Log");
-exports.SpawnPackUser = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.SpawnPackUser = new Command_1.Command("", "", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("spawnpackuser")
     .addStringOption(new discord_js_1.SlashCommandStringOption()
     .setName("pack")

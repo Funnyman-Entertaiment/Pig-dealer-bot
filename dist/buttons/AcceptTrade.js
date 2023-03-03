@@ -37,33 +37,21 @@ function AddOfferedPigsToUser(userInfo, pigOffer) {
     }
     return pigsAdded;
 }
-exports.AcceptTrade = new Button_1.Button("AcceptTrade", async (interaction) => {
+exports.AcceptTrade = new Button_1.Button("AcceptTrade", false, true, false, async (interaction, _serverInfo, messageInfo) => {
+    if (messageInfo === undefined) {
+        return;
+    }
     const server = interaction.guild;
     if (server === null) {
         return;
     }
     const message = interaction.message;
-    const user = interaction.user;
-    const msgInfo = (0, MessageInfo_1.GetMessageInfo)(server.id, message.id);
+    const msgInfo = messageInfo;
     if (msgInfo === undefined) {
-        const errorEmbed = new builders_1.EmbedBuilder()
-            .setTitle("This message has expired")
-            .setDescription("Trade messages expire after ~15 minutes of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
-            .setColor(discord_js_1.Colors.Red);
-        interaction.reply({
-            embeds: [errorEmbed],
-            ephemeral: true
-        });
         return;
     }
-    if (msgInfo.Type !== "PigTrade") {
-        return;
-    }
-    if (msgInfo.User !== user.id) {
-        return;
-    }
-    const starterInfo = await (0, UserInfo_1.GetUserInfo)(msgInfo.TradeStarterID) ?? new UserInfo_1.UserInfo(msgInfo.TradeStarterID, [], {}, false, []);
-    const receiverInfo = await (0, UserInfo_1.GetUserInfo)(msgInfo.TradeReceiverID) ?? new UserInfo_1.UserInfo(msgInfo.TradeReceiverID, [], {}, false, []);
+    const starterInfo = await (0, UserInfo_1.GetUserInfo)(msgInfo.TradeStarterID) ?? (0, UserInfo_1.CreateNewDefaultUserInfo)(msgInfo.TradeStarterID);
+    const receiverInfo = await (0, UserInfo_1.GetUserInfo)(msgInfo.TradeReceiverID) ?? (0, UserInfo_1.CreateNewDefaultUserInfo)(msgInfo.TradeReceiverID);
     await (0, UserInfo_1.AddUserInfosToCache)([starterInfo, receiverInfo]);
     const hasAddedPigToStarter = RemoveOfferedPigsFromUser(starterInfo, msgInfo.TradeStarterOffer);
     const hasAddedPigToReceiver = RemoveOfferedPigsFromUser(receiverInfo, msgInfo.TradeReceiverOffer);

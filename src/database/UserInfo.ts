@@ -5,6 +5,7 @@ import { db } from "../Bot";
 import { GetPig, Pig } from "./Pigs";
 
 export class UserInfo extends DatabaseElement {
+    LastTimeOpened2Pack: Timestamp | undefined;
     LastTimeOpened: Timestamp | undefined;
     AssembledPigs: string[];
     Pigs: {[key: string]: number};
@@ -12,10 +13,11 @@ export class UserInfo extends DatabaseElement {
     FavouritePigs: string[];
     BulletinMsgId: string | undefined;
 
-    constructor(id: string, assembledPigs: string[], pigs: {[key: string]: number}, warnedAboutCooldown: boolean, favouritePigs: string[], bulletinMsgId?: string, lastTimeOpened?: Timestamp) {
+    constructor(id: string, assembledPigs: string[], pigs: {[key: string]: number}, warnedAboutCooldown: boolean, favouritePigs: string[], bulletinMsgId?: string, lastTimeOpened?: Timestamp, lastTimeOpened2Pack?: Timestamp) {
         super(id);
         this.AssembledPigs = assembledPigs;
         this.Pigs = pigs;
+        this.LastTimeOpened2Pack = lastTimeOpened2Pack;
         this.LastTimeOpened = lastTimeOpened;
         this.WarnedAboutCooldown = warnedAboutCooldown;
         this.FavouritePigs = favouritePigs;
@@ -34,6 +36,10 @@ export class UserInfo extends DatabaseElement {
             data.LastTimeOpened = this.LastTimeOpened;
         }
 
+        if (this.LastTimeOpened2Pack !== undefined){
+            data.LastTimeOpened2Pack = this.LastTimeOpened2Pack;
+        }
+
         if(this.BulletinMsgId !== undefined){
             data.BulletinMsgId = this.BulletinMsgId;
         }
@@ -44,6 +50,17 @@ export class UserInfo extends DatabaseElement {
 
 
 let CachedUserInfos: DatabaseElementList<UserInfo> | undefined;
+
+
+export function CreateNewDefaultUserInfo(id: string){
+    return new UserInfo(
+        id,
+        [],
+        {},
+        false,
+        []
+    );
+}
 
 
 export async function SaveAllUserInfo(){
@@ -60,6 +77,7 @@ function CreateUserInfoFromData(id: string, userInfoData: DocumentData): UserInf
         userInfoData.FavouritePigs?? [],
         userInfoData.BulletinMsgId,
         userInfoData.LastTimeOpened,
+        userInfoData.LastTimeOpened2Pack
     );
 
     return newUserInfo;

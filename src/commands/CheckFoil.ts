@@ -1,6 +1,5 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, CommandInteractionOptionResolver, EmbedBuilder, SlashCommandBooleanOption, SlashCommandBuilder } from "discord.js";
 import { Command } from "../Command";
-import { GetUserInfo } from "../database/UserInfo";
 import { GetAllPigs } from "../database/Pigs";
 import { AddFoilChecksToEmbed } from "../Utils/PigRenderer";
 import { AddMessageInfoToCache, FoilChecksMessage } from "../database/MessageInfo";
@@ -8,14 +7,25 @@ import { AddMessageInfoToCache, FoilChecksMessage } from "../database/MessageInf
 const FOILED_RARITIES = ["Common", "Rare", "Epic", "Legendary"];
 
 export const CheckFoils = new Command(
+    "Check Foils",
+    "Shows you your progress on your eligibility for crafting a foil from every rarity of every set.",
+    false,
+    true,
     new SlashCommandBuilder()
         .setName("checkfoils")
         .setDescription("Gives you a list of all foils you can craft.")
+        .addBooleanOption(new SlashCommandBooleanOption()
+            .setName("onlydupes")
+            .setDescription("Whether to only count dupe pigs or not. Default is true."))
         .setDMPermission(false),
 
-    async function (interaction) {
+    async function (interaction, _serverInfo, userInfo) {
+        if(userInfo === undefined){ return; }
+
+        const options = (interaction.options as CommandInteractionOptionResolver);
+        const onlydupes = options.getBoolean("onlydupes") ?? true;
+
         const user = interaction.user;
-        const userInfo = await GetUserInfo(user.id);
 
         if (userInfo === undefined) {
             const noPigsEmbed = new EmbedBuilder()
@@ -38,7 +48,12 @@ export const CheckFoils = new Command(
         pigs.forEach(pig => {
             if (!FOILED_RARITIES.includes(pig.Rarity)) { return; }
 
-            const userAmount = userPigs[pig.ID] ?? 0;
+            let userAmount = userPigs[pig.ID] ?? 0;
+            userAmount = userAmount / 1; //For some reason it gets treated as a string
+
+            if(onlydupes){
+                userAmount = Math.max(0, userAmount - 1);
+            }
 
             if (pigAmountsPerSet[pig.Set] === undefined) {
                 pigAmountsPerSet[pig.Set] = {};
@@ -50,7 +65,7 @@ export const CheckFoils = new Command(
                 pigAmountsPerRarity[pig.Rarity] = 0;
             }
 
-            pigAmountsPerRarity[pig.Rarity] += userAmount / 1;
+            pigAmountsPerRarity[pig.Rarity] += userAmount;
         });
 
         const checkFoilsEmbed = new EmbedBuilder()

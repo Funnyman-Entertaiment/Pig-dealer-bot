@@ -8,10 +8,14 @@ import { TrySendAutoRemoveMessage, TrySendMessageToChannel } from "../Utils/Send
 import { PrintServer } from "../Utils/Log";
 import { GetPig } from "../database/Pigs";
 import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
-import { AddUserInfoToCache, GetUserInfo, UserInfo } from "../database/UserInfo";
+import { AddUserInfoToCache, CreateNewDefaultUserInfo, GetUserInfo, UserInfo } from "../database/UserInfo";
 import { CheckAndSendAssemblyPigEmbeds } from "../Utils/AssemblyyPigs";
 
 export const GivePig = new Command(
+    "",
+    "",
+    false,
+    false,
     new SlashCommandBuilder()
         .setName("givepig")
         .addStringOption(new SlashCommandStringOption()
@@ -122,15 +126,8 @@ export const GivePig = new Command(
         let userInfo = await GetUserInfo(userID);
 
         if(userInfo === undefined){
-            userInfo = new UserInfo(
-                userID,
-                [],
-                {
-                    [pig.ID]: 1
-                },
-                false,
-                []
-            );
+            userInfo = CreateNewDefaultUserInfo(userID);
+            userInfo.Pigs[pig.ID] = 1
             AddUserInfoToCache(userInfo);
         }else{
             if(userInfo.Pigs[pig.ID] === undefined){
@@ -150,7 +147,7 @@ export const GivePig = new Command(
             .setTitle(title?? `${user.user.username} has received a free pig!`);
 
         const img = AddPigRenderToEmbed(pigEmbed, {
-            pig: pig
+            pig: pig,
         });
 
         if(sendEmbed){

@@ -4,6 +4,10 @@ import { SaveAllUserInfo } from "../database/UserInfo";
 import { SaveAllServerInfo } from "../database/ServerInfo";
 
 export const SaveCache = new Command(
+    "",
+    "",
+    false,
+    false,
     new SlashCommandBuilder()
         .setName("savecache")
         .setDescription("Saves all cache to the db"),

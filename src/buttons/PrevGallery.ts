@@ -1,5 +1,5 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, EmbedBuilder, GuildChannel } from "discord.js";
-import { GetMessageInfo, PigGalleryMessage } from "../database/MessageInfo";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, GuildChannel } from "discord.js";
+import { PigGalleryMessage } from "../database/MessageInfo";
 import { GetPig } from "../database/Pigs";
 import { MakeErrorEmbed } from "../Utils/Errors";
 import { Button } from "../Button";
@@ -8,58 +8,23 @@ import { DoesPigIdHaveUniqueEvent, TriggerUniquePigEvent } from "../uniquePigEve
 import { LogError, PrintChannel, PrintServer } from "../Utils/Log";
 
 
-export const PrevGallery = new Button("GalleryPrevious",
-    async (interaction) => {
-        await interaction.deferUpdate();
+export const PrevGallery = new Button(
+    "GalleryPrevious",
+    false,
+    true,
+    false,
+    async (interaction, _serverInfo, messageInfo) => {
+        if(messageInfo === undefined){ return; }
 
         const server = interaction.guild;
-        if(server === null) {
-            const errorEmbed = MakeErrorEmbed(
-                "Error fetching server from interaction",
-                "Where did you find this message?"
-            );
+        if(server === null){ return; }
 
-            await interaction.followUp({
-                embeds: [errorEmbed]
-            });
-
-            return;
-        }
+        await interaction.deferUpdate();
 
         const message = interaction.message;
-        const msgInfo = GetMessageInfo(server.id, message.id) as PigGalleryMessage;
+        const msgInfo = messageInfo as PigGalleryMessage;
 
-        if(msgInfo === undefined){
-            const errorEmbed = new EmbedBuilder()
-                .setTitle("This message has expired")
-                .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
-                .setColor(Colors.Red);
-            
-            interaction.reply({
-                embeds: [errorEmbed],
-                ephemeral: true
-            });
-    
-            return;
-        }
-
-        if(msgInfo === undefined || msgInfo.Type !== "PigGallery"){ return; }
-
-        if(msgInfo.User === undefined){
-            const errorEmbed = MakeErrorEmbed(
-                "This message doesn't have an associated user",
-                `Server: ${server.id}`,
-                `Message: ${message.id}`
-            );
-
-            await interaction.followUp({
-                embeds: [errorEmbed]
-            });
-
-            return;
-        }
-
-        if(interaction.user.id !== msgInfo.User){ return; }
+        if(msgInfo === undefined){return;}
 
         if(msgInfo.CurrentPig === 0){ return; }
 

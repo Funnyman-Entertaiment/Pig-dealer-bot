@@ -5,6 +5,10 @@ import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
 
 
 export const TestPig = new Command(
+    "",
+    "",
+    false,
+    false,
     new SlashCommandBuilder()
     .setName("testpig")
     .addStringOption(option =>
@@ -14,11 +18,9 @@ export const TestPig = new Command(
     .setDescription("pig"),
 
     async (interaction) => {
-        const rawId = (interaction.options as CommandInteractionOptionResolver).getString('id')
-        let id: string = "0"
-        if(rawId !== null){
-            id = rawId.toString();
-        }
+        const options = (interaction.options as CommandInteractionOptionResolver)
+        const rawId = options.getString('id', true)
+        const id = rawId.toString();
 
         const pig = GetPig(id);
 

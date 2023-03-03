@@ -5,6 +5,10 @@ import { COLOR_PER_PACK_RARITY } from "../Constants/ColorPerPackRarity";
 
 
 export const TestPack = new Command(
+    "",
+    "",
+    false,
+    false,
     new SlashCommandBuilder()
     .setName("testpack")
     .addIntegerOption(option =>

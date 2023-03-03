@@ -9,6 +9,10 @@ import { PigListMessage, AddMessageInfoToCache } from "../database/MessageInfo";
 
 
 export const ShowBinderList = new Command(
+    "Binder List",
+    "Shows you the pigs you own in list view. By default, it sorts them by set, but by setting that value to false it will sort them by ID.\nYou can also define a rarity and/or a user to only see pigs from only one rarity or another user, respectively.\nWhen viewing someone else's binder, a checkmark will signify if you already own a pig from their collection.",
+    false,
+    true,
     new SlashCommandBuilder()
         .setName("binderlist")
         .addBooleanOption(option =>
@@ -26,7 +30,9 @@ export const ShowBinderList = new Command(
         .setDescription("Let's you check your own or someone else's pig binder")
         .setDMPermission(false),
 
-    async (interaction) => {
+    async (interaction, _serverInfo, userInfo) => {
+        if(userInfo === undefined){ return; }
+
         await interaction.deferReply();
 
         const server = interaction.guild;
@@ -40,7 +46,6 @@ export const ShowBinderList = new Command(
             .map(rarity => rarity.trim().toLowerCase())
             .filter(rarity => rarity.length > 0);
 
-        let userId: string;
         let author: { name: string, iconURL: string } | null;
 
         if (user === null) {
@@ -50,31 +55,15 @@ export const ShowBinderList = new Command(
             if (author === null) {
                 return;
             }
-            userId = interaction.user.id;
         } else {
             LogInfo(`User ${PrintUser(interaction.user)} is checking the binder of ${PrintUser(user)}`)
-            userId = user.id;
             const username = user.username;
             const avatar = user.avatarURL();
 
             author = { name: username, iconURL: avatar === null ? "" : avatar };
         }
 
-        const userInfo = await GetUserInfo(userId);
         let pigs = GetUserPigs(userInfo);
-
-        if (userInfo === undefined) {
-            const emptyEmbed = new EmbedBuilder()
-                .setAuthor(author)
-                .setColor(Colors.DarkRed)
-                .setTitle("This user has no pigs!")
-                .setDescription("Open some packs, loser");
-
-            await interaction.followUp({
-                embeds: [emptyEmbed]
-            });
-            return;
-        }
 
         if (raritiesToFilter.length > 0) {
             pigs = pigs.filter(pig => {

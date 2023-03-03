@@ -4,10 +4,12 @@ exports.RunPostChooseRandomPack = exports.RunPostAssembledPigs = exports.RunPost
 const Chritmas_1 = require("./Chritmas");
 const Easter_1 = require("./Easter");
 const NewYears_1 = require("./NewYears");
+const SaintPatricks_1 = require("./SaintPatricks");
 const SeasonalEvents = [
     Chritmas_1.Christmas,
     NewYears_1.NewYears,
-    Easter_1.Easter
+    Easter_1.Easter,
+    SaintPatricks_1.SaintPatricks
 ];
 function GetActiveEvents() {
     return SeasonalEvents.filter(x => x.IsActive());

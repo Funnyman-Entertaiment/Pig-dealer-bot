@@ -13,7 +13,7 @@ const Pigs_1 = require("../database/Pigs");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const UserInfo_1 = require("../database/UserInfo");
 const AssemblyyPigs_1 = require("../Utils/AssemblyyPigs");
-exports.GivePig = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.GivePig = new Command_1.Command("", "", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("givepig")
     .addStringOption(new discord_js_1.SlashCommandStringOption()
     .setName("pig")
@@ -115,9 +115,8 @@ exports.GivePig = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     }
     let userInfo = await (0, UserInfo_1.GetUserInfo)(userID);
     if (userInfo === undefined) {
-        userInfo = new UserInfo_1.UserInfo(userID, [], {
-            [pig.ID]: 1
-        }, false, []);
+        userInfo = (0, UserInfo_1.CreateNewDefaultUserInfo)(userID);
+        userInfo.Pigs[pig.ID] = 1;
         (0, UserInfo_1.AddUserInfoToCache)(userInfo);
     }
     else {
@@ -136,7 +135,7 @@ exports.GivePig = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     const pigEmbed = new discord_js_1.EmbedBuilder()
         .setTitle(title ?? `${user.user.username} has received a free pig!`);
     const img = (0, PigRenderer_1.AddPigRenderToEmbed)(pigEmbed, {
-        pig: pig
+        pig: pig,
     });
     if (sendEmbed) {
         (0, SendMessage_1.TrySendMessageToChannel)(serverID, serverInfo.Channel, {

@@ -6,7 +6,7 @@ const Command_1 = require("../Command");
 const Errors_1 = require("../Utils/Errors");
 const ServerInfo_1 = require("../database/ServerInfo");
 const Log_1 = require("../Utils/Log");
-exports.GetRole = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.GetRole = new Command_1.Command("Get Role", "Gives you the role the bot pings when a pack drops or an announcement is made. It can be removed with `/removerole`.", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("getrole")
     .setDescription("Assigns you the pig collector role in this server")
     .setDMPermission(false), async function (interaction) {

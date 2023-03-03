@@ -1,9 +1,9 @@
-import { SlashCommandBuilder, SlashCommandStringOption, CommandInteraction, SlashCommandSubcommandBuilder, SlashCommandUserOption, CommandInteractionOptionResolver, EmbedBuilder, Colors, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import { SlashCommandBuilder, SlashCommandStringOption, CommandInteraction, SlashCommandSubcommandBuilder, SlashCommandUserOption, CommandInteractionOptionResolver, EmbedBuilder, Colors, ActionRowBuilder, ButtonBuilder, ButtonStyle, GuildChannel, TextChannel } from "discord.js";
 import { Command } from "../Command";
 import { GetPig } from "../database/Pigs";
 import { GetAuthor } from "../Utils/GetAuthor";
 import { AddMessageInfoToCache, GetTradeOfferForUser, IsUserInTrade, PigTradeMessage, RemoveMessageInfoFromCache } from "../database/MessageInfo";
-import { AddUserInfosToCache, GetUserInfo, UserInfo } from "../database/UserInfo";
+import { AddUserInfosToCache, CreateNewDefaultUserInfo, GetUserInfo } from "../database/UserInfo";
 import { client } from "../Bot";
 import { MakeErrorEmbed } from "../Utils/Errors";
 import { LogInfo, PrintUser } from "../Utils/Log";
@@ -160,20 +160,8 @@ async function NewTrade(interaction: CommandInteraction, options: CommandInterac
         return;
     }
 
-    const starterInfo = await GetUserInfo(tradeStarter.id) ?? new UserInfo(
-        tradeStarter.id,
-        [],
-        {},
-        false,
-        []
-    );
-    const receiverInfo = await GetUserInfo(tradeReceiver.id) ?? new UserInfo(
-        tradeReceiver.id,
-        [],
-        {},
-        false,
-        []
-    );
+    const starterInfo = await GetUserInfo(tradeStarter.id) ?? CreateNewDefaultUserInfo(tradeStarter.id);
+    const receiverInfo = await GetUserInfo(tradeReceiver.id) ?? CreateNewDefaultUserInfo(tradeReceiver.id);
     await AddUserInfosToCache([starterInfo, receiverInfo]);
 
     const pigsString = options.getString("pigs") ?? "";
@@ -269,20 +257,8 @@ async function CounterOfferTrade(interaction: CommandInteraction, options: Comma
         return;
     }
 
-    const starterInfo = await GetUserInfo(msgInfo.TradeStarterID) ?? new UserInfo(
-        msgInfo.TradeStarterID,
-        [],
-        {},
-        false,
-        []
-    );
-    const receiverInfo = await GetUserInfo(msgInfo.TradeReceiverID) ?? new UserInfo(
-        msgInfo.TradeReceiverID,
-        [],
-        {},
-        false,
-        []
-    );
+    const starterInfo = await GetUserInfo(msgInfo.TradeStarterID) ?? CreateNewDefaultUserInfo(msgInfo.TradeStarterID);
+    const receiverInfo = await GetUserInfo(msgInfo.TradeReceiverID) ?? CreateNewDefaultUserInfo(msgInfo.TradeReceiverID); 
     await AddUserInfosToCache([starterInfo, receiverInfo]);
 
     const pigsString = options.getString("pigs") ?? "";
@@ -315,7 +291,7 @@ async function CounterOfferTrade(interaction: CommandInteraction, options: Comma
     msgInfo.TradeReceiverOffer = pigAmounts;
 
     const tradeServer = await client.guilds.fetch(msgInfo.ServerId);
-    const tradeChannel = await tradeServer.channels.fetch(msgInfo.ChannelSentID);
+    const tradeChannel = await tradeServer.channels.fetch(msgInfo.ChannelSentID) as TextChannel;
     if (tradeChannel === null || !tradeChannel.isTextBased()) {
         const errorEmbed = MakeErrorEmbed(
             `Error fetching original channel of trade`,
@@ -441,6 +417,10 @@ async function CounterOfferTrade(interaction: CommandInteraction, options: Comma
 }
 
 export const Trade = new Command(
+    "Trade",
+    "Use `/trade start` to start a trade with another user. Define a user and the pigs you're offering (using the syntax pigs:1,2,3,4, for IDs).\nAfter it's sent, they can respond with /trade offer to offer you pigs in exchange. Once that transpires, you will have the chance to accept or decline the final trade proposition.\nNote that the 0 digits at the start of lower digit IDs are purely cosmetic and are not needed when searching by ID. E.G. ACAB Pig (001) becomes only 1 when putting it into a command.",
+    false,
+    false,
     new SlashCommandBuilder()
         .setName("trade")
         .addSubcommand(new SlashCommandSubcommandBuilder()

@@ -5,10 +5,12 @@ const discord_js_1 = require("discord.js");
 const Button_1 = require("../Button");
 const Errors_1 = require("../Utils/Errors");
 const Log_1 = require("../Utils/Log");
-const MessageInfo_1 = require("../database/MessageInfo");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const Pigs_1 = require("../database/Pigs");
-exports.PreviousSet = new Button_1.Button("SetPrevious", async (interaction) => {
+exports.PreviousSet = new Button_1.Button("SetPrevious", false, true, false, async (interaction, _serverInfo, messageInfo) => {
+    if (messageInfo === undefined) {
+        return;
+    }
     await interaction.deferUpdate();
     const server = interaction.guild;
     if (server === null) {
@@ -19,29 +21,8 @@ exports.PreviousSet = new Button_1.Button("SetPrevious", async (interaction) => 
         return;
     }
     const message = interaction.message;
-    const msgInfo = (0, MessageInfo_1.GetMessageInfo)(server.id, message.id);
+    const msgInfo = messageInfo;
     if (msgInfo === undefined) {
-        const errorEmbed = new discord_js_1.EmbedBuilder()
-            .setTitle("This message has expired")
-            .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
-            .setColor(discord_js_1.Colors.Red);
-        interaction.reply({
-            embeds: [errorEmbed],
-            ephemeral: true
-        });
-        return;
-    }
-    if (msgInfo.Type !== "PigList") {
-        return;
-    }
-    if (msgInfo.User === undefined) {
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("This message doesn't have an associated user", `Server: ${server.id}`, `Message: ${message.id}`);
-        await interaction.followUp({
-            embeds: [errorEmbed]
-        });
-        return;
-    }
-    if (interaction.user.id !== msgInfo.User) {
         return;
     }
     if (message.embeds[0] === undefined) {

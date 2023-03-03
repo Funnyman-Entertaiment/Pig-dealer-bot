@@ -14,7 +14,6 @@ const Errors_1 = require("../Utils/Errors");
 const UserInfo_1 = require("../database/UserInfo");
 const MessageInfo_1 = require("../database/MessageInfo");
 const Pigs_1 = require("../database/Pigs");
-const ServerInfo_1 = require("../database/ServerInfo");
 const Log_1 = require("../Utils/Log");
 const Packs_1 = require("../database/Packs");
 const fs_1 = require("fs");
@@ -56,7 +55,10 @@ function CanUserOpenPack(interaction, userInfo, msgInfo) {
         });
         return false;
     }
-    const lastTimeOpened = userInfo.LastTimeOpened;
+    let lastTimeOpened = userInfo.LastTimeOpened;
+    if (msgInfo.Pack === SignificantPackIDs_1.PACK_2) {
+        lastTimeOpened = userInfo.LastTimeOpened2Pack;
+    }
     const currentTime = lite_1.Timestamp.now();
     if (lastTimeOpened !== undefined &&
         currentTime.seconds - lastTimeOpened.seconds <= 60 * Variables_1.Cooldowns.MINUTES_PACK_OPENING_CD &&
@@ -83,7 +85,12 @@ function SetUserCooldown(msgInfo, userInfo, server, interaction) {
     if (msgInfo.IgnoreCooldown) {
         return;
     }
-    userInfo.LastTimeOpened = lite_1.Timestamp.now();
+    if (msgInfo.Pack === SignificantPackIDs_1.PACK_2) {
+        userInfo.LastTimeOpened2Pack = lite_1.Timestamp.now();
+    }
+    else {
+        userInfo.LastTimeOpened = lite_1.Timestamp.now();
+    }
     if (server.memberCount > 5) {
         return;
     }
@@ -95,7 +102,9 @@ function SetUserCooldown(msgInfo, userInfo, server, interaction) {
         embeds: [warningEmbed],
     });
     if (userInfo.WarnedAboutCooldown) {
-        userInfo.LastTimeOpened = lite_1.Timestamp.fromMillis(userInfo.LastTimeOpened.toMillis() + 1000 * 60 * 60 * 96);
+        const longTime = lite_1.Timestamp.fromMillis(lite_1.Timestamp.now().toMillis() + 1000 * 60 * 60 * 96);
+        userInfo.LastTimeOpened2Pack = longTime;
+        userInfo.LastTimeOpened = longTime;
     }
     userInfo.WarnedAboutCooldown = true;
 }
@@ -315,7 +324,13 @@ function GetEasterStagePack(msgInfo, pack) {
     const newPack = (0, Packs_1.GetPackByName)(`Egg Stage ${elapsedMinutes}`) ?? pack;
     return newPack;
 }
-exports.OpenPack = new Button_1.Button("OpenPack", async (interaction) => {
+exports.OpenPack = new Button_1.Button("OpenPack", true, true, false, async (interaction, serverInfo, messageInfo) => {
+    if (serverInfo === undefined) {
+        return;
+    }
+    if (messageInfo === undefined) {
+        return;
+    }
     if (interaction.guild === null) {
         return;
     }
@@ -324,20 +339,10 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (interaction) => {
     const message = interaction.message;
     const serverID = server.id;
     const userID = user.id;
-    const msgID = message.id;
-    const serverInfo = await (0, ServerInfo_1.GetServerInfo)(serverID);
-    const userInfo = await (0, UserInfo_1.GetUserInfo)(userID) ?? new UserInfo_1.UserInfo(userID, [], {}, false, []);
+    const userInfo = await (0, UserInfo_1.GetUserInfo)(userID) ?? (0, UserInfo_1.CreateNewDefaultUserInfo)(userID);
     (0, UserInfo_1.AddUserInfoToCache)(userInfo);
-    const msgInfo = (0, MessageInfo_1.GetMessageInfo)(serverID, msgID);
+    const msgInfo = messageInfo;
     if (msgInfo === undefined) {
-        const errorEmbed = new builders_1.EmbedBuilder()
-            .setTitle("This message has expired")
-            .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
-            .setColor(discord_js_1.Colors.Red);
-        interaction.reply({
-            embeds: [errorEmbed],
-            ephemeral: true
-        });
         return;
     }
     if (msgInfo.BeingOpenedBy !== undefined) {
@@ -372,7 +377,7 @@ exports.OpenPack = new Button_1.Button("OpenPack", async (interaction) => {
     if (embed === undefined) {
         (0, Log_1.LogError)(`Couldn't get embed from message in channel ${(0, Log_1.PrintChannel)(interaction.channel)} in server ${(0, Log_1.PrintServer)(server)}`);
         const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`Couldn't get embed from message`, `Make sure the bot is able to send embeds`);
-        interaction.reply({
+        interaction.followUp({
             ephemeral: true,
             embeds: [errorEmbed]
         });

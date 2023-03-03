@@ -6,20 +6,24 @@ import { AddMessageInfoToCache, PigListMessage } from "../database/MessageInfo";
 import { LogInfo, PrintUser } from "../Utils/Log";
 
 export const Catalogue = new Command(
+    "catalogue",
+    "Shows you all pigs the bot has to offer, sorted by set. You can define a rarity to only show pigs of that rarity.\nWhen viewing the catalogue, a checkmark will signify pigs you already own.",
+    false,
+    false,
     new SlashCommandBuilder()
         .setName("catalogue")
-        .addStringOption(option => 
+        .addStringOption(option =>
             option.setName("rarity")
                 .setDescription("Filter pigs by rarity. Multiple rarities separated by commas."))
         .setDescription("Shows all pigs in the bot sorted by set")
         .setDMPermission(false),
 
-    async (interaction: CommandInteraction) => {
+    async (interaction) => {
         await interaction.deferReply();
 
         const serverId = interaction.guild?.id;
 
-        if(serverId === undefined){
+        if (serverId === undefined) {
             return;
         }
 
@@ -41,6 +45,8 @@ export const Catalogue = new Command(
         const sets: string[] = [];
 
         pigs.forEach(pig => {
+            if (pig.Rarity.endsWith("(foil)")) { return; }
+
             if (pigsBySet[pig.Set] === undefined) {
                 pigsBySet[pig.Set] = [];
             }
@@ -53,9 +59,9 @@ export const Catalogue = new Command(
         });
 
         for (const set in pigsBySet) {
-            const pigs = pigsBySet[set];                
-            pigsBySet[set] = pigs.sort((a, b) =>{
-                try{
+            const pigs = pigsBySet[set];
+            pigsBySet[set] = pigs.sort((a, b) => {
+                try {
                     const numA = parseInt(a);
                     const numB = parseInt(b);
 
@@ -72,13 +78,13 @@ export const Catalogue = new Command(
 
         const catalogueEmbed = new EmbedBuilder()
             .setTitle("Pig Catalogue")
-            .setDescription(`**${firstSet === "-"? "Default": firstSet}**`)
+            .setDescription(`**${firstSet === "-" ? "Default" : firstSet}**`)
             .setColor(Colors.DarkVividPink);
 
         const firstPigsPage = pigsBySet[firstSet].slice(0, Math.min(pigsBySet[firstSet].length, 9));
         AddPigListRenderToEmbed(catalogueEmbed, {
             pigs: firstPigsPage.map(id => GetPig(id)).filter(pig => pig !== undefined) as any as Pig[],
-            pigCounts: {}
+            pigCounts: {},
         });
 
         const row = new ActionRowBuilder<ButtonBuilder>()

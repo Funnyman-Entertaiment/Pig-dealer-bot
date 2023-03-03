@@ -7,7 +7,7 @@ const Pigs_1 = require("../database/Pigs");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const MessageInfo_1 = require("../database/MessageInfo");
 const Log_1 = require("../Utils/Log");
-exports.Catalogue = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.Catalogue = new Command_1.Command("catalogue", "Shows you all pigs the bot has to offer, sorted by set. You can define a rarity to only show pigs of that rarity.\nWhen viewing the catalogue, a checkmark will signify pigs you already own.", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("catalogue")
     .addStringOption(option => option.setName("rarity")
     .setDescription("Filter pigs by rarity. Multiple rarities separated by commas."))
@@ -32,6 +32,9 @@ exports.Catalogue = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     const pigsBySet = {};
     const sets = [];
     pigs.forEach(pig => {
+        if (pig.Rarity.endsWith("(foil)")) {
+            return;
+        }
         if (pigsBySet[pig.Set] === undefined) {
             pigsBySet[pig.Set] = [];
         }
@@ -62,7 +65,7 @@ exports.Catalogue = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
     const firstPigsPage = pigsBySet[firstSet].slice(0, Math.min(pigsBySet[firstSet].length, 9));
     (0, PigRenderer_1.AddPigListRenderToEmbed)(catalogueEmbed, {
         pigs: firstPigsPage.map(id => (0, Pigs_1.GetPig)(id)).filter(pig => pig !== undefined),
-        pigCounts: {}
+        pigCounts: {},
     });
     const row = new discord_js_1.ActionRowBuilder()
         .addComponents(new discord_js_1.ButtonBuilder()

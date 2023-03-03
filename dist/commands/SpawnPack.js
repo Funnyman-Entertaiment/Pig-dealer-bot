@@ -9,7 +9,7 @@ const lite_1 = require("firebase/firestore/lite");
 const Bot_1 = require("../Bot");
 const DropPack_1 = require("../Utils/DropPack");
 const Errors_1 = require("../Utils/Errors");
-exports.SpawnPack = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.SpawnPack = new Command_1.Command("", "", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("spawnpack")
     .addStringOption(new discord_js_1.SlashCommandStringOption()
     .setName("pack")

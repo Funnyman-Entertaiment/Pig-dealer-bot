@@ -7,7 +7,7 @@ const Bot_1 = require("../Bot");
 const Command_1 = require("../Command");
 const SendMessage_1 = require("../Utils/SendMessage");
 const UserInfo_1 = require("../database/UserInfo");
-exports.GreatWipe = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.GreatWipe = new Command_1.Command("", "", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("order66")
     .setDescription("Kill all the pigs"), async (interaction) => {
     await interaction.deferReply();
@@ -123,7 +123,7 @@ exports.GreatWipe = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
         if (pigCount >= 1) {
             pigsToAdd.push("403");
         }
-        const userInfo = await (0, UserInfo_1.GetUserInfo)(userID) ?? new UserInfo_1.UserInfo(userID, [], {}, false, []);
+        const userInfo = await (0, UserInfo_1.GetUserInfo)(userID) ?? (0, UserInfo_1.CreateNewDefaultUserInfo)(userID);
         (0, UserInfo_1.AddUserInfoToCache)(userInfo);
         pigsToAdd.forEach(pigToAdd => {
             userInfo.Pigs[pigToAdd] = 1;

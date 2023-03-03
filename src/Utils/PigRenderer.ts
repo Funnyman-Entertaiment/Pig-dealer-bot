@@ -1,6 +1,6 @@
 import { EmbedBuilder } from "discord.js";
 import fs from 'fs';
-import { Pig } from "../database/Pigs";
+import { GetPig, Pig } from "../database/Pigs";
 import { COLOR_PER_PIG_RARITY } from "../Constants/ColorPerPigRarity";
 import { PIGS_PER_FOIL_RARITY } from "../Constants/PigsPerFoilRarity";
 
@@ -73,19 +73,28 @@ export function AddPigListRenderToEmbed(embed: EmbedBuilder, options: PigListRen
     embed.setFields([]);
 
     embed.addFields(options.pigs.map(pig => {
-        const count = options.pigCounts[pig.ID]?? 1;
+        const pigID = pig.ID;
+
+        const count = options.pigCounts[pigID]?? 1;
         let number = "";
         if(count !== 1){
             number = ` (${count})`;
         }
 
-        const isFavourite = favouritePigs.includes(pig.ID);
-        const isShared = sharedPigs.includes(pig.ID);
+        const isFavourite = favouritePigs.includes(pigID);
+        const isShared = sharedPigs.includes(pigID);
         const stickers = `${isFavourite? "⭐": ""} ${isShared? "✅" : ""}`.trim();
 
+        const rarityTag = pig.Tags.find(tag => tag.startsWith("[RARITY]"));
+        let rarity = pig.Rarity as string;
+        if(rarityTag !== undefined){
+            const showRarity = rarityTag.replace("[RARITY]", "").trim();
+            rarity = showRarity;
+        }
+
         return {
-            name: `${pig.Name} #${pig.ID.padStart(3, "0")}${number}`,
-            value: `${stickers}${stickers.length>0? "\n":""}_${pig.Rarity}_\n${pig.Description}`,
+            name: `${pig.Name} #${pigID.padStart(3, "0")}${number}`,
+            value: `${stickers}${stickers.length>0? "\n":""}_${rarity}_\n${pig.Description}`,
             inline: true
         };
     }));
@@ -127,7 +136,7 @@ export function AddFoilChecksToEmbed(embed: EmbedBuilder, options: FoilCheckRend
             const amount = pigAmountsPerRarity[rarity] ?? 0;
             const targetAmount = PIGS_PER_FOIL_RARITY[rarity];
 
-            fieldDescription += `${rarity} ${amount}/${targetAmount} ${amount < targetAmount? "❌":"✅"}\n`
+            fieldDescription += `${rarity} ${amount}/${targetAmount} ${amount < targetAmount? "":"✅"}\n`
         });
 
         embed.addFields({

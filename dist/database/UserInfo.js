@@ -1,22 +1,24 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetUserPigs = exports.GetUserPigIDs = exports.GetUserInfo = exports.AddUserInfosToCache = exports.AddUserInfoToCache = exports.SaveAllUserInfo = exports.UserInfo = void 0;
+exports.GetUserPigs = exports.GetUserPigIDs = exports.GetUserInfo = exports.AddUserInfosToCache = exports.AddUserInfoToCache = exports.SaveAllUserInfo = exports.CreateNewDefaultUserInfo = exports.UserInfo = void 0;
 const lite_1 = require("firebase/firestore/lite");
 const DatabaseCacheList_1 = require("./DatabaseCacheList");
 const DatabaseElement_1 = require("./DatabaseElement");
 const Bot_1 = require("../Bot");
 const Pigs_1 = require("./Pigs");
 class UserInfo extends DatabaseElement_1.DatabaseElement {
+    LastTimeOpened2Pack;
     LastTimeOpened;
     AssembledPigs;
     Pigs;
     WarnedAboutCooldown;
     FavouritePigs;
     BulletinMsgId;
-    constructor(id, assembledPigs, pigs, warnedAboutCooldown, favouritePigs, bulletinMsgId, lastTimeOpened) {
+    constructor(id, assembledPigs, pigs, warnedAboutCooldown, favouritePigs, bulletinMsgId, lastTimeOpened, lastTimeOpened2Pack) {
         super(id);
         this.AssembledPigs = assembledPigs;
         this.Pigs = pigs;
+        this.LastTimeOpened2Pack = lastTimeOpened2Pack;
         this.LastTimeOpened = lastTimeOpened;
         this.WarnedAboutCooldown = warnedAboutCooldown;
         this.FavouritePigs = favouritePigs;
@@ -32,6 +34,9 @@ class UserInfo extends DatabaseElement_1.DatabaseElement {
         if (this.LastTimeOpened !== undefined) {
             data.LastTimeOpened = this.LastTimeOpened;
         }
+        if (this.LastTimeOpened2Pack !== undefined) {
+            data.LastTimeOpened2Pack = this.LastTimeOpened2Pack;
+        }
         if (this.BulletinMsgId !== undefined) {
             data.BulletinMsgId = this.BulletinMsgId;
         }
@@ -40,12 +45,16 @@ class UserInfo extends DatabaseElement_1.DatabaseElement {
 }
 exports.UserInfo = UserInfo;
 let CachedUserInfos;
+function CreateNewDefaultUserInfo(id) {
+    return new UserInfo(id, [], {}, false, []);
+}
+exports.CreateNewDefaultUserInfo = CreateNewDefaultUserInfo;
 async function SaveAllUserInfo() {
     await CachedUserInfos?.SaveAll();
 }
 exports.SaveAllUserInfo = SaveAllUserInfo;
 function CreateUserInfoFromData(id, userInfoData) {
-    const newUserInfo = new UserInfo(id, userInfoData.AssembledPigs ?? [], userInfoData.Pigs ?? {}, userInfoData.WarnedAboutCooldown ?? false, userInfoData.FavouritePigs ?? [], userInfoData.BulletinMsgId, userInfoData.LastTimeOpened);
+    const newUserInfo = new UserInfo(id, userInfoData.AssembledPigs ?? [], userInfoData.Pigs ?? {}, userInfoData.WarnedAboutCooldown ?? false, userInfoData.FavouritePigs ?? [], userInfoData.BulletinMsgId, userInfoData.LastTimeOpened, userInfoData.LastTimeOpened2Pack);
     return newUserInfo;
 }
 function GetCachedUserInfos() {

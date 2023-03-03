@@ -6,8 +6,8 @@ export default () => {
         if(error instanceof DiscordAPIError){
             LogError(`${error.message}: ${error.url}`);
         }else if(error instanceof Error){
-            if(error.stack !== undefined && error.stack.split("\n")[1] !== undefined){
-                LogError(`[${error.name}] ${error.message}: ${error.stack.split("\n")[1].trim()}`);
+            if(error.stack !== undefined){
+                LogError(`[${error.name}] ${error.message}: ${error.stack.trim()}`);
             }else{
                 LogError(`[${error.name}] ${error.message}`);
             }

@@ -8,6 +8,10 @@ import { DropPack } from "../Utils/DropPack";
 import { MakeErrorEmbed } from "../Utils/Errors";
 
 export const SpawnPack = new Command(
+    "",
+    "",
+    false,
+    false,
     new SlashCommandBuilder()
     .setName("spawnpack")
     .addStringOption(new SlashCommandStringOption()

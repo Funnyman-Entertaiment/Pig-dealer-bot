@@ -2,11 +2,16 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, EmbedBuilder, Sla
 import { Command } from "../Command";
 import { client } from "../Bot";
 import { LogInfo, PrintUser } from "../Utils/Log";
+import { BOT_INVITE_LINK, TRADE_SERVER_INVITE_LINK } from "../Constants/Links";
 
 export const Information = new Command(
+    "Information",
+    "gives you a description of the bot as well as a link to our discord server and an invite for you to get this bot in your own server. (note that using this bot in a server with less than 6 members is heavily discouraged and indeed punished.)",
+    false,
+    false,
     new SlashCommandBuilder()
         .setName("information")
-        .setDescription("Sends you an invitation link so you can have Pig Dealer in your own server."),
+        .setDescription("Sends a message that contains some general information about Pig Dealer."),
 
     async (interaction) => {
         const botUser = client.user;
@@ -48,11 +53,11 @@ export const Information = new Command(
             new ButtonBuilder()
                 .setLabel("Invite the bot!")
                 .setStyle(ButtonStyle.Link)
-                .setURL("https://discord.com/api/oauth2/authorize?client_id=1040735137228406884&permissions=268470272&scope=bot%20applications.commands"),
+                .setURL(BOT_INVITE_LINK),
             new ButtonBuilder()
                 .setLabel("Join the server!")
                 .setStyle(ButtonStyle.Link)
-                .setURL("https://discord.gg/wnAnhRyKjM")
+                .setURL(TRADE_SERVER_INVITE_LINK)
         );
 
         LogInfo(`User ${PrintUser(interaction.user)} is checking the bot information`);

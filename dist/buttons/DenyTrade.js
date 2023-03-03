@@ -6,29 +6,14 @@ const Button_1 = require("../Button");
 const Errors_1 = require("../Utils/Errors");
 const builders_1 = require("@discordjs/builders");
 const discord_js_1 = require("discord.js");
-exports.DenyTrade = new Button_1.Button("CancelTrade", async (interaction) => {
-    const server = interaction.guild;
-    if (server === null) {
+exports.DenyTrade = new Button_1.Button("CancelTrade", false, true, false, async (interaction, _serverInfo, messageInfo) => {
+    if (messageInfo === undefined) {
         return;
     }
     const message = interaction.message;
     const user = interaction.user;
-    const msgInfo = (0, MessageInfo_1.GetMessageInfo)(server.id, message.id);
+    const msgInfo = messageInfo;
     if (msgInfo === undefined) {
-        const errorEmbed = new builders_1.EmbedBuilder()
-            .setTitle("This message has expired")
-            .setDescription("Trade messages expire after ~15 minutes of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
-            .setColor(discord_js_1.Colors.Red);
-        interaction.reply({
-            embeds: [errorEmbed],
-            ephemeral: true
-        });
-        return;
-    }
-    if (msgInfo.Type !== "PigTrade") {
-        return;
-    }
-    if (msgInfo.User !== user.id) {
         return;
     }
     interaction.deferUpdate();

@@ -1,8 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, CommandInteractionOptionResolver, EmbedBuilder, SlashCommandBooleanOption, SlashCommandBuilder, SlashCommandStringOption } from "discord.js";
 import { Command } from "../Command";
-import { GetUserInfo } from "../database/UserInfo";
 import { GetAuthor } from "../Utils/GetAuthor";
-import { GetAllPigs, GetPig, GetPigsBySet } from "../database/Pigs";
+import { GetAllPigs, GetPig } from "../database/Pigs";
 import { PIGS_PER_FOIL_RARITY } from "../Constants/PigsPerFoilRarity";
 import { AddMessageInfoToCache, PigFoilMessage } from "../database/MessageInfo";
 
@@ -25,6 +24,10 @@ function GetFieldDescriptionFromPigAmounts(pigAmounts: { [key: string]: number }
 }
 
 export const Foil = new Command(
+    "Foil",
+    "Used to craft a foil pig, using 100 common, 50 rare, 15 epic or 5 legendary pigs from the same set.\n`onlydupes` defines whether the bot only uses duped pigs for the process.\nYou will have the chance to review the pigs the bot has selected to use in the craft before it happens.\nIf you wish to manually select which pigs to use when crafting a foil pig, use `/foilpigs`",
+    false,
+    true,
     new SlashCommandBuilder()
         .setName("foil")
         .addStringOption(new SlashCommandStringOption()
@@ -59,25 +62,12 @@ export const Foil = new Command(
         .setDescription("Attempt to craft a foil pig using other random pigs for a set and rarity.")
         .setDMPermission(false),
 
-    async function (interaction) {
+    async function (interaction, _serverInfo, userInfo) {
+        if(userInfo === undefined){ return; }
         const server = interaction.guild;
         if(server === null){ return; }
 
         const user = interaction.user;
-        const userInfo = await GetUserInfo(user.id);
-
-        if (userInfo === undefined) {
-            const emptyEmbed = new EmbedBuilder()
-                .setAuthor(GetAuthor(interaction))
-                .setColor(Colors.DarkRed)
-                .setTitle("You have no pigs!")
-                .setDescription("Open some packs, you'll need a lot of them.");
-
-            await interaction.reply({
-                embeds: [emptyEmbed]
-            });
-            return;
-        }
 
         const options = (interaction.options as CommandInteractionOptionResolver);
         let targetSet = options.getString("set", true).toLowerCase();

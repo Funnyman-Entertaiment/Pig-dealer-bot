@@ -1,4 +1,4 @@
-import { GetUserInfo, UserInfo, AddUserInfosToCache } from "../database/UserInfo";
+import { GetUserInfo, UserInfo, AddUserInfosToCache, CreateNewDefaultUserInfo } from "../database/UserInfo";
 import { Button } from "../Button";
 import { GetMessageInfo, PigTradeMessage, RemoveMessageInfoFromCache } from "../database/MessageInfo";
 import { MakeErrorEmbed } from "../Utils/Errors";
@@ -45,46 +45,22 @@ function AddOfferedPigsToUser(userInfo: UserInfo, pigOffer: {[key: string]: numb
     return pigsAdded;
 } 
 
-export const AcceptTrade = new Button("AcceptTrade",
-    async (interaction) => {
+export const AcceptTrade = new Button(
+    "AcceptTrade",
+    false,
+    true,
+    false,
+    async (interaction, _serverInfo, messageInfo) => {
+        if(messageInfo === undefined){ return; }
         const server = interaction.guild;
         if(server === null){return;}
         const message = interaction.message;
-        const user = interaction.user;
 
-        const msgInfo = GetMessageInfo(server.id, message.id) as PigTradeMessage | undefined;
+        const msgInfo = messageInfo as PigTradeMessage;
+        if(msgInfo === undefined){ return; }
 
-        if(msgInfo === undefined){
-            const errorEmbed = new EmbedBuilder()
-                .setTitle("This message has expired")
-                .setDescription("Trade messages expire after ~15 minutes of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
-                .setColor(Colors.Red);
-            
-            interaction.reply({
-                embeds: [errorEmbed],
-                ephemeral: true
-            });
-    
-            return;
-        }
-
-        if(msgInfo.Type !== "PigTrade"){ return; }
-        if(msgInfo.User !== user.id){ return; }
-
-        const starterInfo = await GetUserInfo(msgInfo.TradeStarterID) ?? new UserInfo(
-            msgInfo.TradeStarterID,
-            [],
-            {},
-            false,
-            []
-        );
-        const receiverInfo = await GetUserInfo(msgInfo.TradeReceiverID) ?? new UserInfo(
-            msgInfo.TradeReceiverID,
-            [],
-            {},
-            false,
-            []
-        );
+        const starterInfo = await GetUserInfo(msgInfo.TradeStarterID) ?? CreateNewDefaultUserInfo(msgInfo.TradeStarterID);
+        const receiverInfo = await GetUserInfo(msgInfo.TradeReceiverID) ?? CreateNewDefaultUserInfo(msgInfo.TradeReceiverID);
         await AddUserInfosToCache([starterInfo, receiverInfo]);
 
         const hasAddedPigToStarter = RemoveOfferedPigsFromUser(starterInfo, msgInfo.TradeStarterOffer);

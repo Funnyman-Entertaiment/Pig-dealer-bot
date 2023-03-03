@@ -59,7 +59,7 @@ async function RemoveTradeBulletin(interaction, userInfo) {
         embeds: [successEmbed]
     });
 }
-exports.TradeBulletin = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.TradeBulletin = new Command_1.Command("Trade Bulletin", "Only available on the Pig Dealer Trading Forum.\n Use `/tradebulletin add` to post a text embed to the dedicated channel, used for finding trade partners.\nIf you wish to remove a bulletin, use `/tradebulletin` remove.", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("tradebulletin")
     .addSubcommand(new discord_js_1.SlashCommandSubcommandBuilder()
     .setName("add")
@@ -78,7 +78,7 @@ exports.TradeBulletin = new Command_1.Command(new discord_js_1.SlashCommandBuild
     if (subcommand === undefined) {
         return;
     }
-    const userInfo = await (0, UserInfo_1.GetUserInfo)(interaction.user.id) ?? new UserInfo_1.UserInfo(interaction.user.id, [], {}, false, []);
+    const userInfo = await (0, UserInfo_1.GetUserInfo)(interaction.user.id) ?? (0, UserInfo_1.CreateNewDefaultUserInfo)(interaction.user.id);
     switch (subcommand) {
         case ("add"):
             AddTradeBulletin(interaction, userInfo, options);

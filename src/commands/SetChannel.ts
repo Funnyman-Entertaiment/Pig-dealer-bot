@@ -1,9 +1,13 @@
 import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, ChannelType, Colors, PermissionFlagsBits, Guild, GuildChannel } from "discord.js";
-import { AddServerInfoToCache, GetServerInfo, SaveAllServerInfo, ServerInfo } from "../database/ServerInfo";
+import { AddServerInfoToCache, CreateNewDefaultServerInfo, SaveAllServerInfo } from "../database/ServerInfo";
 import { Command } from "../Command";
 import { LogInfo, PrintUser, PrintChannel, PrintServer } from "../Utils/Log";
 
 export const SetBotChannel = new Command(
+    "Set Channel",
+    "Only available to users with administrative access to the server. It will define what channel the bot sends packs to.",
+    false,
+    false,
     new SlashCommandBuilder()
         .setName("setchannel")
         .addChannelOption(option =>
@@ -15,27 +19,10 @@ export const SetBotChannel = new Command(
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .setDMPermission(false),
 
-    async (interaction) => {
-        const channel = (interaction.options as CommandInteractionOptionResolver).getChannel('channel')
+    async (interaction, serverInfo) => {
+        const server = interaction.guild;
 
-        if (channel === null) {
-            return;
-        }
-
-        if (channel.type !== ChannelType.GuildText) {
-            const errorEmbed = new EmbedBuilder()
-                .setTitle("Channel must be a text channel.")
-                .setColor(Colors.Red);
-
-            await interaction.reply({
-                ephemeral: true,
-                embeds: [errorEmbed]
-            });
-
-            return;
-        }
-
-        if (interaction.guildId === null) {
+        if(server === null){
             const errorEmbed = new EmbedBuilder()
                 .setTitle("There was an error fetching the server id.")
                 .setColor(Colors.Red);
@@ -48,23 +35,15 @@ export const SetBotChannel = new Command(
             return;
         }
 
-        LogInfo(`User ${PrintUser(interaction.user)} is setting the dropping channel to ${PrintChannel(channel as any as GuildChannel)} in server ${PrintServer(interaction.guild as any as Guild)}`);
-
-        let serverInfo = await GetServerInfo(interaction.guildId);
-
         if(serverInfo === undefined){
-            serverInfo = new ServerInfo(
-                interaction.guildId,
-                channel.id,
-                undefined,
-                channel.id,
-                false,
-                [],
-                true
-            );
-        }else{
-            serverInfo.Channel = channel.id;
+            serverInfo = CreateNewDefaultServerInfo(server.id);
         }
+
+        const channel = (interaction.options as CommandInteractionOptionResolver).getChannel('channel', true)
+
+        LogInfo(`User ${PrintUser(interaction.user)} is setting the dropping channel to ${PrintChannel(channel as any as GuildChannel)} in server ${PrintServer(server)}`);
+
+        serverInfo.Channel = channel.id;
 
         await AddServerInfoToCache(serverInfo);
 

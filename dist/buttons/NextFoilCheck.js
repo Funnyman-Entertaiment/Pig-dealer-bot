@@ -1,46 +1,23 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NextFoilCheck = void 0;
-const MessageInfo_1 = require("../database/MessageInfo");
 const Button_1 = require("../Button");
 const discord_js_1 = require("discord.js");
 const Errors_1 = require("../Utils/Errors");
 const Log_1 = require("../Utils/Log");
 const PigRenderer_1 = require("../Utils/PigRenderer");
-exports.NextFoilCheck = new Button_1.Button("NextFoilCheck", async (interaction) => {
+exports.NextFoilCheck = new Button_1.Button("NextFoilCheck", false, true, true, async (interaction, _serverInfo, messageInfo) => {
+    if (messageInfo === undefined) {
+        return;
+    }
     await interaction.deferUpdate();
     const server = interaction.guild;
     if (server === null) {
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Error fetching server from interaction", "Where did you find this message?");
-        await interaction.followUp({
-            embeds: [errorEmbed]
-        });
         return;
     }
     const message = interaction.message;
-    const msgInfo = (0, MessageInfo_1.GetMessageInfo)(server.id, message.id);
+    const msgInfo = messageInfo;
     if (msgInfo === undefined) {
-        const errorEmbed = new discord_js_1.EmbedBuilder()
-            .setTitle("This message has expired")
-            .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
-            .setColor(discord_js_1.Colors.Red);
-        await interaction.followUp({
-            embeds: [errorEmbed],
-            ephemeral: true
-        });
-        return;
-    }
-    if (msgInfo.Type !== "FoilChecks") {
-        return;
-    }
-    if (msgInfo.User === undefined) {
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("This message doesn't have an associated user", `Server: ${server.id}`, `Message: ${message.id}`);
-        await interaction.followUp({
-            embeds: [errorEmbed]
-        });
-        return;
-    }
-    if (interaction.user.id !== msgInfo.User) {
         return;
     }
     let newPage = msgInfo.CurrentPage + 1;

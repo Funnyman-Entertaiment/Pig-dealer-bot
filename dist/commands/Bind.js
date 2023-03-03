@@ -9,7 +9,7 @@ const MessageInfo_1 = require("../database/MessageInfo");
 const Log_1 = require("../Utils/Log");
 const UserInfo_1 = require("../database/UserInfo");
 const GetAuthor_1 = require("../Utils/GetAuthor");
-exports.ShowBinder = new Command_1.Command(new discord_js_1.SlashCommandBuilder()
+exports.ShowBinder = new Command_1.Command("Binder", "Shows you the pigs you own, with an image for each. You can define a user to see someone else's binder, rarity, to only see pigs of a certain rarity. You can also set favourites to True to only see pigs you've favourited.\nWhen viewing someone else's binder, a checkmark will signify if you already own a pig from their collection.", false, true, new discord_js_1.SlashCommandBuilder()
     .setName("binder")
     .addUserOption(option => option.setName('user')
     .setDescription('user to check the binder of'))
@@ -18,7 +18,10 @@ exports.ShowBinder = new Command_1.Command(new discord_js_1.SlashCommandBuilder(
     .addBooleanOption(option => option.setName('favourites')
     .setDescription('show only favourite pigs'))
     .setDescription("Let's you check your own or someone else's pig binder")
-    .setDMPermission(false), async (interaction) => {
+    .setDMPermission(false), async (interaction, _serverInfo, userInfo) => {
+    if (userInfo === undefined) {
+        return;
+    }
     await interaction.deferReply();
     const server = interaction.guild;
     if (server === null) {
@@ -47,7 +50,6 @@ exports.ShowBinder = new Command_1.Command(new discord_js_1.SlashCommandBuilder(
     const raritiesToFilter = rarities.split(',')
         .map(rarity => rarity.trim().toLowerCase())
         .filter(rarity => rarity.length > 0);
-    const userInfo = await (0, UserInfo_1.GetUserInfo)(userId);
     let pigs = (0, UserInfo_1.GetUserPigIDs)(userInfo);
     if (userInfo === undefined) {
         const emptyEmbed = new discord_js_1.EmbedBuilder()

@@ -1,91 +1,39 @@
-import { EmbedBuilder, Colors, GuildChannel, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import { EmbedBuilder, GuildChannel, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import { Button } from "../Button";
 import { MakeErrorEmbed } from "../Utils/Errors";
-import { GetMessageInfo, PigGalleryMessage } from "../database/MessageInfo";
-import { GetUserInfo } from "../database/UserInfo";
+import { PigGalleryMessage } from "../database/MessageInfo";
 import { LogError, PrintChannel, PrintServer } from "../Utils/Log";
 import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
 import { GetPig } from "../database/Pigs";
 import { DoesPigIdHaveUniqueEvent } from "../uniquePigEvents/UniquePigEvents";
 
-export const FavouritePig = new Button("FavouritePig",
-    async function(interaction){
-        await interaction.deferUpdate();
+export const FavouritePig = new Button(
+    "FavouritePig",
+    false,
+    true,
+    true,
+    async function (interaction, _serverInfo, messageInfo, userInfo) {
+        if (messageInfo === undefined) { return; }
+        if (userInfo === undefined) { return; }
 
         const server = interaction.guild;
-        if(server === null) {
-            const errorEmbed = MakeErrorEmbed(
-                "Error fetching server from interaction",
-                "Where did you find this message?"
-            );
-
-            await interaction.followUp({
-                embeds: [errorEmbed]
-            });
-
-            return;
-        }
-
+        if (server === null) { return; }
         const message = interaction.message;
-        const msgInfo = GetMessageInfo(server.id, message.id) as PigGalleryMessage;
+        const msgInfo = messageInfo as PigGalleryMessage;
+        if (msgInfo === undefined) { return; }
 
-        if(msgInfo === undefined){
-            const errorEmbed = new EmbedBuilder()
-                .setTitle("This message has expired")
-                .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
-                .setColor(Colors.Red);
-            
-            interaction.reply({
-                embeds: [errorEmbed],
-                ephemeral: true
-            });
-    
-            return;
-        }
+        await interaction.deferUpdate();
 
-        if(msgInfo === undefined || msgInfo.Type !== "PigGallery"){ return; }
-
-        if(msgInfo.User === undefined){
-            const errorEmbed = MakeErrorEmbed(
-                "This message doesn't have an associated user",
-                `Server: ${server.id}`,
-                `Message: ${message.id}`
-            );
-
-            await interaction.followUp({
-                embeds: [errorEmbed]
-            });
-
-            return;
-        }
-
-        if(interaction.user.id !== msgInfo.User){ return; }
-
-        const userInfo = await GetUserInfo(interaction.user.id);
-
-        if(userInfo === undefined){
-            const errorEmbed = MakeErrorEmbed(
-                "This user has no information stored",
-                `User: ${userInfo}`
-            );
-
-            await interaction.followUp({
-                embeds: [errorEmbed]
-            });
-
-            return;
-        }
-        
         const currentPigID = msgInfo.Pigs[msgInfo.CurrentPig];
 
-        if(!msgInfo.FavouritePigs.includes(currentPigID)){
+        if (!msgInfo.FavouritePigs.includes(currentPigID)) {
             msgInfo.FavouritePigs.push(currentPigID);
         }
-        if(!userInfo.FavouritePigs.includes(currentPigID)){
+        if (!userInfo.FavouritePigs.includes(currentPigID)) {
             userInfo.FavouritePigs.push(currentPigID);
         }
 
-        if(message.embeds[0] === undefined){
+        if (message.embeds[0] === undefined) {
             LogError(`Couldn't get embed from message in channel ${PrintChannel(interaction.channel as any as GuildChannel)} in server ${PrintServer(server)}`)
             const errorEmbed = MakeErrorEmbed(`Couldn't get embed from message`, `Make sure the bot is able to send embeds`);
             interaction.followUp({
@@ -98,7 +46,7 @@ export const FavouritePig = new Button("FavouritePig",
 
         const pig = GetPig(currentPigID);
 
-        if(pig === undefined){
+        if (pig === undefined) {
             const errorEmbed = MakeErrorEmbed(
                 "Couldn't fetch pig",
                 `Server: ${server.id}`,
@@ -122,28 +70,28 @@ export const FavouritePig = new Button("FavouritePig",
             shared: msgInfo.SharedPigs.includes(pig.ID)
         });
         const row = new ActionRowBuilder<ButtonBuilder>()
-        .addComponents(
-            new ButtonBuilder()
-                .setCustomId('GalleryPrevious')
-                .setLabel('Previous')
-                .setStyle(ButtonStyle.Primary)
-                .setDisabled(msgInfo.CurrentPig === 0),
-            new ButtonBuilder()
-                .setCustomId('GalleryNext')
-                .setLabel('Next')
-                .setStyle(ButtonStyle.Primary)
-                .setDisabled(msgInfo.CurrentPig === msgInfo.Pigs.length - 1)
-        );
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId('GalleryPrevious')
+                    .setLabel('Previous')
+                    .setStyle(ButtonStyle.Primary)
+                    .setDisabled(msgInfo.CurrentPig === 0),
+                new ButtonBuilder()
+                    .setCustomId('GalleryNext')
+                    .setLabel('Next')
+                    .setStyle(ButtonStyle.Primary)
+                    .setDisabled(msgInfo.CurrentPig === msgInfo.Pigs.length - 1)
+            );
 
-        if(msgInfo.ShowFavouriteButton){
-            if(!msgInfo.FavouritePigs.includes(pig.ID)){
+        if (msgInfo.ShowFavouriteButton) {
+            if (!msgInfo.FavouritePigs.includes(pig.ID)) {
                 row.addComponents(
                     new ButtonBuilder()
                         .setCustomId('FavouritePig')
                         .setLabel('Favourite ⭐')
                         .setStyle(ButtonStyle.Secondary)
                 );
-            }else{
+            } else {
                 row.addComponents(
                     new ButtonBuilder()
                         .setCustomId('UnfavouritePig')

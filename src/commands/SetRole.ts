@@ -1,10 +1,13 @@
 import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, Colors, PermissionFlagsBits } from "discord.js";
-import { doc, setDoc } from "firebase/firestore/lite";
-import { AddServerInfoToCache, GetServerInfo, SaveAllServerInfo, ServerInfo } from "../database/ServerInfo";
+import { AddServerInfoToCache, CreateNewDefaultServerInfo, SaveAllServerInfo } from "../database/ServerInfo";
 import { Command } from "../Command";
-import { db } from "../Bot";
+import { LogInfo, PrintUser, PrintServer } from "../Utils/Log";
 
 export const SetBotRole = new Command(
+    "Set Role",
+    "Only available to users with administrative access to the server. It will define what role the bot pings when a new pack drops, or when an announcement is made.",
+    true,
+    false,
     new SlashCommandBuilder()
         .setName("setrole")
         .addRoleOption(option =>
@@ -15,14 +18,10 @@ export const SetBotRole = new Command(
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .setDMPermission(false),
 
-    async (interaction) => {
-        const role = (interaction.options as CommandInteractionOptionResolver).getRole('role')
+    async (interaction, serverInfo) => {
+        const server = interaction.guild;
 
-        if (role === null) {
-            return;
-        }
-
-        if (interaction.guildId === null) {
+        if(server === null){
             const errorEmbed = new EmbedBuilder()
                 .setTitle("There was an error fetching the server id.")
                 .setColor(Colors.Red);
@@ -35,25 +34,19 @@ export const SetBotRole = new Command(
             return;
         }
 
-        let serverInfo = await GetServerInfo(interaction.guildId);
-
         if(serverInfo === undefined){
-            serverInfo = new ServerInfo(
-                interaction.guildId,
-                undefined,
-                role.id,
-                undefined,
-                false,
-                [],
-                true
-            );
-        }else{
-            serverInfo.Role = role.id;
+            serverInfo = CreateNewDefaultServerInfo(server.id);
         }
+
+        const role = (interaction.options as CommandInteractionOptionResolver).getRole('role', true)
+
+        LogInfo(`User ${PrintUser(interaction.user)} is setting the dropping channel to ${role.name} in server ${PrintServer(server)}`);
+
+        serverInfo.Role = role.id;
 
         await AddServerInfoToCache(serverInfo);
 
-        SaveAllServerInfo()
+        SaveAllServerInfo();
 
         const successEmbed = new EmbedBuilder()
             .setTitle(`Role succesfully set to @${role.name}`)

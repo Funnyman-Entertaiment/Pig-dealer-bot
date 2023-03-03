@@ -3,6 +3,10 @@ import { Command } from "../Command";
 import { GetActiveEvents } from "../seasonalEvents/SeasonalEvents";
 
 export const Events = new Command(
+    "Events",
+    "Tells you the rules and a description of the current event, if there is one going on.",
+    false,
+    false,
     new SlashCommandBuilder()
         .setName("events")
         .setDescription("Gives some information about the events that are currently going on, if any."),

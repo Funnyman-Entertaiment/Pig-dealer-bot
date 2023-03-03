@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, Colors, EmbedBuilder, GuildChannel } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, GuildChannel } from "discord.js";
 import { Button } from "../Button";
 import { MakeErrorEmbed } from "../Utils/Errors";
 import { LogError, PrintChannel, PrintServer } from "../Utils/Log";
@@ -6,8 +6,14 @@ import { AddPigListRenderToEmbed } from "../Utils/PigRenderer";
 import { GetMessageInfo, PigListMessage } from "../database/MessageInfo";
 import { GetPig, Pig } from "../database/Pigs";
 
-export const PreviousList = new Button("ListPrevious",
-    async (interaction) => {
+export const PreviousList = new Button(
+    "ListPrevious",
+    false,
+    true,
+    false,
+    async (interaction, _serverInfo, messageInfo) => {
+        if(messageInfo === undefined){return;}
+
         await interaction.deferUpdate();
 
         const server = interaction.guild;
@@ -25,39 +31,8 @@ export const PreviousList = new Button("ListPrevious",
         }
 
         const message = interaction.message;
-        const msgInfo = GetMessageInfo(server.id, message.id) as PigListMessage;
-
-        if(msgInfo === undefined){
-            const errorEmbed = new EmbedBuilder()
-                .setTitle("This message has expired")
-                .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
-                .setColor(Colors.Red);
-            
-            interaction.reply({
-                embeds: [errorEmbed],
-                ephemeral: true
-            });
-    
-            return;
-        }
-
-        if(msgInfo.Type !== "PigList"){ return; }
-
-        if(msgInfo.User === undefined){
-            const errorEmbed = MakeErrorEmbed(
-                "This message doesn't have an associated user",
-                `Server: ${server.id}`,
-                `Message: ${message.id}`
-            );
-
-            await interaction.followUp({
-                embeds: [errorEmbed]
-            });
-
-            return;
-        }
-
-        if(interaction.user.id !== msgInfo.User){ return; }
+        const msgInfo = messageInfo as PigListMessage;
+        if(msgInfo === undefined){ return; }
 
         if(message.embeds[0] === undefined){
             LogError(`Couldn't get embed from message in channel ${PrintChannel(interaction.channel as any as GuildChannel)} in server ${PrintServer(server)}`)
