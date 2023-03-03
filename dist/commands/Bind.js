@@ -9,7 +9,7 @@ const MessageInfo_1 = require("../database/MessageInfo");
 const Log_1 = require("../Utils/Log");
 const UserInfo_1 = require("../database/UserInfo");
 const GetAuthor_1 = require("../Utils/GetAuthor");
-exports.ShowBinder = new Command_1.Command("Binder", "Shows you the pigs you own, with an image for each. You can define a user to see someone else's binder, rarity, to only see pigs of a certain rarity. You can also set favourites to True to only see pigs you've favourited.\nWhen viewing someone else's binder, a checkmark will signify if you already own a pig from their collection.", true, true, new discord_js_1.SlashCommandBuilder()
+exports.ShowBinder = new Command_1.Command("Binder", "Shows you the pigs you own, with an image for each. You can define a user to see someone else's binder, rarity, to only see pigs of a certain rarity. You can also set favourites to True to only see pigs you've favourited.\nWhen viewing someone else's binder, a checkmark will signify if you already own a pig from their collection.", false, true, new discord_js_1.SlashCommandBuilder()
     .setName("binder")
     .addUserOption(option => option.setName('user')
     .setDescription('user to check the binder of'))
@@ -18,10 +18,7 @@ exports.ShowBinder = new Command_1.Command("Binder", "Shows you the pigs you own
     .addBooleanOption(option => option.setName('favourites')
     .setDescription('show only favourite pigs'))
     .setDescription("Let's you check your own or someone else's pig binder")
-    .setDMPermission(false), async (interaction, serverInfo, userInfo) => {
-    if (serverInfo === undefined) {
-        return;
-    }
+    .setDMPermission(false), async (interaction, _serverInfo, userInfo) => {
     if (userInfo === undefined) {
         return;
     }
@@ -114,7 +111,6 @@ exports.ShowBinder = new Command_1.Command("Binder", "Shows you the pigs you own
     const sharedPigs = (0, UserInfo_1.GetUserPigIDs)(interactionUserInfo);
     const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(openedPackEmbed, {
         pig: firstPig,
-        safe: serverInfo.SafeMode,
         count: userInfo?.Pigs[firstPig.ID] ?? 1,
         favourite: favouritePigs.includes(firstPig.ID),
         shared: userInfo.ID === interaction.user.id ? false : sharedPigs.includes(firstPig.ID)

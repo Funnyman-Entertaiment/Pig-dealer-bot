@@ -6,11 +6,10 @@ import { Colors } from "discord.js";
 
 export const DenyTrade = new Button(
     "CancelTrade",
-    true,
+    false,
     true,
     false,
-    async (interaction, serverInfo, messageInfo) => {
-        if (serverInfo === undefined) { return; }
+    async (interaction, _serverInfo, messageInfo) => {
         if (messageInfo === undefined) { return; }
         const message = interaction.message;
         const user = interaction.user;

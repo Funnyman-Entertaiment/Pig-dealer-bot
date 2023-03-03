@@ -8,7 +8,7 @@ import { RARITIES_PER_PIG_COUNT } from "../Constants/RaritiesPerPigCount";
 import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
 import { GOLDEN_PIG_CHANCE_PER_RARITY } from "../Constants/GoldenPigChancePerRarity";
 import { MakeErrorEmbed } from "../Utils/Errors";
-import { AddUserInfoToCache, GetUserInfo, GetUserPigIDs, UserInfo } from "../database/UserInfo";
+import { AddUserInfoToCache, CreateNewDefaultUserInfo, GetUserInfo, GetUserPigIDs, UserInfo } from "../database/UserInfo";
 import { AddMessageInfoToCache, GetMessageInfo, MessageInfo, PigGalleryMessage, RandomPackMessage } from "../database/MessageInfo";
 import { GetAllPigs, GetPig, GetPigsBySet, GetPigsWithTag, Pig } from "../database/Pigs";
 import { GetServerInfo, ServerInfo } from "../database/ServerInfo";
@@ -244,14 +244,13 @@ function ChoosePigs(serverInfo: ServerInfo, pack: Pack) {
     return chosenPigs;
 }
 
-function GetOpenPackFollowUp(packName: string, chosenPigs: Pig[], newPigs: string[], interaction: Interaction, userInfo: UserInfo, serverInfo: ServerInfo) {
+function GetOpenPackFollowUp(packName: string, chosenPigs: Pig[], newPigs: string[], interaction: Interaction, userInfo: UserInfo) {
     const openedPackEmbed = new EmbedBuilder()
         .setTitle(`You've opened a ${packName}`)
         .setDescription(`1/${chosenPigs.length}`);
 
     const imgPath = AddPigRenderToEmbed(openedPackEmbed, {
         pig: chosenPigs[0],
-        safe: serverInfo.SafeMode,
         new: newPigs.includes(chosenPigs[0].ID),
         count: 1,
         favourite: userInfo.FavouritePigs.includes(chosenPigs[0].ID)
@@ -300,12 +299,12 @@ function GetOpenPackFollowUp(packName: string, chosenPigs: Pig[], newPigs: strin
     }
 }
 
-function SendOpenPackFollowUp(userInfo: UserInfo, chosenPigs: Pig[], pigsToShowInPack: Pig[], pack: Pack, serverId: string, interaction: ButtonInteraction, serverInfo: ServerInfo) {
+function SendOpenPackFollowUp(userInfo: UserInfo, chosenPigs: Pig[], pigsToShowInPack: Pig[], pack: Pack, serverId: string, interaction: ButtonInteraction) {
     const userPigs = GetUserPigIDs(userInfo);
 
     const newPigs = chosenPigs.filter(pig => !userPigs.includes(pig.ID)).map(pig => pig.ID);
 
-    const packFollowUp = GetOpenPackFollowUp(pack.Name, pigsToShowInPack, newPigs, interaction, userInfo, serverInfo);
+    const packFollowUp = GetOpenPackFollowUp(pack.Name, pigsToShowInPack, newPigs, interaction, userInfo);
 
     if (packFollowUp === undefined) {
         return;
@@ -428,15 +427,8 @@ export const OpenPack = new Button(
 
         const serverID = server.id;
         const userID = user.id;
-        const msgID = message.id;
 
-        const userInfo = await GetUserInfo(userID) ?? new UserInfo(
-            userID,
-            [],
-            {},
-            false,
-            []
-        );
+        const userInfo = await GetUserInfo(userID) ?? CreateNewDefaultUserInfo(userID);
         AddUserInfoToCache(userInfo);
         const msgInfo = messageInfo as RandomPackMessage;
         if(msgInfo === undefined){return;}
@@ -485,7 +477,7 @@ export const OpenPack = new Button(
         if (embed === undefined) {
             LogError(`Couldn't get embed from message in channel ${PrintChannel(interaction.channel as any as GuildChannel)} in server ${PrintServer(server)}`)
             const errorEmbed = MakeErrorEmbed(`Couldn't get embed from message`, `Make sure the bot is able to send embeds`);
-            interaction.reply({
+            interaction.followUp({
                 ephemeral: true,
                 embeds: [errorEmbed]
             });
@@ -508,7 +500,7 @@ export const OpenPack = new Button(
 
         RunPostPackOpened(pack, serverInfo, chosenPigs, pigsToShowInPack);
 
-        SendOpenPackFollowUp(userInfo, chosenPigs, pigsToShowInPack, pack, serverID, interaction, serverInfo);
+        SendOpenPackFollowUp(userInfo, chosenPigs, pigsToShowInPack, pack, serverID, interaction);
 
         AddPigsToUser(chosenPigs, userInfo);
 

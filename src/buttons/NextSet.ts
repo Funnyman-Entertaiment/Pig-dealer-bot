@@ -1,18 +1,17 @@
-import { ActionRowBuilder, ButtonBuilder, Colors, EmbedBuilder, GuildChannel } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, GuildChannel } from "discord.js";
 import { Button } from "../Button";
 import { MakeErrorEmbed } from "../Utils/Errors";
 import { LogError, PrintChannel, PrintServer } from "../Utils/Log";
-import { GetMessageInfo, PigListMessage } from "../database/MessageInfo";
+import { PigListMessage } from "../database/MessageInfo";
 import { AddPigListRenderToEmbed } from "../Utils/PigRenderer";
 import { GetPig, Pig } from "../database/Pigs";
 
 export const NextSet = new Button(
     "SetNext",
-    true,
+    false,
     true,
     false,
-    async (interaction, serverInfo, messageInfo) => {
-        if(serverInfo === undefined){ return; }
+    async (interaction, _serverInfo, messageInfo) => {
         if(messageInfo === undefined){ return; }
 
         await interaction.deferUpdate();
@@ -59,7 +58,6 @@ export const NextSet = new Button(
         const firstPigsPage = msgInfo.PigsBySet[newSet].slice(0, Math.min(msgInfo.PigsBySet[newSet].length, 9));
         AddPigListRenderToEmbed(editedEmbed, {
             pigs: firstPigsPage.map(id => GetPig(id)).filter(pig => pig !== undefined) as any as Pig[],
-            safe: serverInfo.SafeMode,
             pigCounts: msgInfo.PigCounts,
             sharedPigs: msgInfo.SharedPigs,
             favouritePigs: msgInfo.FavouritePigs

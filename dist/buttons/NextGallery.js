@@ -51,7 +51,6 @@ exports.NextGallery = new Button_1.Button("GalleryNext", true, true, false, asyn
     }
     const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(editedEmbed, {
         pig: pig,
-        safe: serverInfo.SafeMode,
         new: msgInfo.NewPigs.includes(pig.ID),
         showId: !(0, UniquePigEvents_1.DoesPigIdHaveUniqueEvent)(pigToLoad),
         count: msgInfo.PigCounts[pig.ID],

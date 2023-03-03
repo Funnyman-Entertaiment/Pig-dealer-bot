@@ -58,7 +58,6 @@ async function SendAssemblyPigEmbed(serverInfo: ServerInfo, userInfo: UserInfo, 
 
     const imgPath = AddPigRenderToEmbed(assemblyPigEmbed, {
         pig: completedPig,
-        safe: serverInfo.SafeMode,
         new: true
     });
 

@@ -1,6 +1,7 @@
 import { SlashCommandBuilder, EmbedBuilder, CommandInteractionOptionResolver, Colors, PermissionFlagsBits } from "discord.js";
-import { AddServerInfoToCache, SaveAllServerInfo } from "../database/ServerInfo";
+import { AddServerInfoToCache, CreateNewDefaultServerInfo, SaveAllServerInfo } from "../database/ServerInfo";
 import { Command } from "../Command";
+import { LogInfo, PrintUser, PrintServer } from "../Utils/Log";
 
 export const SetBotRole = new Command(
     "Set Role",
@@ -18,10 +19,9 @@ export const SetBotRole = new Command(
         .setDMPermission(false),
 
     async (interaction, serverInfo) => {
-        if(serverInfo === undefined){ return; }
-        const role = (interaction.options as CommandInteractionOptionResolver).getRole('role', true)
+        const server = interaction.guild;
 
-        if (interaction.guildId === null) {
+        if(server === null){
             const errorEmbed = new EmbedBuilder()
                 .setTitle("There was an error fetching the server id.")
                 .setColor(Colors.Red);
@@ -34,11 +34,19 @@ export const SetBotRole = new Command(
             return;
         }
 
+        if(serverInfo === undefined){
+            serverInfo = CreateNewDefaultServerInfo(server.id);
+        }
+
+        const role = (interaction.options as CommandInteractionOptionResolver).getRole('role', true)
+
+        LogInfo(`User ${PrintUser(interaction.user)} is setting the dropping channel to ${role.name} in server ${PrintServer(server)}`);
+
         serverInfo.Role = role.id;
 
         await AddServerInfoToCache(serverInfo);
 
-        SaveAllServerInfo()
+        SaveAllServerInfo();
 
         const successEmbed = new EmbedBuilder()
             .setTitle(`Role succesfully set to @${role.name}`)

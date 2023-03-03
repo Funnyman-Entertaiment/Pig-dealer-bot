@@ -10,11 +10,10 @@ function ChooseRandomPigFromList(pigs: Pig[]): Pig {
 
 export const AcceptFoil = new Button(
     "AcceptFoil",
+    false,
     true,
     true,
-    true,
-    async (interaction, serverInfo, messageInfo, userInfo) => {
-        if (serverInfo === undefined) { return; }
+    async (interaction, _serverInfo, messageInfo, userInfo) => {
         if (messageInfo === undefined) { return; }
         if (userInfo === undefined) { return; }
 
@@ -83,7 +82,6 @@ export const AcceptFoil = new Button(
             });
         const imgPath = AddPigRenderToEmbed(foilPigEmbed, {
             pig: chosenFoil,
-            safe: serverInfo.SafeMode,
             count: prevAmount + 1,
             favourite: userInfo.FavouritePigs.includes(chosenFoil.ID),
             new: prevAmount == 0

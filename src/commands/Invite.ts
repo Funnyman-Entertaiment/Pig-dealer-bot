@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from "discord.js";
 import { Command } from "../Command";
 import { LogInfo, PrintUser } from "../Utils/Log";
+import { BOT_INVITE_LINK } from "../Constants/Links";
 
 export const Invite = new Command(
     "Invite",
@@ -15,9 +16,9 @@ export const Invite = new Command(
         LogInfo(`Sending bot invite to user ${PrintUser(interaction.user)}`);
 
         if(interaction.guild === null){
-            interaction.reply("https://discord.com/api/oauth2/authorize?client_id=1040735137228406884&permissions=268470272&scope=bot%20applications.commands");
+            interaction.reply(BOT_INVITE_LINK);
         }else{
-            interaction.user.send("https://discord.com/api/oauth2/authorize?client_id=1040735137228406884&permissions=268470272&scope=bot%20applications.commands");
+            interaction.user.send(BOT_INVITE_LINK);
             interaction.reply({
                 content: "Message sent!",
                 ephemeral: true

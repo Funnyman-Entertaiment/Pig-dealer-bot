@@ -1,13 +1,13 @@
-import { FoilChecksMessage, GetMessageInfo } from "../database/MessageInfo";
+import { FoilChecksMessage } from "../database/MessageInfo";
 import { Button } from "../Button";
-import { EmbedBuilder, Colors, GuildChannel } from "discord.js";
+import { EmbedBuilder, GuildChannel } from "discord.js";
 import { MakeErrorEmbed } from "../Utils/Errors";
 import { LogError, PrintChannel, PrintServer } from "../Utils/Log";
 import { AddFoilChecksToEmbed } from "../Utils/PigRenderer";
 
 export const PreviousFoilCheck = new Button(
     "PreviousFoilCheck",
-    true,
+    false,
     true,
     false,
     async (interaction, _serverInfo, messageInfo) => {

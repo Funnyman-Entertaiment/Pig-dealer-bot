@@ -1,4 +1,4 @@
-import { GetUserInfo, UserInfo, AddUserInfosToCache } from "../database/UserInfo";
+import { GetUserInfo, UserInfo, AddUserInfosToCache, CreateNewDefaultUserInfo } from "../database/UserInfo";
 import { Button } from "../Button";
 import { GetMessageInfo, PigTradeMessage, RemoveMessageInfoFromCache } from "../database/MessageInfo";
 import { MakeErrorEmbed } from "../Utils/Errors";
@@ -47,11 +47,10 @@ function AddOfferedPigsToUser(userInfo: UserInfo, pigOffer: {[key: string]: numb
 
 export const AcceptTrade = new Button(
     "AcceptTrade",
-    true,
+    false,
     true,
     false,
-    async (interaction, serverInfo, messageInfo) => {
-        if(serverInfo === undefined){ return; }
+    async (interaction, _serverInfo, messageInfo) => {
         if(messageInfo === undefined){ return; }
         const server = interaction.guild;
         if(server === null){return;}
@@ -60,20 +59,8 @@ export const AcceptTrade = new Button(
         const msgInfo = messageInfo as PigTradeMessage;
         if(msgInfo === undefined){ return; }
 
-        const starterInfo = await GetUserInfo(msgInfo.TradeStarterID) ?? new UserInfo(
-            msgInfo.TradeStarterID,
-            [],
-            {},
-            false,
-            []
-        );
-        const receiverInfo = await GetUserInfo(msgInfo.TradeReceiverID) ?? new UserInfo(
-            msgInfo.TradeReceiverID,
-            [],
-            {},
-            false,
-            []
-        );
+        const starterInfo = await GetUserInfo(msgInfo.TradeStarterID) ?? CreateNewDefaultUserInfo(msgInfo.TradeStarterID);
+        const receiverInfo = await GetUserInfo(msgInfo.TradeReceiverID) ?? CreateNewDefaultUserInfo(msgInfo.TradeReceiverID);
         await AddUserInfosToCache([starterInfo, receiverInfo]);
 
         const hasAddedPigToStarter = RemoveOfferedPigsFromUser(starterInfo, msgInfo.TradeStarterOffer);

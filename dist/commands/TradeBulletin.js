@@ -59,7 +59,7 @@ async function RemoveTradeBulletin(interaction, userInfo) {
         embeds: [successEmbed]
     });
 }
-exports.TradeBulletin = new Command_1.Command("Trade Bulletin", "Only available on the Pig Dealer Trading Forum.\n Use `/tradebulletin add` to post a text embed to the dedicated channel, used for finding trade partners.\nIf you wish to remove a bulletin, use `/tradebulletin` remove.", true, false, new discord_js_1.SlashCommandBuilder()
+exports.TradeBulletin = new Command_1.Command("Trade Bulletin", "Only available on the Pig Dealer Trading Forum.\n Use `/tradebulletin add` to post a text embed to the dedicated channel, used for finding trade partners.\nIf you wish to remove a bulletin, use `/tradebulletin` remove.", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("tradebulletin")
     .addSubcommand(new discord_js_1.SlashCommandSubcommandBuilder()
     .setName("add")

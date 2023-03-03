@@ -200,13 +200,12 @@ function ChoosePigs(serverInfo, pack) {
     });
     return chosenPigs;
 }
-function GetOpenPackFollowUp(packName, chosenPigs, newPigs, interaction, userInfo, serverInfo) {
+function GetOpenPackFollowUp(packName, chosenPigs, newPigs, interaction, userInfo) {
     const openedPackEmbed = new builders_1.EmbedBuilder()
         .setTitle(`You've opened a ${packName}`)
         .setDescription(`1/${chosenPigs.length}`);
     const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(openedPackEmbed, {
         pig: chosenPigs[0],
-        safe: serverInfo.SafeMode,
         new: newPigs.includes(chosenPigs[0].ID),
         count: 1,
         favourite: userInfo.FavouritePigs.includes(chosenPigs[0].ID)
@@ -245,10 +244,10 @@ function GetOpenPackFollowUp(packName, chosenPigs, newPigs, interaction, userInf
         files: [imgPath]
     };
 }
-function SendOpenPackFollowUp(userInfo, chosenPigs, pigsToShowInPack, pack, serverId, interaction, serverInfo) {
+function SendOpenPackFollowUp(userInfo, chosenPigs, pigsToShowInPack, pack, serverId, interaction) {
     const userPigs = (0, UserInfo_1.GetUserPigIDs)(userInfo);
     const newPigs = chosenPigs.filter(pig => !userPigs.includes(pig.ID)).map(pig => pig.ID);
-    const packFollowUp = GetOpenPackFollowUp(pack.Name, pigsToShowInPack, newPigs, interaction, userInfo, serverInfo);
+    const packFollowUp = GetOpenPackFollowUp(pack.Name, pigsToShowInPack, newPigs, interaction, userInfo);
     if (packFollowUp === undefined) {
         return;
     }
@@ -340,7 +339,6 @@ exports.OpenPack = new Button_1.Button("OpenPack", true, true, false, async (int
     const message = interaction.message;
     const serverID = server.id;
     const userID = user.id;
-    const msgID = message.id;
     const userInfo = await (0, UserInfo_1.GetUserInfo)(userID) ?? new UserInfo_1.UserInfo(userID, [], {}, false, []);
     (0, UserInfo_1.AddUserInfoToCache)(userInfo);
     const msgInfo = messageInfo;
@@ -396,7 +394,7 @@ exports.OpenPack = new Button_1.Button("OpenPack", true, true, false, async (int
     const chosenPigs = ChoosePigs(serverInfo, pack).filter(x => x !== undefined);
     const pigsToShowInPack = [...chosenPigs];
     (0, SeasonalEvents_1.RunPostPackOpened)(pack, serverInfo, chosenPigs, pigsToShowInPack);
-    SendOpenPackFollowUp(userInfo, chosenPigs, pigsToShowInPack, pack, serverID, interaction, serverInfo);
+    SendOpenPackFollowUp(userInfo, chosenPigs, pigsToShowInPack, pack, serverID, interaction);
     AddPigsToUser(chosenPigs, userInfo);
     const assembledPigs = await (0, AssemblyyPigs_1.CheckAndSendAssemblyPigEmbeds)(serverID, userID, chosenPigs);
     if (assembledPigs === undefined) {

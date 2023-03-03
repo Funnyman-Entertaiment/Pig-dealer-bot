@@ -7,7 +7,7 @@ const Pigs_1 = require("../database/Pigs");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const MessageInfo_1 = require("../database/MessageInfo");
 const FOILED_RARITIES = ["Common", "Rare", "Epic", "Legendary"];
-exports.CheckFoils = new Command_1.Command("Check Foils", "Shows you your progress on your eligibility for crafting a foil from every rarity of every set.", true, true, new discord_js_1.SlashCommandBuilder()
+exports.CheckFoils = new Command_1.Command("Check Foils", "Shows you your progress on your eligibility for crafting a foil from every rarity of every set.", false, true, new discord_js_1.SlashCommandBuilder()
     .setName("checkfoils")
     .setDescription("Gives you a list of all foils you can craft.")
     .addBooleanOption(new discord_js_1.SlashCommandBooleanOption()

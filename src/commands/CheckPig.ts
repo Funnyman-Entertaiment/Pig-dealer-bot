@@ -10,7 +10,7 @@ import { LogInfo, PrintUser } from "../Utils/Log";
 export const CheckPig = new Command(
     "CheckPig",
     "Shows a single pig in your collection",
-    true,
+    false,
     true,
     new SlashCommandBuilder()
     .setName("checkpig")
@@ -21,8 +21,7 @@ export const CheckPig = new Command(
     .setDescription("Shows you a single pig you own.")
     .setDMPermission(false),
 
-    async function(interaction, serverInfo, userInfo){
-        if(serverInfo === undefined){ return; }
+    async function(interaction, _serverInfo, userInfo){
         if(userInfo === undefined){ return; }
 
         const pigID = (interaction.options as CommandInteractionOptionResolver).getString('id', true);
@@ -68,7 +67,6 @@ export const CheckPig = new Command(
 
         const img = AddPigRenderToEmbed(pigEmbed, {
             pig: pig,
-            safe: serverInfo.SafeMode,
             favourite: userInfo?.FavouritePigs.includes(pigID),
             count: userInfo?.Pigs[pigID]
         });

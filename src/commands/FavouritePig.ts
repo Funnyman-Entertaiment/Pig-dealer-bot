@@ -9,7 +9,7 @@ import { LogInfo, PrintUser } from "../Utils/Log";
 export const FavouritePigCmd = new Command(
     "Favourite",
     "Favourites a pig you own, defined by ID or by pressing the \"Favorite⭐\" button on them when viewing your binder in image view.\nFavourited pigs will have a star after their name in your binder and can be specifically searched for by setting \"Favourites\" when typing in a binder viewing command.",
-    true,
+    false,
     true,
     new SlashCommandBuilder()
         .setName("favourite")

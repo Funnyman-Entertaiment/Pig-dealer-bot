@@ -10,7 +10,7 @@ import { GetAuthor } from "../Utils/GetAuthor";
 export const ShowBinder = new Command(
     "Binder",
     "Shows you the pigs you own, with an image for each. You can define a user to see someone else's binder, rarity, to only see pigs of a certain rarity. You can also set favourites to True to only see pigs you've favourited.\nWhen viewing someone else's binder, a checkmark will signify if you already own a pig from their collection.",
-    true,
+    false,
     true,
     new SlashCommandBuilder()
         .setName("binder")
@@ -26,8 +26,7 @@ export const ShowBinder = new Command(
         .setDescription("Let's you check your own or someone else's pig binder")
         .setDMPermission(false),
 
-    async (interaction, serverInfo, userInfo) => {
-        if(serverInfo === undefined){ return; }
+    async (interaction, _serverInfo, userInfo) => {
         if(userInfo === undefined){ return; }
         await interaction.deferReply();
 
@@ -136,7 +135,6 @@ export const ShowBinder = new Command(
 
         const imgPath = AddPigRenderToEmbed(openedPackEmbed, {
             pig: firstPig,
-            safe: serverInfo.SafeMode,
             count: userInfo?.Pigs[firstPig.ID] ?? 1,
             favourite: favouritePigs.includes(firstPig.ID),
             shared: userInfo.ID === interaction.user.id ? false : sharedPigs.includes(firstPig.ID)

@@ -52,7 +52,6 @@ exports.NextSet = new Button_1.Button("SetNext", true, true, false, async (inter
     const firstPigsPage = msgInfo.PigsBySet[newSet].slice(0, Math.min(msgInfo.PigsBySet[newSet].length, 9));
     (0, PigRenderer_1.AddPigListRenderToEmbed)(editedEmbed, {
         pigs: firstPigsPage.map(id => (0, Pigs_1.GetPig)(id)).filter(pig => pig !== undefined),
-        safe: serverInfo.SafeMode,
         pigCounts: msgInfo.PigCounts,
         sharedPigs: msgInfo.SharedPigs,
         favouritePigs: msgInfo.FavouritePigs

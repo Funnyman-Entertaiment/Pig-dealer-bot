@@ -1,21 +1,18 @@
-import { EmbedBuilder, Colors, GuildChannel, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import { EmbedBuilder, GuildChannel, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import { Button } from "../Button";
 import { MakeErrorEmbed } from "../Utils/Errors";
-import { GetMessageInfo, PigGalleryMessage } from "../database/MessageInfo";
-import { GetUserInfo } from "../database/UserInfo";
+import { PigGalleryMessage } from "../database/MessageInfo";
 import { LogError, PrintChannel, PrintServer } from "../Utils/Log";
 import { AddPigRenderToEmbed } from "../Utils/PigRenderer";
 import { GetPig } from "../database/Pigs";
 import { DoesPigIdHaveUniqueEvent } from "../uniquePigEvents/UniquePigEvents";
-import { GetServerInfo } from "../database/ServerInfo";
 
 export const UnfavouritePig = new Button(
     "UnfavouritePig",
+    false,
     true,
     true,
-    true,
-    async function(interaction, serverInfo, messageInfo, userInfo){
-        if(serverInfo === undefined){ return; }
+    async function(interaction, _serverInfo, messageInfo, userInfo){
         if(messageInfo === undefined){ return; }
         if(userInfo === undefined){return;}
         await interaction.deferUpdate();
@@ -68,7 +65,6 @@ export const UnfavouritePig = new Button(
 
         const imgPath = AddPigRenderToEmbed(editedEmbed, {
             pig: pig,
-            safe: serverInfo.SafeMode,
             new: msgInfo.NewPigs.includes(pig.ID),
             showId: !DoesPigIdHaveUniqueEvent(currentPigID),
             count: msgInfo.PigCounts[pig.ID],

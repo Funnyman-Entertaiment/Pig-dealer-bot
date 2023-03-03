@@ -1,7 +1,8 @@
-import { APIEmbedField, ActionRowBuilder, ButtonBuilder, ButtonStyle, Client, Colors, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder, GuildTextBasedChannel, SlashCommandBuilder, TextChannel, roleMention } from "discord.js";
+import { APIEmbedField, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder, GuildTextBasedChannel, SlashCommandBuilder, TextChannel, roleMention } from "discord.js";
 import { Command } from "../Command";
 import { query, collection, getDocs } from "firebase/firestore/lite";
 import { client, db } from "../Bot";
+import { BOT_INVITE_LINK, TRADE_SERVER_INVITE_LINK } from "../Constants/Links";
 
 
 let announcementEmbed: EmbedBuilder | undefined;
@@ -162,11 +163,11 @@ async function SendAnnouncement(interaction: CommandInteraction){
         new ButtonBuilder()
             .setLabel("Invite the bot!")
             .setStyle(ButtonStyle.Link)
-            .setURL("https://discord.com/api/oauth2/authorize?client_id=1040735137228406884&permissions=268470272&scope=bot%20applications.commands"),
+            .setURL(BOT_INVITE_LINK),
         new ButtonBuilder()
             .setLabel("Join the server!")
             .setStyle(ButtonStyle.Link)
-            .setURL("https://discord.gg/wnAnhRyKjM")
+            .setURL(TRADE_SERVER_INVITE_LINK)
     );
 
     const q = query(collection(db, "serverInfo"));

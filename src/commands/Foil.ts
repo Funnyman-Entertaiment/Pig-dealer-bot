@@ -26,7 +26,7 @@ function GetFieldDescriptionFromPigAmounts(pigAmounts: { [key: string]: number }
 export const Foil = new Command(
     "Foil",
     "Used to craft a foil pig, using 100 common, 50 rare, 15 epic or 5 legendary pigs from the same set.\n`onlydupes` defines whether the bot only uses duped pigs for the process.\nYou will have the chance to review the pigs the bot has selected to use in the craft before it happens.\nIf you wish to manually select which pigs to use when crafting a foil pig, use `/foilpigs`",
-    true,
+    false,
     true,
     new SlashCommandBuilder()
         .setName("foil")

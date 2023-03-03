@@ -10,11 +10,10 @@ import { LogError, PrintChannel, PrintServer } from "../Utils/Log";
 
 export const PrevGallery = new Button(
     "GalleryPrevious",
-    true,
+    false,
     true,
     false,
-    async (interaction, serverInfo, messageInfo) => {
-        if(serverInfo === undefined){ return; }
+    async (interaction, _serverInfo, messageInfo) => {
         if(messageInfo === undefined){ return; }
 
         const server = interaction.guild;
@@ -64,7 +63,6 @@ export const PrevGallery = new Button(
 
         const imgPath = AddPigRenderToEmbed(editedEmbed, {
             pig: pig,
-            safe: serverInfo.SafeMode,
             new: msgInfo.NewPigs.includes(pig.ID),
             showId: !DoesPigIdHaveUniqueEvent(pigToLoad),
             count: msgInfo.PigCounts[pig.ID],

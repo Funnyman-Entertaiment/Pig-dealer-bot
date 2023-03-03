@@ -1,6 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, CommandInteractionOptionResolver, EmbedBuilder, SlashCommandBooleanOption, SlashCommandBuilder } from "discord.js";
 import { Command } from "../Command";
-import { GetUserInfo } from "../database/UserInfo";
 import { GetAllPigs } from "../database/Pigs";
 import { AddFoilChecksToEmbed } from "../Utils/PigRenderer";
 import { AddMessageInfoToCache, FoilChecksMessage } from "../database/MessageInfo";
@@ -10,7 +9,7 @@ const FOILED_RARITIES = ["Common", "Rare", "Epic", "Legendary"];
 export const CheckFoils = new Command(
     "Check Foils",
     "Shows you your progress on your eligibility for crafting a foil from every rarity of every set.",
-    true,
+    false,
     true,
     new SlashCommandBuilder()
         .setName("checkfoils")

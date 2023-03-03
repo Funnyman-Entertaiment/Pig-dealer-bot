@@ -53,7 +53,7 @@ const handleSlashCommand = async (interaction: CommandInteraction) => {
         if(serverInfo === undefined){
             const errorEmbed = new EmbedBuilder()
                 .setTitle("This server is not properly set up")
-                .setDescription("An admin needs to use the /setsafemode command before the bot can work properly")
+                .setDescription("An admin may need to use /setchannel before this feature can work properly")
                 .setColor(Colors.DarkRed);
 
             await interaction.reply({
@@ -117,7 +117,7 @@ const handleButtonCommand = async(interaction: ButtonInteraction) => {
         if(serverInfo === undefined){
             const errorEmbed = new EmbedBuilder()
                 .setTitle("This server is not properly set up")
-                .setDescription("An admin needs to use the /setsafemode command before the bot can work properly")
+                .setDescription("An admin may need to use /setchannel before this command can work properly")
                 .setColor(Colors.DarkRed);
 
             await interaction.reply({

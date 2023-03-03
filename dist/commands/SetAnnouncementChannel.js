@@ -14,21 +14,8 @@ exports.SetAnnouncementChannel = new Command_1.Command("Set Announcement Channel
     .setDescription("Let's you choose what channel the bot sends announcements to")
     .setDefaultMemberPermissions(discord_js_1.PermissionFlagsBits.Administrator)
     .setDMPermission(false), async (interaction, serverInfo) => {
-    if (serverInfo === undefined) {
-        return;
-    }
-    const channel = interaction.options.getChannel('channel', true);
-    if (channel.type !== discord_js_1.ChannelType.GuildText) {
-        const errorEmbed = new discord_js_1.EmbedBuilder()
-            .setTitle("Channel must be a text channel.")
-            .setColor(discord_js_1.Colors.Red);
-        await interaction.reply({
-            ephemeral: true,
-            embeds: [errorEmbed]
-        });
-        return;
-    }
-    if (interaction.guildId === null) {
+    const server = interaction.guild;
+    if (server === null) {
         const errorEmbed = new discord_js_1.EmbedBuilder()
             .setTitle("There was an error fetching the server id.")
             .setColor(discord_js_1.Colors.Red);
@@ -38,12 +25,16 @@ exports.SetAnnouncementChannel = new Command_1.Command("Set Announcement Channel
         });
         return;
     }
-    (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} is setting the annoucement channel to ${(0, Log_1.PrintChannel)(channel)} in server ${(0, Log_1.PrintServer)(interaction.guild)}`);
+    if (serverInfo === undefined) {
+        serverInfo = (0, ServerInfo_1.CreateNewDefaultServerInfo)(server.id);
+    }
+    const channel = interaction.options.getChannel('channel', true);
+    (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} is setting the dropping channel to ${(0, Log_1.PrintChannel)(channel)} in server ${(0, Log_1.PrintServer)(server)}`);
     serverInfo.AnnouncementChannel = channel.id;
     await (0, ServerInfo_1.AddServerInfoToCache)(serverInfo);
     (0, ServerInfo_1.SaveAllServerInfo)();
     const successEmbed = new discord_js_1.EmbedBuilder()
-        .setTitle(`Announcements channel succesfully set to ${channel.name}`)
+        .setTitle(`Channel succesfully set to ${channel.name}`)
         .setColor(discord_js_1.Colors.Green);
     await interaction.reply({
         ephemeral: true,

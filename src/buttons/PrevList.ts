@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, Colors, EmbedBuilder, GuildChannel } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, GuildChannel } from "discord.js";
 import { Button } from "../Button";
 import { MakeErrorEmbed } from "../Utils/Errors";
 import { LogError, PrintChannel, PrintServer } from "../Utils/Log";
@@ -8,11 +8,10 @@ import { GetPig, Pig } from "../database/Pigs";
 
 export const PreviousList = new Button(
     "ListPrevious",
-    true,
+    false,
     true,
     false,
-    async (interaction, serverInfo, messageInfo) => {
-        if(serverInfo === undefined){ return; }
+    async (interaction, _serverInfo, messageInfo) => {
         if(messageInfo === undefined){return;}
 
         await interaction.deferUpdate();
@@ -61,7 +60,6 @@ export const PreviousList = new Button(
         const firstPigsPage = pigList.slice(pageStart, pageEnd);
         AddPigListRenderToEmbed(editedEmbed, {
             pigs: firstPigsPage.map(id => GetPig(id)).filter(pig => pig !== undefined) as any as Pig[],
-            safe: serverInfo.SafeMode,
             pigCounts: msgInfo.PigCounts,
             sharedPigs: msgInfo.SharedPigs,
             favouritePigs: msgInfo.FavouritePigs

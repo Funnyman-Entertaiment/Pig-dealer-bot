@@ -75,7 +75,6 @@ exports.AcceptFoil = new Button_1.Button("AcceptFoil", true, true, true, async (
     });
     const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(foilPigEmbed, {
         pig: chosenFoil,
-        safe: serverInfo.SafeMode,
         count: prevAmount + 1,
         favourite: userInfo.FavouritePigs.includes(chosenFoil.ID),
         new: prevAmount == 0

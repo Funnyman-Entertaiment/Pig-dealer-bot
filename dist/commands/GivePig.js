@@ -137,7 +137,6 @@ exports.GivePig = new Command_1.Command("", "", false, false, new discord_js_1.S
         .setTitle(title ?? `${user.user.username} has received a free pig!`);
     const img = (0, PigRenderer_1.AddPigRenderToEmbed)(pigEmbed, {
         pig: pig,
-        safe: serverInfo.SafeMode
     });
     if (sendEmbed) {
         (0, SendMessage_1.TrySendMessageToChannel)(serverID, serverInfo.Channel, {
