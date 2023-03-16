@@ -13,7 +13,7 @@ async function ResetServerUsers() {
     for (let i = 0; i < servers.size; i++) {
         const element = servers.docs[i];
         const serverInfo = await (0, ServerInfo_1.GetServerInfo)(element.id);
-        console.log(`Server: ${i + 1}/${servers.size}`);
+        console.log(`Server: ${i + 1}/${servers.size} (${element.id})`);
         await new Promise(r => setTimeout(r, 100));
         if (serverInfo !== undefined) {
             serverInfo.Enabled = true;
@@ -26,7 +26,7 @@ async function ResetServerUsers() {
     for (let i = 0; i < users.size; i++) {
         const element = users.docs[i];
         const userInfo = await (0, UserInfo_1.GetUserInfo)(element.id);
-        console.log(`User: ${i + 1}/${users.size}`);
+        console.log(`User: ${i + 1}/${users.size} (${element.id})`);
         await new Promise(r => setTimeout(r, 100));
         if (userInfo !== undefined) {
             userInfo.WarnedAboutCooldown = false;
