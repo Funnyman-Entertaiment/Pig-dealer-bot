@@ -45,23 +45,24 @@ exports.ShowBinder = new Command_1.Command("Binder", "Shows you the pigs you own
         const username = user.username;
         const avatar = user.avatarURL();
         author = { name: username, iconURL: avatar === null ? "" : avatar };
+        userInfo = await (0, UserInfo_1.GetUserInfo)(userId);
+        if (userInfo === undefined) {
+            const emptyEmbed = new discord_js_1.EmbedBuilder()
+                .setAuthor(author)
+                .setColor(discord_js_1.Colors.DarkRed)
+                .setTitle("This user has no pigs!")
+                .setDescription("Open some packs, loser");
+            await interaction.followUp({
+                embeds: [emptyEmbed]
+            });
+            return;
+        }
     }
     const rarities = options.getString('rarity') ?? "";
     const raritiesToFilter = rarities.split(',')
         .map(rarity => rarity.trim().toLowerCase())
         .filter(rarity => rarity.length > 0);
     let pigs = (0, UserInfo_1.GetUserPigIDs)(userInfo);
-    if (userInfo === undefined) {
-        const emptyEmbed = new discord_js_1.EmbedBuilder()
-            .setAuthor(author)
-            .setColor(discord_js_1.Colors.DarkRed)
-            .setTitle("This user has no pigs!")
-            .setDescription("Open some packs, loser");
-        await interaction.followUp({
-            embeds: [emptyEmbed]
-        });
-        return;
-    }
     if (raritiesToFilter.length > 0) {
         pigs = pigs.filter(pigID => {
             const pig = (0, Pigs_1.GetPig)(pigID);
@@ -76,7 +77,7 @@ exports.ShowBinder = new Command_1.Command("Binder", "Shows you the pigs you own
     if (onlyFavourites) {
         pigs = pigs.filter(pig => favouritePigs.includes(pig));
     }
-    if (userInfo === undefined || pigs.length === 0) {
+    if (pigs.length === 0) {
         const emptyEmbed = new discord_js_1.EmbedBuilder()
             .setAuthor(author)
             .setColor(discord_js_1.Colors.DarkRed)
@@ -144,6 +145,9 @@ exports.ShowBinder = new Command_1.Command("Binder", "Shows you the pigs you own
         components: [row],
         files: [imgPath]
     }).then(message => {
+        if (userInfo === undefined) {
+            return;
+        }
         const newMessage = new MessageInfo_1.PigGalleryMessage(message.id, server.id, 0, userInfo === undefined ? {} : userInfo.Pigs, pigs, [], [], userInfo.FavouritePigs, userInfo.ID === interaction.user.id ? [] : sharedPigs, userInfo.ID === interaction.user.id && !onlyFavourites, interaction.user.id);
         (0, MessageInfo_1.AddMessageInfoToCache)(newMessage);
     });

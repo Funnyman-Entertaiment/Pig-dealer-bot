@@ -54,6 +54,21 @@ export const ShowBinder = new Command(
             const avatar = user.avatarURL();
 
             author = { name: username, iconURL: avatar === null ? "" : avatar };
+
+            userInfo = await GetUserInfo(userId);
+
+            if (userInfo === undefined) {
+                const emptyEmbed = new EmbedBuilder()
+                    .setAuthor(author)
+                    .setColor(Colors.DarkRed)
+                    .setTitle("This user has no pigs!")
+                    .setDescription("Open some packs, loser");
+    
+                await interaction.followUp({
+                    embeds: [emptyEmbed]
+                });
+                return;
+            }
         }
 
         const rarities = options.getString('rarity') ?? "";
@@ -62,19 +77,6 @@ export const ShowBinder = new Command(
             .filter(rarity => rarity.length > 0);
 
         let pigs = GetUserPigIDs(userInfo);
-
-        if (userInfo === undefined) {
-            const emptyEmbed = new EmbedBuilder()
-                .setAuthor(author)
-                .setColor(Colors.DarkRed)
-                .setTitle("This user has no pigs!")
-                .setDescription("Open some packs, loser");
-
-            await interaction.followUp({
-                embeds: [emptyEmbed]
-            });
-            return;
-        }
 
         if (raritiesToFilter.length > 0) {
             pigs = pigs.filter(pigID => {
@@ -93,7 +95,7 @@ export const ShowBinder = new Command(
             pigs = pigs.filter(pig => favouritePigs.includes(pig));
         }
 
-        if (userInfo === undefined || pigs.length === 0) {
+        if (pigs.length === 0) {
             const emptyEmbed = new EmbedBuilder()
                 .setAuthor(author)
                 .setColor(Colors.DarkRed)
@@ -177,6 +179,8 @@ export const ShowBinder = new Command(
             components: [row],
             files: [imgPath]
         }).then(message => {
+            if(userInfo === undefined){return;}
+
             const newMessage = new PigGalleryMessage(
                 message.id,
                 server.id,

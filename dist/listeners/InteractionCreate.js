@@ -110,10 +110,16 @@ const handleButtonCommand = async (interaction) => {
         const messageId = interaction.message.id;
         messageInfo = (0, MessageInfo_1.GetMessageInfo)(serverId, messageId);
         if (messageInfo === undefined) {
-            const errorEmbed = new discord_js_1.EmbedBuilder()
+            let errorEmbed = new discord_js_1.EmbedBuilder()
                 .setTitle("This message has expired")
-                .setDescription("Trade messages expire after ~15 minutes of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
+                .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
                 .setColor(discord_js_1.Colors.Red);
+            if (button.id === "AcceptTrade" || button.id === "CancelTrade") {
+                errorEmbed = new discord_js_1.EmbedBuilder()
+                    .setTitle("This message has expired")
+                    .setDescription("Trade messages expire after ~15 minutes of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
+                    .setColor(discord_js_1.Colors.Red);
+            }
             interaction.reply({
                 embeds: [errorEmbed],
                 ephemeral: true

@@ -49,6 +49,18 @@ exports.ShowBinderList = new Command_1.Command("Binder List", "Shows you the pig
         const username = user.username;
         const avatar = user.avatarURL();
         author = { name: username, iconURL: avatar === null ? "" : avatar };
+        userInfo = await (0, UserInfo_1.GetUserInfo)(user.id);
+        if (userInfo === undefined) {
+            const emptyEmbed = new discord_js_1.EmbedBuilder()
+                .setAuthor(author)
+                .setColor(discord_js_1.Colors.DarkRed)
+                .setTitle("This user has no pigs!")
+                .setDescription("Open some packs, loser");
+            await interaction.followUp({
+                embeds: [emptyEmbed]
+            });
+            return;
+        }
     }
     let pigs = (0, UserInfo_1.GetUserPigs)(userInfo);
     if (raritiesToFilter.length > 0) {
@@ -58,7 +70,8 @@ exports.ShowBinderList = new Command_1.Command("Binder List", "Shows you the pig
     }
     const onlyFavourites = options.getBoolean('favourites') ?? false;
     if (onlyFavourites) {
-        pigs = pigs.filter(pig => userInfo.FavouritePigs.includes(pig.ID));
+        const favouritePigs = userInfo.FavouritePigs;
+        pigs = pigs.filter(pig => favouritePigs.includes(pig.ID));
     }
     if (userInfo === undefined || pigs.length === 0) {
         const emptyEmbed = new discord_js_1.EmbedBuilder()
@@ -150,6 +163,9 @@ exports.ShowBinderList = new Command_1.Command("Binder List", "Shows you the pig
         embeds: [catalogueEmbed],
         components: [row]
     }).then(message => {
+        if (userInfo === undefined) {
+            return;
+        }
         const messageInfo = new MessageInfo_1.PigListMessage(message.id, server.id, userInfo === undefined ? {} : userInfo.Pigs, pigsBySet, userInfo?.FavouritePigs ?? [], userInfo.ID === interaction.user.id ? [] : sharedPigs, firstSet, 0, interaction.user.id);
         (0, MessageInfo_1.AddMessageInfoToCache)(messageInfo);
     });

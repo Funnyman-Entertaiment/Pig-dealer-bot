@@ -33,9 +33,9 @@ exports.client = new discord_js_1.Client({
     ],
     partials: [discord_js_1.Partials.Channel, discord_js_1.Partials.Reaction, discord_js_1.Partials.Message],
 });
+(0, UnhandledException_1.default)();
 (0, Ready_1.default)();
 (0, InteractionCreate_1.default)();
-(0, UnhandledException_1.default)();
 (0, GuildJoin_1.default)();
 (0, GuildLeave_1.default)();
 exports.client.login(token);

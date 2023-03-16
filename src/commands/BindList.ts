@@ -31,7 +31,7 @@ export const ShowBinderList = new Command(
         .setDMPermission(false),
 
     async (interaction, _serverInfo, userInfo) => {
-        if(userInfo === undefined){ return; }
+        if (userInfo === undefined) { return; }
 
         await interaction.deferReply();
 
@@ -61,6 +61,21 @@ export const ShowBinderList = new Command(
             const avatar = user.avatarURL();
 
             author = { name: username, iconURL: avatar === null ? "" : avatar };
+
+            userInfo = await GetUserInfo(user.id);
+
+            if (userInfo === undefined) {
+                const emptyEmbed = new EmbedBuilder()
+                    .setAuthor(author)
+                    .setColor(Colors.DarkRed)
+                    .setTitle("This user has no pigs!")
+                    .setDescription("Open some packs, loser");
+
+                await interaction.followUp({
+                    embeds: [emptyEmbed]
+                });
+                return;
+            }
         }
 
         let pigs = GetUserPigs(userInfo);
@@ -73,7 +88,8 @@ export const ShowBinderList = new Command(
 
         const onlyFavourites = options.getBoolean('favourites') ?? false;
         if (onlyFavourites) {
-            pigs = pigs.filter(pig => userInfo.FavouritePigs.includes(pig.ID));
+            const favouritePigs = userInfo.FavouritePigs
+            pigs = pigs.filter(pig => favouritePigs.includes(pig.ID));
         }
 
         if (userInfo === undefined || pigs.length === 0) {
@@ -186,6 +202,8 @@ export const ShowBinderList = new Command(
             embeds: [catalogueEmbed],
             components: [row]
         }).then(message => {
+            if (userInfo === undefined) { return; }
+
             const messageInfo = new PigListMessage(
                 message.id,
                 server.id,
