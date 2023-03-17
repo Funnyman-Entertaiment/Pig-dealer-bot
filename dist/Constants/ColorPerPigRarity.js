@@ -17,5 +17,6 @@ exports.COLOR_PER_PIG_RARITY = {
     ["Apology Present"]: discord_js_1.Colors.White,
     ["Personal Gift"]: discord_js_1.Colors.White,
     ["Unimplemented"]: discord_js_1.Colors.Grey,
-    ["Easter"]: 9031664
+    ["Easter"]: 9031664,
+    ["Saint Patrick's Day"]: discord_js_1.Colors.Green
 };
