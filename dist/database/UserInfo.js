@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetUserPigs = exports.GetUserPigIDs = exports.GetUserInfo = exports.AddUserInfosToCache = exports.AddUserInfoToCache = exports.SaveAllUserInfo = exports.UserInfo = void 0;
+exports.GetUserPigs = exports.GetUserPigIDs = exports.GetUserInfo = exports.AddUserInfosToCache = exports.AddUserInfoToCache = exports.SaveAllUserInfo = exports.CreateNewDefaultUserInfo = exports.UserInfo = void 0;
 const lite_1 = require("firebase/firestore/lite");
 const DatabaseCacheList_1 = require("./DatabaseCacheList");
 const DatabaseElement_1 = require("./DatabaseElement");
@@ -45,6 +45,10 @@ class UserInfo extends DatabaseElement_1.DatabaseElement {
 }
 exports.UserInfo = UserInfo;
 let CachedUserInfos;
+function CreateNewDefaultUserInfo(id) {
+    return new UserInfo(id, [], {}, false, []);
+}
+exports.CreateNewDefaultUserInfo = CreateNewDefaultUserInfo;
 async function SaveAllUserInfo() {
     await CachedUserInfos?.SaveAll();
 }

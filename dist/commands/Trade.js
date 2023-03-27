@@ -137,8 +137,8 @@ async function NewTrade(interaction, options) {
         });
         return;
     }
-    const starterInfo = await (0, UserInfo_1.GetUserInfo)(tradeStarter.id) ?? new UserInfo_1.UserInfo(tradeStarter.id, [], {}, false, []);
-    const receiverInfo = await (0, UserInfo_1.GetUserInfo)(tradeReceiver.id) ?? new UserInfo_1.UserInfo(tradeReceiver.id, [], {}, false, []);
+    const starterInfo = await (0, UserInfo_1.GetUserInfo)(tradeStarter.id) ?? (0, UserInfo_1.CreateNewDefaultUserInfo)(tradeStarter.id);
+    const receiverInfo = await (0, UserInfo_1.GetUserInfo)(tradeReceiver.id) ?? (0, UserInfo_1.CreateNewDefaultUserInfo)(tradeReceiver.id);
     await (0, UserInfo_1.AddUserInfosToCache)([starterInfo, receiverInfo]);
     const pigsString = options.getString("pigs") ?? "";
     const pigAmounts = ParseTradePigsString(interaction, pigsString);
@@ -206,8 +206,8 @@ async function CounterOfferTrade(interaction, options) {
         });
         return;
     }
-    const starterInfo = await (0, UserInfo_1.GetUserInfo)(msgInfo.TradeStarterID) ?? new UserInfo_1.UserInfo(msgInfo.TradeStarterID, [], {}, false, []);
-    const receiverInfo = await (0, UserInfo_1.GetUserInfo)(msgInfo.TradeReceiverID) ?? new UserInfo_1.UserInfo(msgInfo.TradeReceiverID, [], {}, false, []);
+    const starterInfo = await (0, UserInfo_1.GetUserInfo)(msgInfo.TradeStarterID) ?? (0, UserInfo_1.CreateNewDefaultUserInfo)(msgInfo.TradeStarterID);
+    const receiverInfo = await (0, UserInfo_1.GetUserInfo)(msgInfo.TradeReceiverID) ?? (0, UserInfo_1.CreateNewDefaultUserInfo)(msgInfo.TradeReceiverID);
     await (0, UserInfo_1.AddUserInfosToCache)([starterInfo, receiverInfo]);
     const pigsString = options.getString("pigs") ?? "";
     const pigAmounts = ParseTradePigsString(interaction, pigsString);
@@ -308,7 +308,7 @@ async function CounterOfferTrade(interaction, options) {
         ephemeral: true
     });
 }
-exports.Trade = new Command_1.Command("Trade", "Use `/trade start` to start a trade with another user. Define a user and the pigs you're offering (using the syntax pigs:1,2,3,4, for IDs).\nAfter it's sent, they can respond with /trade offer to offer you pigs in exchange. Once that transpires, you will have the chance to accept or decline the final trade proposition.\nNote that the 0 digits at the start of lower digit IDs are purely cosmetic and are not needed when searching by ID. E.G. ACAB Pig (001) becomes only 1 when putting it into a command.", true, false, new discord_js_1.SlashCommandBuilder()
+exports.Trade = new Command_1.Command("Trade", "Use `/trade start` to start a trade with another user. Define a user and the pigs you're offering (using the syntax pigs:1,2,3,4, for IDs).\nAfter it's sent, they can respond with /trade offer to offer you pigs in exchange. Once that transpires, you will have the chance to accept or decline the final trade proposition.\nNote that the 0 digits at the start of lower digit IDs are purely cosmetic and are not needed when searching by ID. E.G. ACAB Pig (001) becomes only 1 when putting it into a command.", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("trade")
     .addSubcommand(new discord_js_1.SlashCommandSubcommandBuilder()
     .setName("start")

@@ -44,7 +44,7 @@ const handleSlashCommand = async (interaction) => {
         if (serverInfo === undefined) {
             const errorEmbed = new discord_js_1.EmbedBuilder()
                 .setTitle("This server is not properly set up")
-                .setDescription("An admin needs to use the /setsafemode command before the bot can work properly")
+                .setDescription("An admin may need to use /setchannel before this feature can work properly")
                 .setColor(discord_js_1.Colors.DarkRed);
             await interaction.reply({
                 embeds: [errorEmbed]
@@ -89,7 +89,7 @@ const handleButtonCommand = async (interaction) => {
         if (serverInfo === undefined) {
             const errorEmbed = new discord_js_1.EmbedBuilder()
                 .setTitle("This server is not properly set up")
-                .setDescription("An admin needs to use the /setsafemode command before the bot can work properly")
+                .setDescription("An admin may need to use /setchannel before this command can work properly")
                 .setColor(discord_js_1.Colors.DarkRed);
             await interaction.reply({
                 embeds: [errorEmbed]
@@ -110,10 +110,16 @@ const handleButtonCommand = async (interaction) => {
         const messageId = interaction.message.id;
         messageInfo = (0, MessageInfo_1.GetMessageInfo)(serverId, messageId);
         if (messageInfo === undefined) {
-            const errorEmbed = new discord_js_1.EmbedBuilder()
+            let errorEmbed = new discord_js_1.EmbedBuilder()
                 .setTitle("This message has expired")
-                .setDescription("Trade messages expire after ~15 minutes of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
+                .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
                 .setColor(discord_js_1.Colors.Red);
+            if (button.id === "AcceptTrade" || button.id === "CancelTrade") {
+                errorEmbed = new discord_js_1.EmbedBuilder()
+                    .setTitle("This message has expired")
+                    .setDescription("Trade messages expire after ~15 minutes of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
+                    .setColor(discord_js_1.Colors.Red);
+            }
             interaction.reply({
                 embeds: [errorEmbed],
                 ephemeral: true

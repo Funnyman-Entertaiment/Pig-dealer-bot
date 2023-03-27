@@ -37,10 +37,7 @@ function AddOfferedPigsToUser(userInfo, pigOffer) {
     }
     return pigsAdded;
 }
-exports.AcceptTrade = new Button_1.Button("AcceptTrade", true, true, false, async (interaction, serverInfo, messageInfo) => {
-    if (serverInfo === undefined) {
-        return;
-    }
+exports.AcceptTrade = new Button_1.Button("AcceptTrade", false, true, false, async (interaction, _serverInfo, messageInfo) => {
     if (messageInfo === undefined) {
         return;
     }
@@ -53,8 +50,8 @@ exports.AcceptTrade = new Button_1.Button("AcceptTrade", true, true, false, asyn
     if (msgInfo === undefined) {
         return;
     }
-    const starterInfo = await (0, UserInfo_1.GetUserInfo)(msgInfo.TradeStarterID) ?? new UserInfo_1.UserInfo(msgInfo.TradeStarterID, [], {}, false, []);
-    const receiverInfo = await (0, UserInfo_1.GetUserInfo)(msgInfo.TradeReceiverID) ?? new UserInfo_1.UserInfo(msgInfo.TradeReceiverID, [], {}, false, []);
+    const starterInfo = await (0, UserInfo_1.GetUserInfo)(msgInfo.TradeStarterID) ?? (0, UserInfo_1.CreateNewDefaultUserInfo)(msgInfo.TradeStarterID);
+    const receiverInfo = await (0, UserInfo_1.GetUserInfo)(msgInfo.TradeReceiverID) ?? (0, UserInfo_1.CreateNewDefaultUserInfo)(msgInfo.TradeReceiverID);
     await (0, UserInfo_1.AddUserInfosToCache)([starterInfo, receiverInfo]);
     const hasAddedPigToStarter = RemoveOfferedPigsFromUser(starterInfo, msgInfo.TradeStarterOffer);
     const hasAddedPigToReceiver = RemoveOfferedPigsFromUser(receiverInfo, msgInfo.TradeReceiverOffer);

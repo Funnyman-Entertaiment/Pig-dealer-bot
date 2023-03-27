@@ -11,7 +11,7 @@ import { PigListMessage, AddMessageInfoToCache } from "../database/MessageInfo";
 export const ShowBinderList = new Command(
     "Binder List",
     "Shows you the pigs you own in list view. By default, it sorts them by set, but by setting that value to false it will sort them by ID.\nYou can also define a rarity and/or a user to only see pigs from only one rarity or another user, respectively.\nWhen viewing someone else's binder, a checkmark will signify if you already own a pig from their collection.",
-    true,
+    false,
     true,
     new SlashCommandBuilder()
         .setName("binderlist")
@@ -30,9 +30,8 @@ export const ShowBinderList = new Command(
         .setDescription("Let's you check your own or someone else's pig binder")
         .setDMPermission(false),
 
-    async (interaction, serverInfo, userInfo) => {
-        if(serverInfo === undefined){ return; }
-        if(userInfo === undefined){ return; }
+    async (interaction, _serverInfo, userInfo) => {
+        if (userInfo === undefined) { return; }
 
         await interaction.deferReply();
 
@@ -47,7 +46,6 @@ export const ShowBinderList = new Command(
             .map(rarity => rarity.trim().toLowerCase())
             .filter(rarity => rarity.length > 0);
 
-        let userId: string;
         let author: { name: string, iconURL: string } | null;
 
         if (user === null) {
@@ -57,14 +55,27 @@ export const ShowBinderList = new Command(
             if (author === null) {
                 return;
             }
-            userId = interaction.user.id;
         } else {
             LogInfo(`User ${PrintUser(interaction.user)} is checking the binder of ${PrintUser(user)}`)
-            userId = user.id;
             const username = user.username;
             const avatar = user.avatarURL();
 
             author = { name: username, iconURL: avatar === null ? "" : avatar };
+
+            userInfo = await GetUserInfo(user.id);
+
+            if (userInfo === undefined) {
+                const emptyEmbed = new EmbedBuilder()
+                    .setAuthor(author)
+                    .setColor(Colors.DarkRed)
+                    .setTitle("This user has no pigs!")
+                    .setDescription("Open some packs, loser");
+
+                await interaction.followUp({
+                    embeds: [emptyEmbed]
+                });
+                return;
+            }
         }
 
         let pigs = GetUserPigs(userInfo);
@@ -77,7 +88,8 @@ export const ShowBinderList = new Command(
 
         const onlyFavourites = options.getBoolean('favourites') ?? false;
         if (onlyFavourites) {
-            pigs = pigs.filter(pig => userInfo.FavouritePigs.includes(pig.ID));
+            const favouritePigs = userInfo.FavouritePigs
+            pigs = pigs.filter(pig => favouritePigs.includes(pig.ID));
         }
 
         if (userInfo === undefined || pigs.length === 0) {
@@ -142,7 +154,6 @@ export const ShowBinderList = new Command(
         const firstPigsPage = pigsBySet[firstSet].slice(0, Math.min(pigsBySet[firstSet].length, 9));
         AddPigListRenderToEmbed(catalogueEmbed, {
             pigs: firstPigsPage.map(id => GetPig(id)).filter(pig => pig !== undefined) as any as Pig[],
-            safe: serverInfo.SafeMode,
             pigCounts: userInfo?.Pigs ?? {},
             favouritePigs: userInfo?.FavouritePigs ?? [],
             sharedPigs: userInfo.ID === interaction.user.id ? [] : sharedPigs
@@ -191,6 +202,8 @@ export const ShowBinderList = new Command(
             embeds: [catalogueEmbed],
             components: [row]
         }).then(message => {
+            if (userInfo === undefined) { return; }
+
             const messageInfo = new PigListMessage(
                 message.id,
                 server.id,

@@ -7,7 +7,7 @@ import { AddFoilChecksToEmbed } from "../Utils/PigRenderer";
 
 export const NextFoilCheck = new Button(
     "NextFoilCheck",
-    true,
+    false,
     true,
     true,
     async (interaction, _serverInfo, messageInfo) => {

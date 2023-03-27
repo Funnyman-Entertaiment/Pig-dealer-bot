@@ -7,10 +7,7 @@ const Errors_1 = require("../Utils/Errors");
 const Log_1 = require("../Utils/Log");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const Pigs_1 = require("../database/Pigs");
-exports.PreviousSet = new Button_1.Button("SetPrevious", true, true, false, async (interaction, serverInfo, messageInfo) => {
-    if (serverInfo === undefined) {
-        return;
-    }
+exports.PreviousSet = new Button_1.Button("SetPrevious", false, true, false, async (interaction, _serverInfo, messageInfo) => {
     if (messageInfo === undefined) {
         return;
     }
@@ -56,7 +53,6 @@ exports.PreviousSet = new Button_1.Button("SetPrevious", true, true, false, asyn
     const firstPigsPage = msgInfo.PigsBySet[newSet].slice(0, Math.min(msgInfo.PigsBySet[newSet].length, 9));
     (0, PigRenderer_1.AddPigListRenderToEmbed)(editedEmbed, {
         pigs: firstPigsPage.map(id => (0, Pigs_1.GetPig)(id)).filter(pig => pig !== undefined),
-        safe: serverInfo.SafeMode,
         pigCounts: msgInfo.PigCounts,
         sharedPigs: msgInfo.SharedPigs,
         favouritePigs: msgInfo.FavouritePigs

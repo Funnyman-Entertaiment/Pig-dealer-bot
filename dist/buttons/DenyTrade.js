@@ -6,10 +6,7 @@ const Button_1 = require("../Button");
 const Errors_1 = require("../Utils/Errors");
 const builders_1 = require("@discordjs/builders");
 const discord_js_1 = require("discord.js");
-exports.DenyTrade = new Button_1.Button("CancelTrade", true, true, false, async (interaction, serverInfo, messageInfo) => {
-    if (serverInfo === undefined) {
-        return;
-    }
+exports.DenyTrade = new Button_1.Button("CancelTrade", false, true, false, async (interaction, _serverInfo, messageInfo) => {
     if (messageInfo === undefined) {
         return;
     }

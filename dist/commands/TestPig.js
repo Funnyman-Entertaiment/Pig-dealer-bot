@@ -10,12 +10,9 @@ exports.TestPig = new Command_1.Command("", "", false, false, new discord_js_1.S
     .addStringOption(option => option.setName('id')
     .setDescription('Pig id')
     .setRequired(true))
-    .addBooleanOption(option => option.setName('safe')
-    .setDescription('Safe or not'))
     .setDescription("pig"), async (interaction) => {
     const options = interaction.options;
     const rawId = options.getString('id', true);
-    const safe = options.getBoolean('safe') ?? false;
     const id = rawId.toString();
     const pig = (0, Pigs_1.GetPig)(id);
     if (pig === undefined) {
@@ -30,7 +27,7 @@ exports.TestPig = new Command_1.Command("", "", false, false, new discord_js_1.S
     }
     const pigEmbed = new discord_js_1.EmbedBuilder()
         .setTitle("Here's your pig");
-    const img = (0, PigRenderer_1.AddPigRenderToEmbed)(pigEmbed, { pig: pig, safe: safe });
+    const img = (0, PigRenderer_1.AddPigRenderToEmbed)(pigEmbed, { pig: pig });
     await interaction.reply({
         embeds: [pigEmbed],
         files: [img]

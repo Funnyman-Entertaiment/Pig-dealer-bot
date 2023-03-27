@@ -49,7 +49,6 @@ async function SendAssemblyPigEmbed(serverInfo, userInfo, completedPig) {
     });
     const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(assemblyPigEmbed, {
         pig: completedPig,
-        safe: serverInfo.SafeMode,
         new: true
     });
     (0, SendMessage_1.TrySendMessageToChannel)(serverInfo.ID, serverInfo.Channel, {

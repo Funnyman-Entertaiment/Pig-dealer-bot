@@ -15,15 +15,11 @@ export const TestPig = new Command(
 		option.setName('id')
 			.setDescription('Pig id')
 			.setRequired(true))
-    .addBooleanOption(option =>
-        option.setName('safe')
-            .setDescription('Safe or not'))
     .setDescription("pig"),
 
     async (interaction) => {
         const options = (interaction.options as CommandInteractionOptionResolver)
         const rawId = options.getString('id', true)
-        const safe = options.getBoolean('safe') ?? false
         const id = rawId.toString();
 
         const pig = GetPig(id);
@@ -44,7 +40,7 @@ export const TestPig = new Command(
         const pigEmbed = new EmbedBuilder()
             .setTitle("Here's your pig");
 
-        const img = AddPigRenderToEmbed(pigEmbed, {pig: pig, safe: safe});
+        const img = AddPigRenderToEmbed(pigEmbed, {pig: pig});
 
         await interaction.reply({
             embeds: [pigEmbed],

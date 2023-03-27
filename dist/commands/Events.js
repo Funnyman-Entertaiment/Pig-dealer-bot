@@ -4,7 +4,7 @@ exports.Events = void 0;
 const discord_js_1 = require("discord.js");
 const Command_1 = require("../Command");
 const SeasonalEvents_1 = require("../seasonalEvents/SeasonalEvents");
-exports.Events = new Command_1.Command("Events", "Tells you the rules and a description of the current event, if there is one going on.", true, false, new discord_js_1.SlashCommandBuilder()
+exports.Events = new Command_1.Command("Events", "Tells you the rules and a description of the current event, if there is one going on.", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("events")
     .setDescription("Gives some information about the events that are currently going on, if any."), async (interaction) => {
     const activeEvents = (0, SeasonalEvents_1.GetActiveEvents)();

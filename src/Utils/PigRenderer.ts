@@ -6,7 +6,6 @@ import { PIGS_PER_FOIL_RARITY } from "../Constants/PigsPerFoilRarity";
 
 export interface PigRenderOptions {
     pig: Pig,
-    safe: boolean,
     count?: number,
     new?: boolean,
     showId?: boolean,
@@ -15,16 +14,7 @@ export interface PigRenderOptions {
 }
 
 export function AddPigRenderToEmbed(embed: EmbedBuilder, options: PigRenderOptions): string{
-    let pig = options.pig;
-    const pigID = pig.ID
-
-    if(options.safe){
-        const altPig = GetPig(`alt${pigID}`);
-
-        if(altPig !== undefined){
-            pig = altPig;
-        }
-    }
+    const pig = options.pig;
 
     let img = `${pig.ID}.png`;
     if(pig.Tags.includes("gif")){
@@ -51,7 +41,7 @@ export function AddPigRenderToEmbed(embed: EmbedBuilder, options: PigRenderOptio
     embedDescriptionLines.push(pig.Description.length > 0? pig.Description : "...");
 
     if(options.showId === undefined || options.showId){
-        embedDescriptionLines.push(`#${pigID.padStart(3, "0")}${options.favourite? " ⭐": ""}${options.shared? " ✅": ""}`);
+        embedDescriptionLines.push(`#${pig.ID.padStart(3, "0")}${options.favourite? " ⭐": ""}${options.shared? " ✅": ""}`);
     }
 
     const embedDescription = embedDescriptionLines.join("\n");
@@ -72,7 +62,6 @@ export function AddPigRenderToEmbed(embed: EmbedBuilder, options: PigRenderOptio
 export interface PigListRenderOptions {
     pigs: Pig[],
     pigCounts: {[key: string]: number},
-    safe: boolean,
     favouritePigs?: string[],
     sharedPigs?: string[]
 }
@@ -86,16 +75,6 @@ export function AddPigListRenderToEmbed(embed: EmbedBuilder, options: PigListRen
     embed.addFields(options.pigs.map(pig => {
         const pigID = pig.ID;
 
-        let shownPig = pig;
-
-        if(options.safe){
-            const altPig = GetPig(`alt${pigID}`);
-
-            if(altPig !== undefined){
-                shownPig = altPig;
-            }
-        }
-
         const count = options.pigCounts[pigID]?? 1;
         let number = "";
         if(count !== 1){
@@ -106,9 +85,16 @@ export function AddPigListRenderToEmbed(embed: EmbedBuilder, options: PigListRen
         const isShared = sharedPigs.includes(pigID);
         const stickers = `${isFavourite? "⭐": ""} ${isShared? "✅" : ""}`.trim();
 
+        const rarityTag = pig.Tags.find(tag => tag.startsWith("[RARITY]"));
+        let rarity = pig.Rarity as string;
+        if(rarityTag !== undefined){
+            const showRarity = rarityTag.replace("[RARITY]", "").trim();
+            rarity = showRarity;
+        }
+
         return {
-            name: `${shownPig.Name} #${pigID.padStart(3, "0")}${number}`,
-            value: `${stickers}${stickers.length>0? "\n":""}_${shownPig.Rarity}_\n${shownPig.Description}`,
+            name: `${pig.Name} #${pigID.padStart(3, "0")}${number}`,
+            value: `${stickers}${stickers.length>0? "\n":""}_${rarity}_\n${pig.Description}`,
             inline: true
         };
     }));

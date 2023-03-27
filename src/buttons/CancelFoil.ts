@@ -1,20 +1,13 @@
 import { EmbedBuilder, Colors } from "discord.js";
 import { Button } from "../Button";
-import { GetMessageInfo, PigFoilMessage, RemoveMessageInfoFromCache } from "../database/MessageInfo";
-import { Pig } from "../database/Pigs";
-import { GetUserInfo } from "../database/UserInfo";
-
-function ChooseRandomPigFromList(pigs: Pig[]): Pig {
-    return pigs[Math.floor(Math.random() * pigs.length)]
-}
+import { PigFoilMessage, RemoveMessageInfoFromCache } from "../database/MessageInfo";
 
 export const CancelFoil = new Button(
     "CancelFoil",
+    false,
     true,
     true,
-    true,
-    async (interaction, serverInfo, messageInfo, userInfo) => {
-        if(serverInfo === undefined){ return; }
+    async (interaction, _serverInfo, messageInfo, userInfo) => {
         if(messageInfo === undefined){ return; }
         if(userInfo === undefined){ return; }
 

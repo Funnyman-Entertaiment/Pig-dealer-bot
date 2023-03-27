@@ -6,7 +6,7 @@ const discord_js_1 = require("discord.js");
 const Errors_1 = require("../Utils/Errors");
 const Log_1 = require("../Utils/Log");
 const PigRenderer_1 = require("../Utils/PigRenderer");
-exports.NextFoilCheck = new Button_1.Button("NextFoilCheck", true, true, true, async (interaction, _serverInfo, messageInfo) => {
+exports.NextFoilCheck = new Button_1.Button("NextFoilCheck", false, true, true, async (interaction, _serverInfo, messageInfo) => {
     if (messageInfo === undefined) {
         return;
     }

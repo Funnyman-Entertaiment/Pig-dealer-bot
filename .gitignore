@@ -1,4 +1,5 @@
 .env
+a.env
 .vscode
 .luarc.json
 node_modules

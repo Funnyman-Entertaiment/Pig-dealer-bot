@@ -38,9 +38,9 @@ export const client = new Client({
     partials: [Partials.Channel, Partials.Reaction, Partials.Message],
 });
 
+unhandledException();
 ready();
 interactionCreate();
-unhandledException();
 guildJoin();
 guildLeave();
 

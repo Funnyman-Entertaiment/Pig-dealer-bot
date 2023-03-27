@@ -9,7 +9,7 @@ const Pigs_1 = require("../database/Pigs");
 const UserInfo_1 = require("../database/UserInfo");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const MessageInfo_1 = require("../database/MessageInfo");
-exports.ShowBinderList = new Command_1.Command("Binder List", "Shows you the pigs you own in list view. By default, it sorts them by set, but by setting that value to false it will sort them by ID.\nYou can also define a rarity and/or a user to only see pigs from only one rarity or another user, respectively.\nWhen viewing someone else's binder, a checkmark will signify if you already own a pig from their collection.", true, true, new discord_js_1.SlashCommandBuilder()
+exports.ShowBinderList = new Command_1.Command("Binder List", "Shows you the pigs you own in list view. By default, it sorts them by set, but by setting that value to false it will sort them by ID.\nYou can also define a rarity and/or a user to only see pigs from only one rarity or another user, respectively.\nWhen viewing someone else's binder, a checkmark will signify if you already own a pig from their collection.", false, true, new discord_js_1.SlashCommandBuilder()
     .setName("binderlist")
     .addBooleanOption(option => option.setName('set')
     .setDescription('Whether to order the pigs by set or not.'))
@@ -20,10 +20,7 @@ exports.ShowBinderList = new Command_1.Command("Binder List", "Shows you the pig
     .addBooleanOption(option => option.setName('favourites')
     .setDescription('show only favourite pigs'))
     .setDescription("Let's you check your own or someone else's pig binder")
-    .setDMPermission(false), async (interaction, serverInfo, userInfo) => {
-    if (serverInfo === undefined) {
-        return;
-    }
+    .setDMPermission(false), async (interaction, _serverInfo, userInfo) => {
     if (userInfo === undefined) {
         return;
     }
@@ -39,7 +36,6 @@ exports.ShowBinderList = new Command_1.Command("Binder List", "Shows you the pig
     const raritiesToFilter = rarities.split(',')
         .map(rarity => rarity.trim().toLowerCase())
         .filter(rarity => rarity.length > 0);
-    let userId;
     let author;
     if (user === null) {
         (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} is checking its own binder`);
@@ -47,14 +43,24 @@ exports.ShowBinderList = new Command_1.Command("Binder List", "Shows you the pig
         if (author === null) {
             return;
         }
-        userId = interaction.user.id;
     }
     else {
         (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} is checking the binder of ${(0, Log_1.PrintUser)(user)}`);
-        userId = user.id;
         const username = user.username;
         const avatar = user.avatarURL();
         author = { name: username, iconURL: avatar === null ? "" : avatar };
+        userInfo = await (0, UserInfo_1.GetUserInfo)(user.id);
+        if (userInfo === undefined) {
+            const emptyEmbed = new discord_js_1.EmbedBuilder()
+                .setAuthor(author)
+                .setColor(discord_js_1.Colors.DarkRed)
+                .setTitle("This user has no pigs!")
+                .setDescription("Open some packs, loser");
+            await interaction.followUp({
+                embeds: [emptyEmbed]
+            });
+            return;
+        }
     }
     let pigs = (0, UserInfo_1.GetUserPigs)(userInfo);
     if (raritiesToFilter.length > 0) {
@@ -64,7 +70,8 @@ exports.ShowBinderList = new Command_1.Command("Binder List", "Shows you the pig
     }
     const onlyFavourites = options.getBoolean('favourites') ?? false;
     if (onlyFavourites) {
-        pigs = pigs.filter(pig => userInfo.FavouritePigs.includes(pig.ID));
+        const favouritePigs = userInfo.FavouritePigs;
+        pigs = pigs.filter(pig => favouritePigs.includes(pig.ID));
     }
     if (userInfo === undefined || pigs.length === 0) {
         const emptyEmbed = new discord_js_1.EmbedBuilder()
@@ -118,7 +125,6 @@ exports.ShowBinderList = new Command_1.Command("Binder List", "Shows you the pig
     const firstPigsPage = pigsBySet[firstSet].slice(0, Math.min(pigsBySet[firstSet].length, 9));
     (0, PigRenderer_1.AddPigListRenderToEmbed)(catalogueEmbed, {
         pigs: firstPigsPage.map(id => (0, Pigs_1.GetPig)(id)).filter(pig => pig !== undefined),
-        safe: serverInfo.SafeMode,
         pigCounts: userInfo?.Pigs ?? {},
         favouritePigs: userInfo?.FavouritePigs ?? [],
         sharedPigs: userInfo.ID === interaction.user.id ? [] : sharedPigs
@@ -157,6 +163,9 @@ exports.ShowBinderList = new Command_1.Command("Binder List", "Shows you the pig
         embeds: [catalogueEmbed],
         components: [row]
     }).then(message => {
+        if (userInfo === undefined) {
+            return;
+        }
         const messageInfo = new MessageInfo_1.PigListMessage(message.id, server.id, userInfo === undefined ? {} : userInfo.Pigs, pigsBySet, userInfo?.FavouritePigs ?? [], userInfo.ID === interaction.user.id ? [] : sharedPigs, firstSet, 0, interaction.user.id);
         (0, MessageInfo_1.AddMessageInfoToCache)(messageInfo);
     });

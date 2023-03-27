@@ -8,11 +8,10 @@ import { GetPig, Pig } from "../database/Pigs";
 
 export const NextList = new Button(
     "ListNext",
-    true,
+    false,
     true,
     false,
-    async (interaction, serverInfo, messageInfo) => {
-        if(serverInfo === undefined){ return; }
+    async (interaction, _serverInfo, messageInfo) => {
         if(messageInfo === undefined){ return; }
 
         await interaction.deferUpdate();
@@ -50,7 +49,6 @@ export const NextList = new Button(
         const firstPigsPage = pigList.slice(pageStart, pageEnd);
         AddPigListRenderToEmbed(editedEmbed, {
             pigs: firstPigsPage.map(id => GetPig(id)).filter(pig => pig !== undefined) as any as Pig[],
-            safe: serverInfo.SafeMode,
             pigCounts: msgInfo.PigCounts,
             sharedPigs: msgInfo.SharedPigs,
             favouritePigs: msgInfo.FavouritePigs

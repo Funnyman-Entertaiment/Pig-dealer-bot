@@ -7,15 +7,12 @@ const Pigs_1 = require("../database/Pigs");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const MessageInfo_1 = require("../database/MessageInfo");
 const Log_1 = require("../Utils/Log");
-exports.Catalogue = new Command_1.Command("catalogue", "Shows you all pigs the bot has to offer, sorted by set. You can define a rarity to only show pigs of that rarity.\nWhen viewing the catalogue, a checkmark will signify pigs you already own.", true, false, new discord_js_1.SlashCommandBuilder()
+exports.Catalogue = new Command_1.Command("catalogue", "Shows you all pigs the bot has to offer, sorted by set. You can define a rarity to only show pigs of that rarity.\nWhen viewing the catalogue, a checkmark will signify pigs you already own.", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("catalogue")
     .addStringOption(option => option.setName("rarity")
     .setDescription("Filter pigs by rarity. Multiple rarities separated by commas."))
     .setDescription("Shows all pigs in the bot sorted by set")
-    .setDMPermission(false), async (interaction, serverInfo) => {
-    if (serverInfo === undefined) {
-        return;
-    }
+    .setDMPermission(false), async (interaction) => {
     await interaction.deferReply();
     const serverId = interaction.guild?.id;
     if (serverId === undefined) {
@@ -69,7 +66,6 @@ exports.Catalogue = new Command_1.Command("catalogue", "Shows you all pigs the b
     (0, PigRenderer_1.AddPigListRenderToEmbed)(catalogueEmbed, {
         pigs: firstPigsPage.map(id => (0, Pigs_1.GetPig)(id)).filter(pig => pig !== undefined),
         pigCounts: {},
-        safe: serverInfo.SafeMode
     });
     const row = new discord_js_1.ActionRowBuilder()
         .addComponents(new discord_js_1.ButtonBuilder()

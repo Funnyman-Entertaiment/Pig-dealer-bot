@@ -5,6 +5,7 @@ const discord_js_1 = require("discord.js");
 const Command_1 = require("../Command");
 const Bot_1 = require("../Bot");
 const Log_1 = require("../Utils/Log");
+const Links_1 = require("../Constants/Links");
 exports.Information = new Command_1.Command("Information", "gives you a description of the bot as well as a link to our discord server and an invite for you to get this bot in your own server. (note that using this bot in a server with less than 6 members is heavily discouraged and indeed punished.)", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("information")
     .setDescription("Sends a message that contains some general information about Pig Dealer."), async (interaction) => {
@@ -45,10 +46,10 @@ exports.Information = new Command_1.Command("Information", "gives you a descript
     const row = new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.ButtonBuilder()
         .setLabel("Invite the bot!")
         .setStyle(discord_js_1.ButtonStyle.Link)
-        .setURL("https://discord.com/api/oauth2/authorize?client_id=1040735137228406884&permissions=268470272&scope=bot%20applications.commands"), new discord_js_1.ButtonBuilder()
+        .setURL(Links_1.BOT_INVITE_LINK), new discord_js_1.ButtonBuilder()
         .setLabel("Join the server!")
         .setStyle(discord_js_1.ButtonStyle.Link)
-        .setURL("https://discord.gg/wnAnhRyKjM"));
+        .setURL(Links_1.TRADE_SERVER_INVITE_LINK));
     (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} is checking the bot information`);
     interaction.reply({
         embeds: [embed],

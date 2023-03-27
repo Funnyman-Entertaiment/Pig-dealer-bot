@@ -52,6 +52,17 @@ export class UserInfo extends DatabaseElement {
 let CachedUserInfos: DatabaseElementList<UserInfo> | undefined;
 
 
+export function CreateNewDefaultUserInfo(id: string){
+    return new UserInfo(
+        id,
+        [],
+        {},
+        false,
+        []
+    );
+}
+
+
 export async function SaveAllUserInfo(){
     await CachedUserInfos?.SaveAll();
 }

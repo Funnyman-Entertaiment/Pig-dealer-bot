@@ -7,7 +7,7 @@ import { LogError, LogWarn, PrintServer } from "../Utils/Log";
 export const RemoveRole = new Command(
     "Remove Role",
     "Removes the role the bot pings when a pack drops or an announcement is made from you.",
-    true,
+    false,
     false,
     new SlashCommandBuilder()
         .setName("removerole")

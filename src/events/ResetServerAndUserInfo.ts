@@ -14,8 +14,8 @@ async function ResetServerUsers(){
         const element = servers.docs[i];
 
         const serverInfo = await GetServerInfo(element.id);
-        console.log(`Server: ${i+1}/${servers.size}`);
-        await new Promise(r => setTimeout(r, 100));
+        console.log(`Server: ${i+1}/${servers.size} (${element.id})`);
+        await new Promise(r => setTimeout(r, 200));
         if(serverInfo !== undefined){
             serverInfo.Enabled = true;
             await AddServerInfoToCache(serverInfo);
@@ -31,8 +31,8 @@ async function ResetServerUsers(){
         const element = users.docs[i];
         
         const userInfo = await GetUserInfo(element.id);
-        console.log(`User: ${i+1}/${users.size}`);
-        await new Promise(r => setTimeout(r, 100));
+        console.log(`User: ${i+1}/${users.size} (${element.id})`);
+        await new Promise(r => setTimeout(r, 200));
         if(userInfo !== undefined){
             userInfo.WarnedAboutCooldown = false;
             await AddUserInfoToCache(userInfo);

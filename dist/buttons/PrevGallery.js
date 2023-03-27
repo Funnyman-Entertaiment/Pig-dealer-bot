@@ -8,10 +8,7 @@ const Button_1 = require("../Button");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const UniquePigEvents_1 = require("../uniquePigEvents/UniquePigEvents");
 const Log_1 = require("../Utils/Log");
-exports.PrevGallery = new Button_1.Button("GalleryPrevious", true, true, false, async (interaction, serverInfo, messageInfo) => {
-    if (serverInfo === undefined) {
-        return;
-    }
+exports.PrevGallery = new Button_1.Button("GalleryPrevious", false, true, false, async (interaction, _serverInfo, messageInfo) => {
     if (messageInfo === undefined) {
         return;
     }
@@ -50,7 +47,6 @@ exports.PrevGallery = new Button_1.Button("GalleryPrevious", true, true, false, 
     }
     const imgPath = (0, PigRenderer_1.AddPigRenderToEmbed)(editedEmbed, {
         pig: pig,
-        safe: serverInfo.SafeMode,
         new: msgInfo.NewPigs.includes(pig.ID),
         showId: !(0, UniquePigEvents_1.DoesPigIdHaveUniqueEvent)(pigToLoad),
         count: msgInfo.PigCounts[pig.ID],

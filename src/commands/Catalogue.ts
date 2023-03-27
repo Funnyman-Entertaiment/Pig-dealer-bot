@@ -8,7 +8,7 @@ import { LogInfo, PrintUser } from "../Utils/Log";
 export const Catalogue = new Command(
     "catalogue",
     "Shows you all pigs the bot has to offer, sorted by set. You can define a rarity to only show pigs of that rarity.\nWhen viewing the catalogue, a checkmark will signify pigs you already own.",
-    true,
+    false,
     false,
     new SlashCommandBuilder()
         .setName("catalogue")
@@ -18,9 +18,7 @@ export const Catalogue = new Command(
         .setDescription("Shows all pigs in the bot sorted by set")
         .setDMPermission(false),
 
-    async (interaction, serverInfo) => {
-        if(serverInfo === undefined){ return; }
-
+    async (interaction) => {
         await interaction.deferReply();
 
         const serverId = interaction.guild?.id;
@@ -87,7 +85,6 @@ export const Catalogue = new Command(
         AddPigListRenderToEmbed(catalogueEmbed, {
             pigs: firstPigsPage.map(id => GetPig(id)).filter(pig => pig !== undefined) as any as Pig[],
             pigCounts: {},
-            safe: serverInfo.SafeMode
         });
 
         const row = new ActionRowBuilder<ButtonBuilder>()

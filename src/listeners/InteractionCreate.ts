@@ -53,7 +53,7 @@ const handleSlashCommand = async (interaction: CommandInteraction) => {
         if(serverInfo === undefined){
             const errorEmbed = new EmbedBuilder()
                 .setTitle("This server is not properly set up")
-                .setDescription("An admin needs to use the /setsafemode command before the bot can work properly")
+                .setDescription("An admin may need to use /setchannel before this feature can work properly")
                 .setColor(Colors.DarkRed);
 
             await interaction.reply({
@@ -117,7 +117,7 @@ const handleButtonCommand = async(interaction: ButtonInteraction) => {
         if(serverInfo === undefined){
             const errorEmbed = new EmbedBuilder()
                 .setTitle("This server is not properly set up")
-                .setDescription("An admin needs to use the /setsafemode command before the bot can work properly")
+                .setDescription("An admin may need to use /setchannel before this command can work properly")
                 .setColor(Colors.DarkRed);
 
             await interaction.reply({
@@ -148,10 +148,17 @@ const handleButtonCommand = async(interaction: ButtonInteraction) => {
         messageInfo = GetMessageInfo(serverId, messageId);
 
         if(messageInfo === undefined){
-            const errorEmbed = new EmbedBuilder()
+            let errorEmbed = new EmbedBuilder()
                 .setTitle("This message has expired")
-                .setDescription("Trade messages expire after ~15 minutes of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
+                .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
                 .setColor(Colors.Red);
+
+            if(button.id === "AcceptTrade" || button.id === "CancelTrade"){
+                errorEmbed = new EmbedBuilder()
+                    .setTitle("This message has expired")
+                    .setDescription("Trade messages expire after ~15 minutes of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
+                    .setColor(Colors.Red);
+            }
             
             interaction.reply({
                 embeds: [errorEmbed],

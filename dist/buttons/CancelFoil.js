@@ -4,13 +4,7 @@ exports.CancelFoil = void 0;
 const discord_js_1 = require("discord.js");
 const Button_1 = require("../Button");
 const MessageInfo_1 = require("../database/MessageInfo");
-function ChooseRandomPigFromList(pigs) {
-    return pigs[Math.floor(Math.random() * pigs.length)];
-}
-exports.CancelFoil = new Button_1.Button("CancelFoil", true, true, true, async (interaction, serverInfo, messageInfo, userInfo) => {
-    if (serverInfo === undefined) {
-        return;
-    }
+exports.CancelFoil = new Button_1.Button("CancelFoil", false, true, true, async (interaction, _serverInfo, messageInfo, userInfo) => {
     if (messageInfo === undefined) {
         return;
     }
