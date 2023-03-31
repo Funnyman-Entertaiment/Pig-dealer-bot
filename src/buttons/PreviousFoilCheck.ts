@@ -43,7 +43,7 @@ export const PreviousFoilCheck = new Button(
         const maxSets = Math.floor(setsNum/6) - 1;
 
         if(newPage < 0){
-            newPage = maxSets;
+            newPage = maxSets + 1;
         }
 
         msgInfo.CurrentPage = newPage;

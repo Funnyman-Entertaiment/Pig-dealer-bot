@@ -34,6 +34,7 @@ import { ChangeFoilRequirements } from "./commands/ChangeFoilRequiredPigs";
 import { Events } from "./commands/Events";
 import { CheckFoils } from "./commands/CheckFoil";
 import { Help } from "./commands/Help";
+import { GetPresaleToken } from "./commands/GetPresaleToken";
 
 export const Commands = [
     Sex,
@@ -56,7 +57,8 @@ export const Commands = [
     FoilPigs,
     CheckFoils,
     Events,
-    Help
+    Help,
+    GetPresaleToken
 ];
 
 export const TradeServerCommands = [
