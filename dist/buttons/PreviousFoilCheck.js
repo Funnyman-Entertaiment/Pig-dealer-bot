@@ -31,7 +31,7 @@ exports.PreviousFoilCheck = new Button_1.Button("PreviousFoilCheck", false, true
     }
     const maxSets = Math.floor(setsNum / 6) - 1;
     if (newPage < 0) {
-        newPage = maxSets;
+        newPage = maxSets + 1;
     }
     msgInfo.CurrentPage = newPage;
     if (message.embeds[0] === undefined) {

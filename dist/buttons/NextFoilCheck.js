@@ -25,8 +25,8 @@ exports.NextFoilCheck = new Button_1.Button("NextFoilCheck", false, true, true, 
     for (const _ in msgInfo.PigAmountsPerSet) {
         setsNum++;
     }
-    const maxSets = Math.floor(setsNum / 6) - 1;
-    if (newPage > maxSets) {
+    const newFirstSet = newPage * 6 + 1;
+    if (newFirstSet > setsNum) {
         newPage = 0;
     }
     msgInfo.CurrentPage = newPage;

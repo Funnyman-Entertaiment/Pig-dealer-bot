@@ -7,6 +7,7 @@ const GetAuthor_1 = require("../Utils/GetAuthor");
 const Pigs_1 = require("../database/Pigs");
 const PigsPerFoilRarity_1 = require("../Constants/PigsPerFoilRarity");
 const MessageInfo_1 = require("../database/MessageInfo");
+const Errors_1 = require("../Utils/Errors");
 function GetFieldDescriptionFromPigAmounts(pigAmounts) {
     const descriptionLines = [];
     for (const pigID in pigAmounts) {
@@ -156,6 +157,17 @@ exports.Foil = new Command_1.Command("Foil", "Used to craft a foil pig, using 10
             });
             return;
         }
+    }
+    let anyPigsInList = false;
+    for (const _ in offeredPigs) {
+        anyPigsInList = true;
+        break;
+    }
+    if (!anyPigsInList) {
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("The offered pigs list is empty", "You can still craft the pig foil tho");
+        await interaction.followUp({
+            embeds: [errorEmbed]
+        });
     }
     const successEmbed = new discord_js_1.EmbedBuilder()
         .setTitle(`${user.username} is trying to craft a ${targetRarity} foil!`)

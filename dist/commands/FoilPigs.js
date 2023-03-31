@@ -119,7 +119,7 @@ exports.FoilPigs = new Command_1.Command("Foil Pigs", "Used to craft a foil pig,
     }
     const user = interaction.user;
     const options = interaction.options;
-    let targetSet = options.getString("set", true).toLowerCase();
+    let targetSet = options.getString("set", true).toLowerCase().trim();
     const targetRarity = options.getString("rarity", true);
     const unparsedOfferedPigs = options.getString("pigs", true);
     const offeredPigs = ParseTradePigsString(interaction, unparsedOfferedPigs);

@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder, SlashCommandBuilder, SlashCommandStringOption } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder, SlashCommandBuilder, SlashCommandStringOption, makeError } from "discord.js";
 import { Command } from "../Command";
 import { GetAuthor } from "../Utils/GetAuthor";
 import { GetAllPigs, GetPig } from "../database/Pigs";
@@ -144,7 +144,7 @@ export const FoilPigs = new Command(
         const user = interaction.user;
 
         const options = (interaction.options as CommandInteractionOptionResolver);
-        let targetSet = options.getString("set", true).toLowerCase();
+        let targetSet = options.getString("set", true).toLowerCase().trim();
         const targetRarity = options.getString("rarity", true);
         const unparsedOfferedPigs = options.getString("pigs", true);
         const offeredPigs = ParseTradePigsString(interaction, unparsedOfferedPigs);

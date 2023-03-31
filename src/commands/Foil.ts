@@ -4,6 +4,7 @@ import { GetAuthor } from "../Utils/GetAuthor";
 import { GetAllPigs, GetPig } from "../database/Pigs";
 import { PIGS_PER_FOIL_RARITY } from "../Constants/PigsPerFoilRarity";
 import { AddMessageInfoToCache, PigFoilMessage } from "../database/MessageInfo";
+import { MakeErrorEmbed } from "../Utils/Errors";
 
 function GetFieldDescriptionFromPigAmounts(pigAmounts: { [key: string]: number }): string {
     const descriptionLines: string[] = [];
@@ -176,6 +177,20 @@ export const Foil = new Command(
                 
                 return;
             }
+        }
+
+        let anyPigsInList = false;
+        for (const _ in offeredPigs) {
+            anyPigsInList = true;
+            break;
+        }
+
+        if(!anyPigsInList){
+            const errorEmbed = MakeErrorEmbed("The offered pigs list is empty", "You can still craft the pig foil tho");
+
+            await interaction.followUp({
+                embeds: [errorEmbed]
+            });
         }
 
         const successEmbed = new EmbedBuilder()

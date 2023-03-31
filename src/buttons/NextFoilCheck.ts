@@ -28,9 +28,8 @@ export const NextFoilCheck = new Button(
             setsNum++;
         }
 
-        const maxSets = Math.floor(setsNum / 6) - 1;
-
-        if (newPage > maxSets) {
+        const newFirstSet = newPage * 6 + 1;
+        if(newFirstSet > setsNum){
             newPage = 0;
         }
 
