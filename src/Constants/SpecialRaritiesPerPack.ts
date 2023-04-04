@@ -85,26 +85,26 @@ export const SPECIAL_RARITIES_PER_PACK: { readonly [key: string]: { readonly [ke
 		{ "Common": 1 },
 		{ "Common": 1, "Rare": 0.1 },
 		{ "Common": 1, "Rare": 0.2 },
-		{ "Rare": 1, "Epic": 0.08, "Easter": 0.48 },
+		{ "Rare": 1, "Epic": 0.08, "Easter": 0.5 },
 	],
 	["Egg Stage 8"]: [
 		{ "Common": 1 },
 		{ "Common": 1, "Rare": 0.1 },
 		{ "Common": 1, "Rare": 0.2 },
-		{ "Rare": 1, "Epic": 0.08, "Easter": 0.56 },
+		{ "Rare": 1, "Epic": 0.08, "Easter": 0.6 },
 	],
 	["Egg Stage 9"]: [
 		{ "Common": 1 },
 		{ "Common": 1, "Rare": 0.1 },
 		{ "Common": 1, "Rare": 0.2 },
 		{ "Rare": 1, "Epic": 0.08 },
-		{ "Rare": 1, "Epic": 0.3, "Legendary": 0.01, "Easter": 0.64 }
+		{ "Rare": 1, "Epic": 0.3, "Legendary": 0.01, "Easter": 0.7 },
 	],
 	["Egg Stage 10"]: [
 		{ "Common": 1 },
 		{ "Common": 1, "Rare": 0.1 },
 		{ "Common": 1, "Rare": 0.2 },
 		{ "Rare": 1, "Epic": 0.08 },
-		{ "Rare": 1, "Epic": 0.3, "Legendary": 0.01, "Easter": 0.72 }
+		{ "Easter": 1 }
 	]
 }

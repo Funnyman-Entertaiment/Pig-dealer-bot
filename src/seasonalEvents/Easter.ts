@@ -31,7 +31,7 @@ export const Easter = new SeasonalEvent(
         if(currentDate.getUTCMonth() !== 3){ return false; }
 
         const firstMonday = GetFirstMondayOfMonth()
-        const lastDay = firstMonday + 7;
+        const lastDay = firstMonday + 10;
 
         return currentDate.getUTCDay() >= firstMonday && currentDate.getUTCDate() <= lastDay;
     }
