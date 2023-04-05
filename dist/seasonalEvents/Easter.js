@@ -28,7 +28,7 @@ exports.Easter = new SeasonalEvent_1.SeasonalEvent("Pigster", "It's pigster, eve
         return false;
     }
     const firstMonday = GetFirstMondayOfMonth();
-    const lastDay = firstMonday + 7;
+    const lastDay = firstMonday + 10;
     return currentDate.getUTCDay() >= firstMonday && currentDate.getUTCDate() <= lastDay;
 });
 let packsUntilEasterEgg = 0;
