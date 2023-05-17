@@ -1,35 +1,63 @@
-import { query, collection, getDocs, WriteBatch, Firestore, writeBatch } from "firebase/firestore/lite";
+import { query, collection, getDocs, writeBatch, DocumentData, QueryDocumentSnapshot } from "firebase/firestore/lite";
 import { db } from "../Bot";
-import { AddServerInfoToCache, GetServerInfo, SaveAllServerInfo } from "../database/ServerInfo";
-import { AddUserInfoToCache, GetUserInfo, SaveAllUserInfo } from "../database/UserInfo";
 import { LogInfo } from "../Utils/Log";
 
 async function ResetServerUsers(){
     LogInfo("Resetting server and user information.")
 
-    const batch = writeBatch(db);
+    const serverGroups: QueryDocumentSnapshot<DocumentData>[][] = [];
+    serverGroups.push([]);
 
     const serverQuery = query(collection(db, "serverInfo"));
     const servers = await getDocs(serverQuery);
 
-    for (let i = 0; i < servers.size; i++) {
-        const element = servers.docs[i];
-        batch.update(element.ref, {
-            Enabled: true
+    servers.forEach(server => {
+        if(serverGroups[serverGroups.length-1].length >= 400){
+            serverGroups.push([]);
+        }
+
+        serverGroups[serverGroups.length-1].push(server);
+    });
+
+    for (let i = 0; i < serverGroups.length; i++) {
+        const batch = writeBatch(db);
+        const serverDocs = serverGroups[i];
+
+        serverDocs.forEach(element => {
+            batch.update(element.ref, {
+                Enabled: true
+            });
         });
+
+        await batch.commit();
     }
+
+    const userGroups: QueryDocumentSnapshot<DocumentData>[][] = [];
+    userGroups.push([]);
 
     const usersQuery = query(collection(db, "users"));
     const users = await getDocs(usersQuery);
 
-    for (let i = 0; i < users.size; i++) {
-        const element = users.docs[i];
-        batch.update(element.ref, {
-            WarnedAboutCooldown: true
-        });
-    }
+    users.forEach(server => {
+        if(userGroups[userGroups.length-1].length >= 400){
+            userGroups.push([]);
+        }
 
-    await batch.commit();
+        userGroups[userGroups.length-1].push(server);
+    });
+
+    for (let i = 0; i < userGroups.length; i++) {
+        const batch = writeBatch(db);
+        const userDocs = userGroups[i];
+
+        userDocs.forEach(element => {
+            batch.update(element.ref, {
+                WarnedAboutCooldown: false
+            });
+        });
+
+        await batch.commit();
+    }
 }
 
 export async function ResetServerAndUserInfo() {
