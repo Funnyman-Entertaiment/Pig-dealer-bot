@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AddFoilChecksToEmbed = exports.AddPigListRenderToEmbed = exports.AddPigRenderToEmbed = void 0;
 const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
+const Pigs_1 = require("../database/Pigs");
 const ColorPerPigRarity_1 = require("../Constants/ColorPerPigRarity");
 const PigsPerFoilRarity_1 = require("../Constants/PigsPerFoilRarity");
 function AddPigRenderToEmbed(embed, options) {
@@ -97,12 +98,14 @@ function AddFoilChecksToEmbed(embed, options) {
         currentSetNum++;
         const pigAmountsPerRarity = options.pigAmountsPerSet[set];
         let fieldDescription = "";
+        const pigsOfSet = (0, Pigs_1.GetPigsBySet)(set);
         FOILED_RARITIES.forEach(rarity => {
+            if (pigsOfSet.find(x => x.Rarity === rarity) === undefined) {
+                return;
+            }
             const amount = pigAmountsPerRarity[rarity] ?? 0;
             const targetAmount = PigsPerFoilRarity_1.PIGS_PER_FOIL_RARITY[rarity];
-            if (targetAmount > 0) {
-                fieldDescription += `${rarity} ${amount}/${targetAmount} ${amount < targetAmount ? "" : "✅"}\n`;
-            }
+            fieldDescription += `${rarity} ${amount}/${targetAmount} ${amount < targetAmount ? "" : "✅"}\n`;
         });
         embed.addFields({
             name: set === "-" ? "Default" : set,

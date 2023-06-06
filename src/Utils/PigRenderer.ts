@@ -1,6 +1,6 @@
 import { EmbedBuilder } from "discord.js";
 import fs from 'fs';
-import { GetPig, Pig } from "../database/Pigs";
+import { GetPig, GetPigsBySet, Pig } from "../database/Pigs";
 import { COLOR_PER_PIG_RARITY } from "../Constants/ColorPerPigRarity";
 import { PIGS_PER_FOIL_RARITY } from "../Constants/PigsPerFoilRarity";
 
@@ -142,13 +142,15 @@ export function AddFoilChecksToEmbed(embed: EmbedBuilder, options: FoilCheckRend
         const pigAmountsPerRarity = options.pigAmountsPerSet[set];
         let fieldDescription = "";
 
+        const pigsOfSet = GetPigsBySet(set);
+
         FOILED_RARITIES.forEach(rarity => {
+            if(pigsOfSet.find(x => x.Rarity === rarity) === undefined) { return; }
+
             const amount = pigAmountsPerRarity[rarity] ?? 0;
             const targetAmount = PIGS_PER_FOIL_RARITY[rarity];
 
-            if(targetAmount > 0) {
-                fieldDescription += `${rarity} ${amount}/${targetAmount} ${amount < targetAmount? "":"✅"}\n`
-            }
+            fieldDescription += `${rarity} ${amount}/${targetAmount} ${amount < targetAmount? "":"✅"}\n`
         });
 
         embed.addFields({
