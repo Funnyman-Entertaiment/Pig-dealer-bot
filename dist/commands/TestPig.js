@@ -19,7 +19,7 @@ exports.TestPig = new Command_1.Command("", "", false, false, new discord_js_1.S
         const pigEmbed = new discord_js_1.EmbedBuilder()
             .setTitle("No pig found")
             .setDescription("Yikes, you sure the id is right");
-        await interaction.followUp({
+        await interaction.reply({
             ephemeral: true,
             embeds: [pigEmbed],
         });
