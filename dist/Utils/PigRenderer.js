@@ -26,6 +26,13 @@ function AddPigRenderToEmbed(embed, options) {
         const showRarity = rarityTag.replace("[RARITY]", "").trim();
         embedDescriptionLines.push(`_${showRarity}_`);
     }
+    if (options.showSet !== undefined && options.showSet) {
+        let set = pig.Set;
+        if (set === "-") {
+            set = "Default";
+        }
+        embedDescriptionLines.push(`${set} set`);
+    }
     embedDescriptionLines.push(pig.Description.length > 0 ? pig.Description : "...");
     if (options.showId === undefined || options.showId) {
         embedDescriptionLines.push(`#${pig.ID.padStart(3, "0")}${options.favourite ? " ⭐" : ""}${options.shared ? " ✅" : ""}`);
@@ -93,7 +100,9 @@ function AddFoilChecksToEmbed(embed, options) {
         FOILED_RARITIES.forEach(rarity => {
             const amount = pigAmountsPerRarity[rarity] ?? 0;
             const targetAmount = PigsPerFoilRarity_1.PIGS_PER_FOIL_RARITY[rarity];
-            fieldDescription += `${rarity} ${amount}/${targetAmount} ${amount < targetAmount ? "" : "✅"}\n`;
+            if (targetAmount > 0) {
+                fieldDescription += `${rarity} ${amount}/${targetAmount} ${amount < targetAmount ? "" : "✅"}\n`;
+            }
         });
         embed.addFields({
             name: set === "-" ? "Default" : set,

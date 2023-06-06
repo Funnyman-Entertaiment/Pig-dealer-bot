@@ -98,11 +98,7 @@ export const SPECIAL_RARITIES_PER_PACK: { readonly [key: string]: { readonly [ke
 		{ "Common": 1, "Rare": 0.1 },
 		{ "Common": 1, "Rare": 0.2 },
 		{ "Rare": 1, "Epic": 0.08 },
-<<<<<<< Updated upstream
 		{ "Rare": 1, "Epic": 0.3, "Legendary": 0.01, "Easter": 0.7 },
-=======
-		{ "Rare": 1, "Epic": 0.3, "Legendary": 0.01, "Easter": 0.64 },
->>>>>>> Stashed changes
 	],
 	["Egg Stage 10"]: [
 		{ "Common": 1 },

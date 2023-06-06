@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ShowBinderList = void 0;
+exports.ShowFoilBinderList = void 0;
 const discord_js_1 = require("discord.js");
 const Command_1 = require("../Command");
 const GetAuthor_1 = require("../Utils/GetAuthor");
@@ -9,8 +9,8 @@ const Pigs_1 = require("../database/Pigs");
 const UserInfo_1 = require("../database/UserInfo");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const MessageInfo_1 = require("../database/MessageInfo");
-exports.ShowBinderList = new Command_1.Command("Binder List", "Shows you the pigs you own in list view. By default, it sorts them by set, but by setting that value to false it will sort them by ID.\nYou can also define a rarity and/or a user to only see pigs from only one rarity or another user, respectively.\nWhen viewing someone else's binder, a checkmark will signify if you already own a pig from their collection.", false, true, new discord_js_1.SlashCommandBuilder()
-    .setName("binderlist")
+exports.ShowFoilBinderList = new Command_1.Command("Foil Binder List", "Shows you the foil pigs you own in list view. By default, it sorts them by set, but by setting that value to false it will sort them by ID.\nYou can also define a rarity and/or a user to only see pigs from only one rarity or another user, respectively.\nWhen viewing someone else's binder, a checkmark will signify if you already own a pig from their collection.", false, true, new discord_js_1.SlashCommandBuilder()
+    .setName("foilbinderlist")
     .addBooleanOption(option => option.setName('set')
     .setDescription('Whether to order the pigs by set or not.'))
     .addUserOption(option => option.setName('user')
@@ -74,7 +74,7 @@ exports.ShowBinderList = new Command_1.Command("Binder List", "Shows you the pig
         pigs = pigs.filter(pig => favouritePigs.includes(pig.ID));
     }
     pigs = pigs.filter(pig => {
-        return !pig.Rarity.includes("(foil)");
+        return pig.Rarity.includes("(foil)");
     });
     if (userInfo === undefined || pigs.length === 0) {
         const emptyEmbed = new discord_js_1.EmbedBuilder()

@@ -52,7 +52,8 @@ exports.NextGallery = new Button_1.Button("GalleryNext", false, true, false, asy
         showId: !(0, UniquePigEvents_1.DoesPigIdHaveUniqueEvent)(pigToLoad),
         count: msgInfo.PigCounts[pig.ID],
         favourite: msgInfo.FavouritePigs.includes(pig.ID),
-        shared: msgInfo.SharedPigs.includes(pig.ID)
+        shared: msgInfo.SharedPigs.includes(pig.ID),
+        showSet: msgInfo.ShowSet
     });
     const row = new discord_js_1.ActionRowBuilder()
         .addComponents(new discord_js_1.ButtonBuilder()

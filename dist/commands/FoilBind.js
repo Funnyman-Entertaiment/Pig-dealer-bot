@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ShowBinder = void 0;
+exports.ShowFoilBinder = void 0;
 const discord_js_1 = require("discord.js");
 const PigRenderer_1 = require("../Utils/PigRenderer");
 const Command_1 = require("../Command");
@@ -9,8 +9,8 @@ const MessageInfo_1 = require("../database/MessageInfo");
 const Log_1 = require("../Utils/Log");
 const UserInfo_1 = require("../database/UserInfo");
 const GetAuthor_1 = require("../Utils/GetAuthor");
-exports.ShowBinder = new Command_1.Command("Binder", "Shows you the pigs you own, with an image for each. You can define a user to see someone else's binder, rarity, to only see pigs of a certain rarity. You can also set favourites to True to only see pigs you've favourited.\nWhen viewing someone else's binder, a checkmark will signify if you already own a pig from their collection.", false, true, new discord_js_1.SlashCommandBuilder()
-    .setName("binder")
+exports.ShowFoilBinder = new Command_1.Command("FoilBinder", "Shows you the foil pigs you own, with an image for each. You can define a user to see someone else's binder, rarity, to only see pigs of a certain rarity. You can also set favourites to True to only see pigs you've favourited.\nWhen viewing someone else's binder, a checkmark will signify if you already own a pig from their collection.", false, true, new discord_js_1.SlashCommandBuilder()
+    .setName("foilbinder")
     .addUserOption(option => option.setName('user')
     .setDescription('user to check the binder of'))
     .addStringOption(option => option.setName('rarity')
@@ -69,7 +69,7 @@ exports.ShowBinder = new Command_1.Command("Binder", "Shows you the pigs you own
             if (pig === undefined) {
                 return false;
             }
-            return raritiesToFilter.includes(pig.Rarity.toLowerCase());
+            return raritiesToFilter.includes(pig.Rarity.replace(" (foil)", "").toLowerCase());
         });
     }
     const favouritePigs = userInfo.FavouritePigs;
@@ -82,7 +82,7 @@ exports.ShowBinder = new Command_1.Command("Binder", "Shows you the pigs you own
         if (pig === undefined) {
             return false;
         }
-        return !pig.Rarity.includes("(foil)");
+        return pig.Rarity.includes("(foil)");
     });
     if (pigs.length === 0) {
         const emptyEmbed = new discord_js_1.EmbedBuilder()
