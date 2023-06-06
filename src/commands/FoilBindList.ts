@@ -8,13 +8,13 @@ import { AddPigListRenderToEmbed } from "../Utils/PigRenderer";
 import { PigListMessage, AddMessageInfoToCache } from "../database/MessageInfo";
 
 
-export const ShowBinderList = new Command(
-    "Binder List",
-    "Shows you the pigs you own in list view. By default, it sorts them by set, but by setting that value to false it will sort them by ID.\nYou can also define a rarity and/or a user to only see pigs from only one rarity or another user, respectively.\nWhen viewing someone else's binder, a checkmark will signify if you already own a pig from their collection.",
+export const ShowFoilBinderList = new Command(
+    "Foil Binder List",
+    "Shows you the foil pigs you own in list view. By default, it sorts them by set, but by setting that value to false it will sort them by ID.\nYou can also define a rarity and/or a user to only see pigs from only one rarity or another user, respectively.\nWhen viewing someone else's binder, a checkmark will signify if you already own a pig from their collection.",
     false,
     true,
     new SlashCommandBuilder()
-        .setName("binderlist")
+        .setName("foilbinderlist")
         .addBooleanOption(option =>
             option.setName('set')
                 .setDescription('Whether to order the pigs by set or not.'))
@@ -92,9 +92,9 @@ export const ShowBinderList = new Command(
             pigs = pigs.filter(pig => favouritePigs.includes(pig.ID));
         }
 
-        //No foiled pigs
+        //Only foiled pigs
         pigs = pigs.filter(pig => {
-            return !pig.Rarity.includes("(foil)");
+            return pig.Rarity.includes("(foil)");
         });
 
         if (userInfo === undefined || pigs.length === 0) {

@@ -1,6 +1,7 @@
 import { Pack } from "../database/Packs";
 import { Pig } from "../database/Pigs";
 import { ServerInfo } from "../database/ServerInfo";
+import { Anniversary } from "./Anniversary";
 import { Christmas } from "./Chritmas";
 import { Easter } from "./Easter";
 import { NewYears } from "./NewYears";
@@ -11,7 +12,8 @@ const SeasonalEvents: SeasonalEvent[] = [
     Christmas,
     NewYears,
     Easter,
-    SaintPatricks
+    SaintPatricks,
+    Anniversary
 ];
 
 export function GetActiveEvents(){

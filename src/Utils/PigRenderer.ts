@@ -10,7 +10,8 @@ export interface PigRenderOptions {
     new?: boolean,
     showId?: boolean,
     favourite?: boolean,
-    shared?: boolean
+    shared?: boolean,
+    showSet?: boolean
 }
 
 export function AddPigRenderToEmbed(embed: EmbedBuilder, options: PigRenderOptions): string{
@@ -38,6 +39,15 @@ export function AddPigRenderToEmbed(embed: EmbedBuilder, options: PigRenderOptio
         const showRarity = rarityTag.replace("[RARITY]", "").trim();
         embedDescriptionLines.push(`_${showRarity}_`);
     }
+
+    if(options.showSet !== undefined && options.showSet) {
+        let set = pig.Set;
+        if(set === "-") {
+            set = "Default";
+        }
+        embedDescriptionLines.push(`${set} set`);
+    }
+
     embedDescriptionLines.push(pig.Description.length > 0? pig.Description : "...");
 
     if(options.showId === undefined || options.showId){
@@ -136,7 +146,9 @@ export function AddFoilChecksToEmbed(embed: EmbedBuilder, options: FoilCheckRend
             const amount = pigAmountsPerRarity[rarity] ?? 0;
             const targetAmount = PIGS_PER_FOIL_RARITY[rarity];
 
-            fieldDescription += `${rarity} ${amount}/${targetAmount} ${amount < targetAmount? "":"✅"}\n`
+            if(targetAmount > 0) {
+                fieldDescription += `${rarity} ${amount}/${targetAmount} ${amount < targetAmount? "":"✅"}\n`
+            }
         });
 
         embed.addFields({

@@ -7,13 +7,13 @@ import { LogError, LogInfo, PrintUser } from "../Utils/Log";
 import { GetUserInfo, GetUserPigIDs } from "../database/UserInfo";
 import { GetAuthor } from "../Utils/GetAuthor";
 
-export const ShowBinder = new Command(
-    "Binder",
-    "Shows you the pigs you own, with an image for each. You can define a user to see someone else's binder, rarity, to only see pigs of a certain rarity. You can also set favourites to True to only see pigs you've favourited.\nWhen viewing someone else's binder, a checkmark will signify if you already own a pig from their collection.",
+export const ShowFoilBinder = new Command(
+    "FoilBinder",
+    "Shows you the foil pigs you own, with an image for each. You can define a user to see someone else's binder, rarity, to only see pigs of a certain rarity. You can also set favourites to True to only see pigs you've favourited.\nWhen viewing someone else's binder, a checkmark will signify if you already own a pig from their collection.",
     false,
     true,
     new SlashCommandBuilder()
-        .setName("binder")
+        .setName("foilbinder")
         .addUserOption(option =>
             option.setName('user')
                 .setDescription('user to check the binder of'))
@@ -84,7 +84,7 @@ export const ShowBinder = new Command(
 
                 if (pig === undefined) { return false; }
 
-                return raritiesToFilter.includes(pig.Rarity.toLowerCase())
+                return raritiesToFilter.includes(pig.Rarity.replace(" (foil)", "").toLowerCase())
             });
         }
 
@@ -95,13 +95,13 @@ export const ShowBinder = new Command(
             pigs = pigs.filter(pig => favouritePigs.includes(pig));
         }
 
-        //No foiled pigs
+        //Only foiled pigs
         pigs = pigs.filter(pigID => {
             const pig = GetPig(pigID);
             if(pig === undefined){
                 return false;
             }
-            return !pig.Rarity.includes("(foil)");
+            return pig.Rarity.includes("(foil)");
         });
 
         if (pigs.length === 0) {

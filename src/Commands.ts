@@ -35,6 +35,8 @@ import { Events } from "./commands/Events";
 import { CheckFoils } from "./commands/CheckFoil";
 import { Help } from "./commands/Help";
 import { GetPresaleToken } from "./commands/GetPresaleToken";
+import { ShowFoilBinder } from "./commands/FoilBind";
+import { ShowFoilBinderList } from "./commands/FoilBindList";
 
 export const Commands = [
     Sex,
@@ -58,7 +60,9 @@ export const Commands = [
     CheckFoils,
     Events,
     Help,
-    GetPresaleToken
+    GetPresaleToken,
+    ShowFoilBinder,
+    ShowFoilBinderList
 ];
 
 export const TradeServerCommands = [
