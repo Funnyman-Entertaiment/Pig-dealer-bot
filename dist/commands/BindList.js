@@ -73,6 +73,9 @@ exports.ShowBinderList = new Command_1.Command("Binder List", "Shows you the pig
         const favouritePigs = userInfo.FavouritePigs;
         pigs = pigs.filter(pig => favouritePigs.includes(pig.ID));
     }
+    pigs = pigs.filter(pig => {
+        return !pig.Rarity.includes("(foil)");
+    });
     if (userInfo === undefined || pigs.length === 0) {
         const emptyEmbed = new discord_js_1.EmbedBuilder()
             .setAuthor(author)

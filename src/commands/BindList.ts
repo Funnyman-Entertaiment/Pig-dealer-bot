@@ -92,6 +92,11 @@ export const ShowBinderList = new Command(
             pigs = pigs.filter(pig => favouritePigs.includes(pig.ID));
         }
 
+        //No foiled pigs
+        pigs = pigs.filter(pig => {
+            return !pig.Rarity.includes("(foil)");
+        });
+
         if (userInfo === undefined || pigs.length === 0) {
             const emptyEmbed = new EmbedBuilder()
                 .setAuthor(author)

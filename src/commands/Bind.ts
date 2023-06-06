@@ -95,6 +95,15 @@ export const ShowBinder = new Command(
             pigs = pigs.filter(pig => favouritePigs.includes(pig));
         }
 
+        //No foiled pigs
+        pigs = pigs.filter(pigID => {
+            const pig = GetPig(pigID);
+            if(pig === undefined){
+                return false;
+            }
+            return !pig.Rarity.includes("(foil)");
+        });
+
         if (pigs.length === 0) {
             const emptyEmbed = new EmbedBuilder()
                 .setAuthor(author)
@@ -192,6 +201,7 @@ export const ShowBinder = new Command(
                 userInfo.FavouritePigs,
                 userInfo.ID === interaction.user.id ? [] : sharedPigs,
                 userInfo.ID === interaction.user.id && !onlyFavourites,
+                false,
                 interaction.user.id
             );
 

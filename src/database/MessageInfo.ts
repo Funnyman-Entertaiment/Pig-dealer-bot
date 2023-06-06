@@ -61,8 +61,9 @@ export class PigGalleryMessage extends MessageInfo {
     FavouritePigs: string[];
     SharedPigs: string[];
     ShowFavouriteButton: boolean;
+    ShowSet: boolean
 
-    constructor(id: string, serverId: string, currentPig: number, pigCounts: {[key: string]: number}, pigs: string[], newPigs: string[], seenPigs: number[], favouritePigs: string[], sharedPigs: string[], showFavouriteButton: boolean, user?: string, timeSent?: Timestamp) {
+    constructor(id: string, serverId: string, currentPig: number, pigCounts: {[key: string]: number}, pigs: string[], newPigs: string[], seenPigs: number[], favouritePigs: string[], sharedPigs: string[], showFavouriteButton: boolean, showSet: boolean, user?: string, timeSent?: Timestamp) {
         super(id, serverId, "PigGallery", user, timeSent);
         this.CurrentPig = currentPig;
         this.PigCounts = pigCounts;
@@ -72,6 +73,7 @@ export class PigGalleryMessage extends MessageInfo {
         this.FavouritePigs = favouritePigs;
         this.SharedPigs = sharedPigs;
         this.ShowFavouriteButton = showFavouriteButton;
+        this.ShowSet = showSet;
     }
 
     GetData(): object {

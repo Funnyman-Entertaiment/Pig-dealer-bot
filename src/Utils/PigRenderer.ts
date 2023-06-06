@@ -1,6 +1,6 @@
 import { EmbedBuilder } from "discord.js";
 import fs from 'fs';
-import { GetPig, Pig } from "../database/Pigs";
+import { GetPig, GetPigsBySet, Pig } from "../database/Pigs";
 import { COLOR_PER_PIG_RARITY } from "../Constants/ColorPerPigRarity";
 import { PIGS_PER_FOIL_RARITY } from "../Constants/PigsPerFoilRarity";
 
@@ -10,7 +10,8 @@ export interface PigRenderOptions {
     new?: boolean,
     showId?: boolean,
     favourite?: boolean,
-    shared?: boolean
+    shared?: boolean,
+    showSet?: boolean
 }
 
 export function AddPigRenderToEmbed(embed: EmbedBuilder, options: PigRenderOptions): string{
@@ -38,6 +39,15 @@ export function AddPigRenderToEmbed(embed: EmbedBuilder, options: PigRenderOptio
         const showRarity = rarityTag.replace("[RARITY]", "").trim();
         embedDescriptionLines.push(`_${showRarity}_`);
     }
+
+    if(options.showSet !== undefined && options.showSet) {
+        let set = pig.Set;
+        if(set === "-") {
+            set = "Default";
+        }
+        embedDescriptionLines.push(`${set} set`);
+    }
+
     embedDescriptionLines.push(pig.Description.length > 0? pig.Description : "...");
 
     if(options.showId === undefined || options.showId){
@@ -132,7 +142,11 @@ export function AddFoilChecksToEmbed(embed: EmbedBuilder, options: FoilCheckRend
         const pigAmountsPerRarity = options.pigAmountsPerSet[set];
         let fieldDescription = "";
 
+        const pigsOfSet = GetPigsBySet(set);
+
         FOILED_RARITIES.forEach(rarity => {
+            if(pigsOfSet.find(x => x.Rarity === rarity) === undefined) { return; }
+
             const amount = pigAmountsPerRarity[rarity] ?? 0;
             const targetAmount = PIGS_PER_FOIL_RARITY[rarity];
 

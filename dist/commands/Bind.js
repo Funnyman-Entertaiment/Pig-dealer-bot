@@ -77,6 +77,13 @@ exports.ShowBinder = new Command_1.Command("Binder", "Shows you the pigs you own
     if (onlyFavourites) {
         pigs = pigs.filter(pig => favouritePigs.includes(pig));
     }
+    pigs = pigs.filter(pigID => {
+        const pig = (0, Pigs_1.GetPig)(pigID);
+        if (pig === undefined) {
+            return false;
+        }
+        return !pig.Rarity.includes("(foil)");
+    });
     if (pigs.length === 0) {
         const emptyEmbed = new discord_js_1.EmbedBuilder()
             .setAuthor(author)
@@ -148,7 +155,7 @@ exports.ShowBinder = new Command_1.Command("Binder", "Shows you the pigs you own
         if (userInfo === undefined) {
             return;
         }
-        const newMessage = new MessageInfo_1.PigGalleryMessage(message.id, server.id, 0, userInfo === undefined ? {} : userInfo.Pigs, pigs, [], [], userInfo.FavouritePigs, userInfo.ID === interaction.user.id ? [] : sharedPigs, userInfo.ID === interaction.user.id && !onlyFavourites, interaction.user.id);
+        const newMessage = new MessageInfo_1.PigGalleryMessage(message.id, server.id, 0, userInfo === undefined ? {} : userInfo.Pigs, pigs, [], [], userInfo.FavouritePigs, userInfo.ID === interaction.user.id ? [] : sharedPigs, userInfo.ID === interaction.user.id && !onlyFavourites, false, interaction.user.id);
         (0, MessageInfo_1.AddMessageInfoToCache)(newMessage);
     });
 });

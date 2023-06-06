@@ -38,6 +38,8 @@ const Events_1 = require("./commands/Events");
 const CheckFoil_1 = require("./commands/CheckFoil");
 const Help_1 = require("./commands/Help");
 const GetPresaleToken_1 = require("./commands/GetPresaleToken");
+const FoilBind_1 = require("./commands/FoilBind");
+const FoilBindList_1 = require("./commands/FoilBindList");
 exports.Commands = [
     Sex_1.Sex,
     SetChannel_1.SetBotChannel,
@@ -60,7 +62,9 @@ exports.Commands = [
     CheckFoil_1.CheckFoils,
     Events_1.Events,
     Help_1.Help,
-    GetPresaleToken_1.GetPresaleToken
+    GetPresaleToken_1.GetPresaleToken,
+    FoilBind_1.ShowFoilBinder,
+    FoilBindList_1.ShowFoilBinderList
 ];
 exports.TradeServerCommands = [
     TradeBulletin_1.TradeBulletin

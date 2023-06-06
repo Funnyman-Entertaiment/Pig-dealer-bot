@@ -208,7 +208,8 @@ function GetOpenPackFollowUp(packName, chosenPigs, newPigs, interaction, userInf
         pig: chosenPigs[0],
         new: newPigs.includes(chosenPigs[0].ID),
         count: 1,
-        favourite: userInfo.FavouritePigs.includes(chosenPigs[0].ID)
+        favourite: userInfo.FavouritePigs.includes(chosenPigs[0].ID),
+        showSet: true
     });
     if (imgPath === undefined) {
         return;
@@ -255,7 +256,7 @@ function SendOpenPackFollowUp(userInfo, chosenPigs, pigsToShowInPack, pack, serv
         if (message === null) {
             return;
         }
-        const newMsgInfo = new MessageInfo_1.PigGalleryMessage(message.id, serverId, 0, {}, pigsToShowInPack.map(pig => pig.ID), newPigs, [], userInfo.FavouritePigs, [], true, interaction.user.id);
+        const newMsgInfo = new MessageInfo_1.PigGalleryMessage(message.id, serverId, 0, {}, pigsToShowInPack.map(pig => pig.ID), newPigs, [], userInfo.FavouritePigs, [], true, true, interaction.user.id);
         (0, MessageInfo_1.AddMessageInfoToCache)(newMsgInfo);
     });
 }

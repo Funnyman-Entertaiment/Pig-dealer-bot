@@ -253,7 +253,8 @@ function GetOpenPackFollowUp(packName: string, chosenPigs: Pig[], newPigs: strin
         pig: chosenPigs[0],
         new: newPigs.includes(chosenPigs[0].ID),
         count: 1,
-        favourite: userInfo.FavouritePigs.includes(chosenPigs[0].ID)
+        favourite: userInfo.FavouritePigs.includes(chosenPigs[0].ID),
+        showSet: true
     });
 
     if (imgPath === undefined) { return; }
@@ -323,6 +324,7 @@ function SendOpenPackFollowUp(userInfo: UserInfo, chosenPigs: Pig[], pigsToShowI
             [],
             userInfo.FavouritePigs,
             [],
+            true,
             true,
             interaction.user.id
         );

@@ -67,7 +67,8 @@ export const PrevGallery = new Button(
             showId: !DoesPigIdHaveUniqueEvent(pigToLoad),
             count: msgInfo.PigCounts[pig.ID],
             favourite: msgInfo.FavouritePigs.includes(pig.ID),
-            shared: msgInfo.SharedPigs.includes(pig.ID)
+            shared: msgInfo.SharedPigs.includes(pig.ID),
+            showSet: msgInfo.ShowSet
         });
         const row = new ActionRowBuilder<ButtonBuilder>()
         .addComponents(

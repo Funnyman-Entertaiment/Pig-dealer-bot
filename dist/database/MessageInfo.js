@@ -57,7 +57,8 @@ class PigGalleryMessage extends MessageInfo {
     FavouritePigs;
     SharedPigs;
     ShowFavouriteButton;
-    constructor(id, serverId, currentPig, pigCounts, pigs, newPigs, seenPigs, favouritePigs, sharedPigs, showFavouriteButton, user, timeSent) {
+    ShowSet;
+    constructor(id, serverId, currentPig, pigCounts, pigs, newPigs, seenPigs, favouritePigs, sharedPigs, showFavouriteButton, showSet, user, timeSent) {
         super(id, serverId, "PigGallery", user, timeSent);
         this.CurrentPig = currentPig;
         this.PigCounts = pigCounts;
@@ -67,6 +68,7 @@ class PigGalleryMessage extends MessageInfo {
         this.FavouritePigs = favouritePigs;
         this.SharedPigs = sharedPigs;
         this.ShowFavouriteButton = showFavouriteButton;
+        this.ShowSet = showSet;
     }
     GetData() {
         if (this.User === undefined) {
