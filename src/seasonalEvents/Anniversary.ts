@@ -1,7 +1,7 @@
 import { Timestamp } from "firebase/firestore/lite";
 import { SeasonalEvent } from "./SeasonalEvent";
-import { FOIL_PACK, PACK_2 } from "src/Constants/SignificantPackIDs";
-import { GetPack } from "src/database/Packs";
+import { FOIL_PACK, PACK_2 } from "../Constants/SignificantPackIDs";
+import { GetPack } from "../database/Packs";
 
 export const Anniversary = new SeasonalEvent(
     "Pigniversary",

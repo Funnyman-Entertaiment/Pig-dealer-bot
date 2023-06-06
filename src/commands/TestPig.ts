@@ -29,7 +29,7 @@ export const TestPig = new Command(
                 .setTitle("No pig found")
                 .setDescription("Yikes, you sure the id is right");
 
-            await interaction.followUp({
+            await interaction.reply({
                 ephemeral: true,
                 embeds: [pigEmbed],
             });
