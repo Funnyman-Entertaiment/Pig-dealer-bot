@@ -17,7 +17,7 @@ exports.NewYears = new SeasonalEvent_1.SeasonalEvent("Pig's New Year", "Party", 
     return (currentDate.getUTCMonth() === 11 && currentDate.getUTCDate() >= 30) ||
         (currentDate.getUTCMonth() === 0 && currentDate.getUTCDate() == 1);
 });
-exports.NewYears.PostPackOpened = function (_pack, serverInfo, chosenPigs, _pigsToShow) {
+exports.NewYears.PostPackOpened = function (_pack, serverInfo, chosenPigs) {
     const currentYear = GetNewYearsYear();
     if (!serverInfo.YearsSpawnedAllNewYearDeco.includes(currentYear) && Math.random() < 0.1) {
         const newYearPigs = (0, Pigs_1.GetPigsByRarity)("New Year");

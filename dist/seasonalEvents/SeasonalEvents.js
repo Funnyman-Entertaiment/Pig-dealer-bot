@@ -5,13 +5,15 @@ const Anniversary_1 = require("./Anniversary");
 const Chritmas_1 = require("./Chritmas");
 const Easter_1 = require("./Easter");
 const NewYears_1 = require("./NewYears");
+const Pigoween_1 = require("./Pigoween");
 const SaintPatricks_1 = require("./SaintPatricks");
 const SeasonalEvents = [
     Chritmas_1.Christmas,
     NewYears_1.NewYears,
     Easter_1.Easter,
     SaintPatricks_1.SaintPatricks,
-    Anniversary_1.Anniversary
+    Anniversary_1.Anniversary,
+    Pigoween_1.Pigoween
 ];
 function GetActiveEvents() {
     return SeasonalEvents.filter(x => x.IsActive());

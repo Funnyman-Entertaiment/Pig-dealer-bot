@@ -24,7 +24,7 @@ exports.Report = new Command_1.Command("Report", "Sends a report message to the 
         embeds: [reportEmbed]
     });
     const successEmbed = new discord_js_1.EmbedBuilder()
-        .setTitle(`Report sent successfully!`)
+        .setTitle("Report sent successfully!")
         .setColor(discord_js_1.Colors.Green);
     interaction.reply({
         ephemeral: true,

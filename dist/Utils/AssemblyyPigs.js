@@ -42,7 +42,7 @@ async function SendAssemblyPigEmbed(serverInfo, userInfo, completedPig) {
     }
     const user = await Bot_1.client.users.fetch(userInfo.ID);
     const assemblyPigEmbed = new discord_js_1.EmbedBuilder()
-        .setTitle(`You've completed a set and obtained a bonus pig!`)
+        .setTitle("You've completed a set and obtained a bonus pig!")
         .setAuthor({
         name: user.username,
         iconURL: user.avatarURL() ?? undefined

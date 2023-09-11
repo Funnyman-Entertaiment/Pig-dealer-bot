@@ -19,7 +19,7 @@ function GetRandomNumber(max, exception) {
     if (exception === undefined) {
         return Math.floor(Math.random() * max);
     }
-    let chosen = GetRandomNumber(max - 1);
+    const chosen = GetRandomNumber(max - 1);
     if (chosen >= exception) {
         return chosen + 1;
     }
@@ -57,8 +57,8 @@ async function SpawnRandomPack() {
             return;
         }
         let embedTitle = `A ${pack.Name} HAS APPEARED!`;
-        let vowelRegex = '^[aieouAIEOU].*';
-        let matched = pack.Name.match(vowelRegex);
+        const vowelRegex = "^[aieouAIEOU].*";
+        const matched = pack.Name.match(vowelRegex);
         if (matched) {
             embedTitle = `AN ${pack.Name} HAS APPEARED!`;
         }

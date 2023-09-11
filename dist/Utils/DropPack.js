@@ -30,15 +30,15 @@ async function DropPack(serverInfo, options) {
         return;
     }
     const pack = options.pack;
-    let img = `${pack.ID}.png`;
+    const img = `${pack.ID}.png`;
     const packEmbed = new discord_js_1.EmbedBuilder()
         .setTitle(options.title)
         .setImage(`attachment://${img}`)
         .setColor(ColorPerPackRarity_1.COLOR_PER_PACK_RARITY[pack.Rarity]);
     const row = new discord_js_1.ActionRowBuilder()
         .addComponents(new discord_js_1.ButtonBuilder()
-        .setCustomId('OpenPack')
-        .setLabel('Open!')
+        .setCustomId("OpenPack")
+        .setLabel("Open!")
         .setStyle(discord_js_1.ButtonStyle.Primary));
     (0, Log_1.LogInfo)(`Sending ${pack.Name} to server with id: ${(0, Log_1.PrintServer)(server)}`);
     if (serverInfo.Role !== undefined && (options.ping !== undefined && options.ping)) {

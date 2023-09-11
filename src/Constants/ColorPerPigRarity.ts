@@ -16,5 +16,8 @@ export const COLOR_PER_PIG_RARITY: { readonly [key: string]: number } = {
 	["Personal Gift"]: Colors.White,
 	["Unimplemented"]: Colors.Grey,
 	["Easter"]: 9031664,
-	["Saint Patrick's Day"]: Colors.Green
+	["Saint Patrick's Day"]: Colors.Green,
+	Halloween: Colors.Orange,
+	["Halloween (Rare)"]: Colors.DarkGold,
+	["Halloween (Epic)"]: Colors.DarkOrange
 };

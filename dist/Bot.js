@@ -20,7 +20,7 @@ const firebaseConfig = {
     storageBucket: `${projectID}.appspot.com`,
     messagingSenderId: process.env.FIREBASE_MSG_SENDER,
     appId: process.env.FIREBASE_API_ID,
-    measurementId: "G-SLSDV1DJR9"
+    measurementId: process.env.MEASUREMENT_ID
 };
 const app = (0, app_1.initializeApp)(firebaseConfig);
 exports.db = (0, lite_1.getFirestore)(app);

@@ -5,6 +5,7 @@ import { Anniversary } from "./Anniversary";
 import { Christmas } from "./Chritmas";
 import { Easter } from "./Easter";
 import { NewYears } from "./NewYears";
+import { Pigoween } from "./Pigoween";
 import { SaintPatricks } from "./SaintPatricks";
 import { SeasonalEvent } from "./SeasonalEvent";
 
@@ -13,7 +14,8 @@ const SeasonalEvents: SeasonalEvent[] = [
 	NewYears,
 	Easter,
 	SaintPatricks,
-	Anniversary
+	Anniversary,
+	Pigoween
 ];
 
 export function GetActiveEvents() {

@@ -27,7 +27,7 @@ exports.PreviousList = new Button_1.Button("ListPrevious", false, true, false, a
     }
     if (message.embeds[0] === undefined) {
         (0, Log_1.LogError)(`Couldn't get embed from message in channel ${(0, Log_1.PrintChannel)(interaction.channel)} in server ${(0, Log_1.PrintServer)(server)}`);
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`Couldn't get embed from message`, `Make sure the bot is able to send embeds`);
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Couldn't get embed from message", "Make sure the bot is able to send embeds");
         interaction.followUp({
             embeds: [errorEmbed]
         });

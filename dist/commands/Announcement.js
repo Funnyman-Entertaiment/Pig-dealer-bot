@@ -160,8 +160,7 @@ async function SendAnnouncement(interaction) {
                 }
             });
         }
-        catch (error) {
-        }
+        catch (error) { }
     });
     announcementEmbed = undefined;
     annoucementFields = [];

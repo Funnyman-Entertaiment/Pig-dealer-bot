@@ -41,9 +41,9 @@ class DatabaseElementList {
         this.Elements = [];
     }
     async Add(element) {
-        let foundElement = this.Get(element.ID);
+        const foundElement = this.Get(element.ID);
         if (foundElement !== undefined) {
-            let foundIndex = this.Elements.indexOf(foundElement);
+            const foundIndex = this.Elements.indexOf(foundElement);
             this.Elements[foundIndex] = element;
             return;
         }

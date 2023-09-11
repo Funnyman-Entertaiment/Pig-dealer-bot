@@ -62,7 +62,7 @@ exports.AcceptTrade = new Button_1.Button("AcceptTrade", false, true, false, asy
     (0, AssemblyyPigs_1.CheckAndSendAssemblyPigEmbeds)(server.id, msgInfo.TradeReceiverID, pigsAddedToReceiver);
     const embed = message.embeds[0];
     if (embed === undefined) {
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`Couldn't retrieve the embed from the trade message`, `Make sure the bot is able to send embeds in this server`, `(The trade has been succesful anyways)`);
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Couldn't retrieve the embed from the trade message", "Make sure the bot is able to send embeds in this server", "(The trade has been succesful anyways)");
         interaction.reply({
             embeds: [errorEmbed]
         });

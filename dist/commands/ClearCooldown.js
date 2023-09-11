@@ -6,8 +6,8 @@ const Command_1 = require("../Command");
 const UserInfo_1 = require("../database/UserInfo");
 exports.ClearCooldown = new Command_1.Command("", "", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("clearcooldown")
-    .addStringOption(option => option.setName('user')
-    .setDescription('user to check the cooldown of')
+    .addStringOption(option => option.setName("user")
+    .setDescription("user to check the cooldown of")
     .setRequired(true))
     .setDescription("Clears the pack opening cooldown of a user")
     .setDMPermission(false), async function (interaction) {

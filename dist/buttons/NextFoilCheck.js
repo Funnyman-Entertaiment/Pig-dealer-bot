@@ -22,9 +22,7 @@ exports.NextFoilCheck = new Button_1.Button("NextFoilCheck", false, true, true, 
     }
     let newPage = msgInfo.CurrentPage + 1;
     let setsNum = 0;
-    for (const _ in msgInfo.PigAmountsPerSet) {
-        setsNum++;
-    }
+    setsNum += Object.keys(msgInfo.PigAmountsPerSet).length;
     const newFirstSet = newPage * 6 + 1;
     if (newFirstSet > setsNum) {
         newPage = 0;
@@ -32,7 +30,7 @@ exports.NextFoilCheck = new Button_1.Button("NextFoilCheck", false, true, true, 
     msgInfo.CurrentPage = newPage;
     if (message.embeds[0] === undefined) {
         (0, Log_1.LogError)(`Couldn't get embed from message in channel ${(0, Log_1.PrintChannel)(interaction.channel)} in server ${(0, Log_1.PrintServer)(server)}`);
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`Couldn't get embed from message`, `Make sure the bot is able to send embeds`);
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Couldn't get embed from message", "Make sure the bot is able to send embeds");
         await interaction.followUp({
             embeds: [errorEmbed]
         });

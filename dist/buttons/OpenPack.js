@@ -25,7 +25,7 @@ const SeasonalEvents_1 = require("../seasonalEvents/SeasonalEvents");
 const ExtraRandom_1 = require("../Utils/ExtraRandom");
 const SignificantPackIDs_1 = require("../Constants/SignificantPackIDs");
 function GetEditedEmbed(embed, pack) {
-    let openedImg = `./img/packs/opened/${pack.ID}.png`;
+    const openedImg = `./img/packs/opened/${pack.ID}.png`;
     if (!(0, fs_1.existsSync)(openedImg)) {
         return;
     }
@@ -113,8 +113,8 @@ function EditEmbedWithOpenedPack(message, pack, embed) {
     const openedImg = GetEditedEmbed(editedEmbed, pack);
     const row = new discord_js_1.ActionRowBuilder()
         .addComponents(new discord_js_1.ButtonBuilder()
-        .setCustomId('OpenPack')
-        .setLabel('Open!')
+        .setCustomId("OpenPack")
+        .setLabel("Open!")
         .setStyle(discord_js_1.ButtonStyle.Primary)
         .setDisabled(true));
     if (openedImg === undefined) {
@@ -216,23 +216,23 @@ function GetOpenPackFollowUp(packName, chosenPigs, newPigs, interaction, userInf
     }
     const row = new discord_js_1.ActionRowBuilder()
         .addComponents(new discord_js_1.ButtonBuilder()
-        .setCustomId('GalleryPrevious')
-        .setLabel('Previous')
+        .setCustomId("GalleryPrevious")
+        .setLabel("Previous")
         .setStyle(discord_js_1.ButtonStyle.Primary)
         .setDisabled(true), new discord_js_1.ButtonBuilder()
-        .setCustomId('GalleryNext')
-        .setLabel('Next')
+        .setCustomId("GalleryNext")
+        .setLabel("Next")
         .setStyle(discord_js_1.ButtonStyle.Primary));
     if (!userInfo.FavouritePigs.includes(chosenPigs[0].ID)) {
         row.addComponents(new discord_js_1.ButtonBuilder()
-            .setCustomId('FavouritePig')
-            .setLabel('Favourite ⭐')
+            .setCustomId("FavouritePig")
+            .setLabel("Favourite ⭐")
             .setStyle(discord_js_1.ButtonStyle.Secondary));
     }
     else {
         row.addComponents(new discord_js_1.ButtonBuilder()
-            .setCustomId('UnfavouritePig')
-            .setLabel('Unfavourite ⭐')
+            .setCustomId("UnfavouritePig")
+            .setLabel("Unfavourite ⭐")
             .setStyle(discord_js_1.ButtonStyle.Secondary));
     }
     const author = (0, GetAuthor_1.GetAuthor)(interaction);
@@ -281,15 +281,15 @@ function CheckSpoiledEgg(msgInfo, pack) {
 }
 function OpenSpoledEgg(message, embed, interaction) {
     const editedEmbed = new builders_1.EmbedBuilder(embed.data);
-    let openedImg = `./img/packs/opened/spoiled.png`;
+    const openedImg = "./img/packs/opened/spoiled.png";
     if (!(0, fs_1.existsSync)(openedImg)) {
         return;
     }
-    editedEmbed.setImage(`attachment://spoiled.png`);
+    editedEmbed.setImage("attachment://spoiled.png");
     const row = new discord_js_1.ActionRowBuilder()
         .addComponents(new discord_js_1.ButtonBuilder()
-        .setCustomId('OpenPack')
-        .setLabel('Open!')
+        .setCustomId("OpenPack")
+        .setLabel("Open!")
         .setStyle(discord_js_1.ButtonStyle.Primary)
         .setDisabled(true));
     if (openedImg === undefined) {
@@ -309,10 +309,10 @@ function OpenSpoledEgg(message, embed, interaction) {
         .setDescription("Sucks to be you...")
         .setAuthor((0, GetAuthor_1.GetAuthor)(interaction))
         .setColor(discord_js_1.Colors.Red)
-        .setImage(`attachment://spoiledegg.png`);
+        .setImage("attachment://spoiledegg.png");
     interaction.followUp({
         embeds: [spoiledEmbed],
-        files: [`./img/special/spoiledegg.png`]
+        files: ["./img/special/spoiledegg.png"]
     });
 }
 function GetEasterStagePack(msgInfo, pack) {
@@ -377,7 +377,7 @@ exports.OpenPack = new Button_1.Button("OpenPack", true, true, false, async (int
     const embed = message.embeds[0];
     if (embed === undefined) {
         (0, Log_1.LogError)(`Couldn't get embed from message in channel ${(0, Log_1.PrintChannel)(interaction.channel)} in server ${(0, Log_1.PrintServer)(server)}`);
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`Couldn't get embed from message`, `Make sure the bot is able to send embeds`);
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Couldn't get embed from message", "Make sure the bot is able to send embeds");
         interaction.followUp({
             ephemeral: true,
             embeds: [errorEmbed]
@@ -388,7 +388,6 @@ exports.OpenPack = new Button_1.Button("OpenPack", true, true, false, async (int
         OpenSpoledEgg(message, embed, interaction);
         return;
     }
-    ;
     EditEmbedWithOpenedPack(message, pack, embed);
     pack = GetEasterStagePack(msgInfo, pack);
     (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} opened ${pack.Name} pack in server ${(0, Log_1.PrintServer)(server)}`);
