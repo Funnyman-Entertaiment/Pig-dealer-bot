@@ -1,11 +1,11 @@
 export abstract class DatabaseElement {
-    ID: string;
+	ID: string;
 
-    constructor(id: string) {
-        this.ID = id;
-    }
+	constructor(id: string) {
+		this.ID = id;
+	}
 
-    GetData(): object {
-        return {};
-    }
+	GetData(): object {
+		return {};
+	}
 }

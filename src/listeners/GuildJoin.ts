@@ -3,12 +3,12 @@ import { client } from "../Bot";
 import { AddServerInfoToCache, CreateNewDefaultServerInfo, GetServerInfo, SaveAllServerInfo } from "../database/ServerInfo";
 
 export default () => {
-    client.on("guildCreate", async (server: Guild) => {
-        const serverInfo = await GetServerInfo(server.id) ?? CreateNewDefaultServerInfo(server.id);
+	client.on("guildCreate", async (server: Guild) => {
+		const serverInfo = await GetServerInfo(server.id) ?? CreateNewDefaultServerInfo(server.id);
 
-        serverInfo.Enabled = true;
+		serverInfo.Enabled = true;
 
-        AddServerInfoToCache(serverInfo);
-        SaveAllServerInfo();
-    });
+		AddServerInfoToCache(serverInfo);
+		SaveAllServerInfo();
+	});
 };

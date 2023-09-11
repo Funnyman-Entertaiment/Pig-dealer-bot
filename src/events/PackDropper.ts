@@ -1,4 +1,4 @@
-import { getDocs, query, collection } from "firebase/firestore/lite"
+import { getDocs, query, collection } from "firebase/firestore/lite";
 import { GetPack } from "../database/Packs";
 import { DropPack } from "../Utils/DropPack";
 import { CreateServerInfoFromData } from "../database/ServerInfo";
@@ -16,126 +16,126 @@ let fivePackTimeout: NodeJS.Timeout | undefined;
 let twelvePackTimeout: NodeJS.Timeout | undefined;
 
 function GetRandomNumber(max: number, exception?: number): number {
-    if (exception === undefined) {
-        return Math.floor(Math.random() * max);
-    }
+	if (exception === undefined) {
+		return Math.floor(Math.random() * max);
+	}
 
-    let chosen = GetRandomNumber(max - 1);
+	const chosen = GetRandomNumber(max - 1);
 
-    if (chosen >= exception) {
-        return chosen + 1;
-    } else {
-        return chosen;
-    }
+	if (chosen >= exception) {
+		return chosen + 1;
+	} else {
+		return chosen;
+	}
 }
 
 
 async function SpawnRandomPack() {
-    if(packDropperTimeout !== undefined){
-        clearTimeout(packDropperTimeout);
-    }
+	if (packDropperTimeout !== undefined) {
+		clearTimeout(packDropperTimeout);
+	}
 
-    const q = query(collection(db, "serverInfo"));
-    const servers = await getDocs(q);
+	const q = query(collection(db, "serverInfo"));
+	const servers = await getDocs(q);
 
-    LogInfo("Sending random packs.");
+	LogInfo("Sending random packs.");
 
-    let pack = GetPack(PACK_2);
+	let pack = GetPack(PACK_2);
 
-    if (packsUntil5Pack === 0) {
-        pack = GetPack(PACK_5);
-    }
+	if (packsUntil5Pack === 0) {
+		pack = GetPack(PACK_5);
+	}
 
-    if (packsUntil12Pack === 0) {
-        pack = GetPack(PACK_12);
-    }
+	if (packsUntil12Pack === 0) {
+		pack = GetPack(PACK_12);
+	}
 
-    if(pack === undefined){ return; }
-    
-    const returnedPack = RunPostChooseRandomPack(pack);
-    if(returnedPack !== undefined){
-        pack = returnedPack;
-    }
+	if (pack === undefined) { return; }
 
-    servers.forEach(async server => {
-        if (pack === undefined) { return; }
+	const returnedPack = RunPostChooseRandomPack(pack);
+	if (returnedPack !== undefined) {
+		pack = returnedPack;
+	}
 
-        const serverInfo = CreateServerInfoFromData(server.id, server.data());
+	servers.forEach(async server => {
+		if (pack === undefined) { return; }
 
-        if(!serverInfo.Enabled){ return; }
+		const serverInfo = CreateServerInfoFromData(server.id, server.data());
 
-        let embedTitle = `A ${pack.Name} HAS APPEARED!`;
-        let vowelRegex = '^[aieouAIEOU].*';
-        let matched = pack.Name.match(vowelRegex);
-        if (matched) {
-            embedTitle = `AN ${pack.Name} HAS APPEARED!`;
-        }
+		if (!serverInfo.Enabled) { return; }
 
-        DropPack(serverInfo, {
-            pack: pack,
-            title: embedTitle,
-            ping: true
-        });
-    });
+		let embedTitle = `A ${pack.Name} HAS APPEARED!`;
+		const vowelRegex = "^[aieouAIEOU].*";
+		const matched = pack.Name.match(vowelRegex);
+		if (matched) {
+			embedTitle = `AN ${pack.Name} HAS APPEARED!`;
+		}
 
-    if (packsUntil5Pack >= 0) { packsUntil5Pack--; }
-    if (packsUntil12Pack >= 0) { packsUntil12Pack--; }
+		DropPack(serverInfo, {
+			pack: pack,
+			title: embedTitle,
+			ping: true
+		});
+	});
 
-    packDropperTimeout = setTimeout(() => {
-        SpawnRandomPack();
-    }, 1000 * 60 * Cooldowns.MINUTES_BETWEEN_PACKS);
+	if (packsUntil5Pack >= 0) { packsUntil5Pack--; }
+	if (packsUntil12Pack >= 0) { packsUntil12Pack--; }
+
+	packDropperTimeout = setTimeout(() => {
+		SpawnRandomPack();
+	}, 1000 * 60 * Cooldowns.MINUTES_BETWEEN_PACKS);
 }
 
 
 async function Set5PackSpawn() {
-    if(fivePackTimeout !== undefined){
-        clearTimeout(fivePackTimeout);
-    }
+	if (fivePackTimeout !== undefined) {
+		clearTimeout(fivePackTimeout);
+	}
 
-    const maxPackNum = Math.floor(Cooldowns.MINUTES_BETWEEN_5_PACKS / Cooldowns.MINUTES_BETWEEN_PACKS)
-    
-    if (maxPackNum <= 0) {
-        return;
-    }
+	const maxPackNum = Math.floor(Cooldowns.MINUTES_BETWEEN_5_PACKS / Cooldowns.MINUTES_BETWEEN_PACKS);
 
-    if (packsUntil12Pack >= 0 && packsUntil12Pack <= maxPackNum) {
-        packsUntil5Pack = GetRandomNumber(maxPackNum, packsUntil12Pack);
-    }else{
-        packsUntil5Pack = GetRandomNumber(maxPackNum);
-    }
+	if (maxPackNum <= 0) {
+		return;
+	}
 
-    fivePackTimeout = setTimeout(() => {
-        Set5PackSpawn();
-    }, 1000 * 60 * Cooldowns.MINUTES_BETWEEN_5_PACKS);
+	if (packsUntil12Pack >= 0 && packsUntil12Pack <= maxPackNum) {
+		packsUntil5Pack = GetRandomNumber(maxPackNum, packsUntil12Pack);
+	} else {
+		packsUntil5Pack = GetRandomNumber(maxPackNum);
+	}
+
+	fivePackTimeout = setTimeout(() => {
+		Set5PackSpawn();
+	}, 1000 * 60 * Cooldowns.MINUTES_BETWEEN_5_PACKS);
 }
 
 
 async function Set12PackSpawn() {
-    if(twelvePackTimeout !== undefined){
-        clearTimeout(twelvePackTimeout);
-    }
+	if (twelvePackTimeout !== undefined) {
+		clearTimeout(twelvePackTimeout);
+	}
 
-    const maxPackNum = Math.floor(Cooldowns.MINUTES_BETWEEN_12_PACKS / Cooldowns.MINUTES_BETWEEN_PACKS)
+	const maxPackNum = Math.floor(Cooldowns.MINUTES_BETWEEN_12_PACKS / Cooldowns.MINUTES_BETWEEN_PACKS);
 
-    if (maxPackNum <= 0) {
-        return;
-    }
+	if (maxPackNum <= 0) {
+		return;
+	}
 
-    packsUntil12Pack = GetRandomNumber(maxPackNum, packsUntil5Pack);
+	packsUntil12Pack = GetRandomNumber(maxPackNum, packsUntil5Pack);
 
 
-    twelvePackTimeout = setTimeout(() => {
-        Set12PackSpawn();
-    }, 1000 * 60 * Cooldowns.MINUTES_BETWEEN_12_PACKS);
+	twelvePackTimeout = setTimeout(() => {
+		Set12PackSpawn();
+	}, 1000 * 60 * Cooldowns.MINUTES_BETWEEN_12_PACKS);
 }
 
 
 export const PackDropper = function () {
-    packDropperTimeout = setTimeout(() => {
-        SpawnRandomPack();
-    }, 1000 * 5);
+	packDropperTimeout = setTimeout(() => {
+		SpawnRandomPack();
+	}, 1000 * 5);
 
-    Set5PackSpawn();
+	Set5PackSpawn();
 
-    Set12PackSpawn();
-}
+	Set12PackSpawn();
+};

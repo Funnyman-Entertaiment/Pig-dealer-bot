@@ -4,21 +4,21 @@ import { GetServerInfo, ServerInfo } from "../database/ServerInfo";
 import { UniquePigEvent } from "./UniquePigEvent";
 
 export const StockingPigEvent = new UniquePigEvent(
-    "306",
-    async function(interaction){
-        const server = interaction.guild;
-        const channel = interaction.channel;
+	"306",
+	async function (interaction) {
+		const server = interaction.guild;
+		const channel = interaction.channel;
 
-        const pack = GetPack("16");
+		const pack = GetPack("16");
 
-        if(pack !== undefined && channel !== null && server !== null){
-            const serverInfo = await GetServerInfo(server.id) as any as ServerInfo;
-            DropPack(serverInfo, {
-                pack: pack,
-                title: `${interaction.user.username} found a stocking!`,
-                userId: interaction.user.id,
-                ignoreCooldown: true
-            });
-        }
-    }
-)
+		if (pack !== undefined && channel !== null && server !== null) {
+			const serverInfo = await GetServerInfo(server.id) as unknown as ServerInfo;
+			DropPack(serverInfo, {
+				pack: pack,
+				title: `${interaction.user.username} found a stocking!`,
+				userId: interaction.user.id,
+				ignoreCooldown: true
+			});
+		}
+	}
+);

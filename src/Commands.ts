@@ -39,63 +39,63 @@ import { ShowFoilBinder } from "./commands/FoilBind";
 import { ShowFoilBinderList } from "./commands/FoilBindList";
 
 export const Commands = [
-    Sex,
-    SetBotChannel,
-    SetBotRole,
-    SetAnnouncementChannel,
-    ShowBinder,
-    ShowBinderList,
-    Report,
-    Catalogue,
-    SearchPig,
-    Trade,
-    GetRole,
-    RemoveRole,
-    Invite,
-    Information,
-    CheckPig,
-    FavouritePigCmd,
-    Foil,
-    FoilPigs,
-    CheckFoils,
-    Events,
-    Help,
-    GetPresaleToken,
-    ShowFoilBinder,
-    ShowFoilBinderList
+	Sex,
+	SetBotChannel,
+	SetBotRole,
+	SetAnnouncementChannel,
+	ShowBinder,
+	ShowBinderList,
+	Report,
+	Catalogue,
+	SearchPig,
+	Trade,
+	GetRole,
+	RemoveRole,
+	Invite,
+	Information,
+	CheckPig,
+	FavouritePigCmd,
+	Foil,
+	FoilPigs,
+	CheckFoils,
+	Events,
+	Help,
+	GetPresaleToken,
+	ShowFoilBinder,
+	ShowFoilBinderList
 ];
 
 export const TradeServerCommands = [
-    TradeBulletin
-]
+	TradeBulletin
+];
 
 export const DebugCommands = [
-    TestPack,
-    TestPig,
-    Announcement,
-    ReloadPigsPacks,
-    SaveCache,
-    SpawnPack,
-    SpawnPackUser,
-    GivePig,
-    ChangeOpeningCooldown,
-    ChangePackCooldown,
-    Change5PackCooldown,
-    Change12PackCooldown,
-    GreatWipe,
-    ClearCooldown,
-    ResetPackDropper,
-    ChangeFoilRequirements
+	TestPack,
+	TestPig,
+	Announcement,
+	ReloadPigsPacks,
+	SaveCache,
+	SpawnPack,
+	SpawnPackUser,
+	GivePig,
+	ChangeOpeningCooldown,
+	ChangePackCooldown,
+	Change5PackCooldown,
+	Change12PackCooldown,
+	GreatWipe,
+	ClearCooldown,
+	ResetPackDropper,
+	ChangeFoilRequirements
 ];
 
 export function SetCommands(){
-    if(client.user === null){ return; }
+	if(client.user === null){ return; }
 
-    if(client.user.id === "1048616940194767009"){
-        Commands.forEach(cmd => DebugCommands.push(cmd));
-        TradeServerCommands.forEach(cmd => DebugCommands.push(cmd));
+	if(client.user.id === "1048616940194767009"){
+		Commands.forEach(cmd => DebugCommands.push(cmd));
+		TradeServerCommands.forEach(cmd => DebugCommands.push(cmd));
 
-        Commands.splice(0, Commands.length);
-        TradeServerCommands.splice(0, TradeServerCommands.length);
-    }
+		Commands.splice(0, Commands.length);
+		TradeServerCommands.splice(0, TradeServerCommands.length);
+	}
 }

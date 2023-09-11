@@ -5,101 +5,101 @@ import { GetServerInfo } from "../database/ServerInfo";
 import { LogError, LogInfo, LogWarn, PrintServer, PrintUser } from "../Utils/Log";
 
 export const GetRole = new Command(
-    "Get Role",
-    "Gives you the role the bot pings when a pack drops or an announcement is made. It can be removed with `/removerole`.",
-    false,
-    false,
-    new SlashCommandBuilder()
-        .setName("getrole")
-        .setDescription("Assigns you the pig collector role in this server")
-        .setDMPermission(false),
+	"Get Role",
+	"Gives you the role the bot pings when a pack drops or an announcement is made. It can be removed with `/removerole`.",
+	false,
+	false,
+	new SlashCommandBuilder()
+		.setName("getrole")
+		.setDescription("Assigns you the pig collector role in this server")
+		.setDMPermission(false),
 
-    async function(interaction){
-        const server = interaction.guild;
-        const channel = interaction.channel as GuildTextBasedChannel;
-        const user = interaction.user;
-        if(server === null){ return; }
-        if(channel === null){ return; }
+	async function (interaction) {
+		const server = interaction.guild;
+		const channel = interaction.channel as GuildTextBasedChannel;
+		const user = interaction.user;
+		if (server === null) { return; }
+		if (channel === null) { return; }
 
-        const serverInfo = await GetServerInfo(server.id);
+		const serverInfo = await GetServerInfo(server.id);
 
-        if(serverInfo === undefined || serverInfo.Role === undefined){
-            const errorEmbed = new EmbedBuilder()
-                .setTitle("This server doesn't have a pig collector role set")
-                .setDescription("Ask the server admins to use the `/setrole` command to select a role that will get pinged everytime a pack drops.")
-                .setColor(Colors.Red);
+		if (serverInfo === undefined || serverInfo.Role === undefined) {
+			const errorEmbed = new EmbedBuilder()
+				.setTitle("This server doesn't have a pig collector role set")
+				.setDescription("Ask the server admins to use the `/setrole` command to select a role that will get pinged everytime a pack drops.")
+				.setColor(Colors.Red);
 
-            interaction.reply({
-                embeds: [errorEmbed]
-            });
+			interaction.reply({
+				embeds: [errorEmbed]
+			});
 
-            return;
-        }
+			return;
+		}
 
-        const me = server.members.me;
+		const me = server.members.me;
 
-        if(me === null){
-            LogError(`Bot couldn't find its user in server ${PrintServer(server)}`);
+		if (me === null) {
+			LogError(`Bot couldn't find its user in server ${PrintServer(server)}`);
 
-            const errorEmbed = MakeErrorEmbed(
-                `Couldn't find bot user in server`,
-                `Server: ${server.id}`
-            );
+			const errorEmbed = MakeErrorEmbed(
+				"Couldn't find bot user in server",
+				`Server: ${server.id}`
+			);
 
-            interaction.reply({
-                embeds: [errorEmbed],
-                ephemeral: true
-            });
+			interaction.reply({
+				embeds: [errorEmbed],
+				ephemeral: true
+			});
 
-            return;
-        }
+			return;
+		}
 
-        const permissions = me.permissionsIn(channel)
-        
-        if(!permissions.has(PermissionFlagsBits.ManageRoles)){
-            const errorEmbed = new EmbedBuilder()
-                .setTitle(`The bot doesn't have enough persmissions to add roles in this server`)
-                .setDescription(`Ask the admins to give the bot permissions to manage roles`)
-                .setColor(Colors.Red);
+		const permissions = me.permissionsIn(channel);
 
-            interaction.reply({
-                embeds: [errorEmbed]
-            });
+		if (!permissions.has(PermissionFlagsBits.ManageRoles)) {
+			const errorEmbed = new EmbedBuilder()
+				.setTitle("The bot doesn't have enough persmissions to add roles in this server")
+				.setDescription("Ask the admins to give the bot permissions to manage roles")
+				.setColor(Colors.Red);
 
-            return;
-        }
+			interaction.reply({
+				embeds: [errorEmbed]
+			});
 
-        await interaction.deferReply();
+			return;
+		}
 
-        const roleID = serverInfo.Role;
-        const member = await server.members.fetch(user.id);
-        const role = await server.roles.fetch(roleID);
+		await interaction.deferReply();
 
-        if(role === null){
-            LogWarn(`Pig collerctor role couldn't be found in server ${PrintServer(server)}`);
+		const roleID = serverInfo.Role;
+		const member = await server.members.fetch(user.id);
+		const role = await server.roles.fetch(roleID);
 
-            const errorEmbed = new EmbedBuilder()
-                .setTitle(`The role couldn't be found`)
-                .setDescription(`Ask the admins to use the \`/setrole\` command again.`)
-                .setColor(Colors.Red)
+		if (role === null) {
+			LogWarn(`Pig collerctor role couldn't be found in server ${PrintServer(server)}`);
 
-            interaction.followUp({
-                embeds: [errorEmbed]
-            });
+			const errorEmbed = new EmbedBuilder()
+				.setTitle("The role couldn't be found")
+				.setDescription("Ask the admins to use the `/setrole` command again.")
+				.setColor(Colors.Red);
 
-            return;
-        }
+			interaction.followUp({
+				embeds: [errorEmbed]
+			});
 
-        LogInfo(`Added pig collector role to user ${PrintUser(member.user)}`);
+			return;
+		}
 
-        member.roles.add(role);
+		LogInfo(`Added pig collector role to user ${PrintUser(member.user)}`);
 
-        const successEmbed = new EmbedBuilder()
-            .setTitle(`You've been given the pig collector role succesfully!`)
-            .setColor(Colors.Green);
+		member.roles.add(role);
 
-        interaction.followUp({
-            embeds: [successEmbed]
-        });
-    }
+		const successEmbed = new EmbedBuilder()
+			.setTitle("You've been given the pig collector role succesfully!")
+			.setColor(Colors.Green);
+
+		interaction.followUp({
+			embeds: [successEmbed]
+		});
+	}
 );

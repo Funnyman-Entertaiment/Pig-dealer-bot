@@ -114,4 +114,4 @@ export const SPECIAL_RARITIES_PER_PACK: { readonly [key: string]: { readonly [ke
 		{ "Rare (foil)": 1, "Epic (foil)": 0.08 },
 		{ "Rare (foil)": 1, "Epic (foil)": 0.3, "Legendary (foil)": 0.01 }
 	],
-}
+};

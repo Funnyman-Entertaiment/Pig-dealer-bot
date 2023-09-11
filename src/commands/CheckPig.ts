@@ -8,72 +8,72 @@ import { LogInfo, PrintUser } from "../Utils/Log";
 
 
 export const CheckPig = new Command(
-    "CheckPig",
-    "Shows a single pig in your collection",
-    false,
-    true,
-    new SlashCommandBuilder()
-    .setName("checkpig")
-    .addStringOption(option =>
-		option.setName('id')
-			.setDescription('ID of the pig you wanna check.')
-			.setRequired(true))
-    .setDescription("Shows you a single pig you own.")
-    .setDMPermission(false),
+	"CheckPig",
+	"Shows a single pig in your collection",
+	false,
+	true,
+	new SlashCommandBuilder()
+		.setName("checkpig")
+		.addStringOption(option =>
+			option.setName("id")
+				.setDescription("ID of the pig you wanna check.")
+				.setRequired(true))
+		.setDescription("Shows you a single pig you own.")
+		.setDMPermission(false),
 
-    async function(interaction, _serverInfo, userInfo){
-        if(userInfo === undefined){ return; }
+	async function (interaction, _serverInfo, userInfo) {
+		if (userInfo === undefined) { return; }
 
-        const pigID = (interaction.options as CommandInteractionOptionResolver).getString('id', true);
+		const pigID = (interaction.options as CommandInteractionOptionResolver).getString("id", true);
 
-        const pig = GetPig(pigID);
+		const pig = GetPig(pigID);
 
-        if(pig === undefined){
-            const errorEmbed = new EmbedBuilder()
-                .setTitle("This pig doesn't exist!")
-                .setColor("Red");
-            
-            interaction.reply({
-                embeds: [errorEmbed],
-                ephemeral: true
-            });
+		if (pig === undefined) {
+			const errorEmbed = new EmbedBuilder()
+				.setTitle("This pig doesn't exist!")
+				.setColor("Red");
 
-            return;
-        }
+			interaction.reply({
+				embeds: [errorEmbed],
+				ephemeral: true
+			});
 
-        const server = interaction.guild;
-        if(server === null){ return; }
+			return;
+		}
 
-        const userPigs = GetUserPigIDs(userInfo);
+		const server = interaction.guild;
+		if (server === null) { return; }
 
-        if(!userPigs.includes(pigID)){
-            const errorEmbed = new EmbedBuilder()
-                .setTitle("You don't have this pig!")
-                .setColor("Red");
-            
-            interaction.reply({
-                embeds: [errorEmbed],
-                ephemeral: true
-            });
+		const userPigs = GetUserPigIDs(userInfo);
 
-            return;
-        }
+		if (!userPigs.includes(pigID)) {
+			const errorEmbed = new EmbedBuilder()
+				.setTitle("You don't have this pig!")
+				.setColor("Red");
 
-        LogInfo(`User ${PrintUser(interaction.user)} is checking it's pig #${pig.ID.padStart(3, '0')}`);
+			interaction.reply({
+				embeds: [errorEmbed],
+				ephemeral: true
+			});
 
-        const pigEmbed = new EmbedBuilder()
-            .setTitle("Here is your pig!")
-            .setAuthor(GetAuthor(interaction));
+			return;
+		}
 
-        const img = AddPigRenderToEmbed(pigEmbed, {
-            pig: pig,
-            favourite: userInfo?.FavouritePigs.includes(pigID),
-            count: userInfo?.Pigs[pigID]
-        });
+		LogInfo(`User ${PrintUser(interaction.user)} is checking it's pig #${pig.ID.padStart(3, "0")}`);
 
-        interaction.reply({
-            embeds: [pigEmbed],
-            files: [img]
-        });
-    }
+		const pigEmbed = new EmbedBuilder()
+			.setTitle("Here is your pig!")
+			.setAuthor(GetAuthor(interaction));
+
+		const img = AddPigRenderToEmbed(pigEmbed, {
+			pig: pig,
+			favourite: userInfo?.FavouritePigs.includes(pigID),
+			count: userInfo?.Pigs[pigID]
+		});
+
+		interaction.reply({
+			embeds: [pigEmbed],
+			files: [img]
+		});
+	}
 );

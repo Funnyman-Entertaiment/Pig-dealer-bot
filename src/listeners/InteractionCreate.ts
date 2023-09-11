@@ -8,206 +8,206 @@ import { GetUserInfo, UserInfo } from "../database/UserInfo";
 import { GetMessageInfo, MessageInfo } from "../database/MessageInfo";
 
 export default () => {
-    client.on("interactionCreate", async (interaction: Interaction) => {
-        if (interaction.isCommand() || interaction.isContextMenuCommand()) {
-            await handleSlashCommand(interaction as CommandInteraction);
-        }else if(interaction.isButton()){
-            await handleButtonCommand(interaction as ButtonInteraction);
-        }
-    });
+	client.on("interactionCreate", async (interaction: Interaction) => {
+		if (interaction.isCommand() || interaction.isContextMenuCommand()) {
+			await handleSlashCommand(interaction as CommandInteraction);
+		} else if (interaction.isButton()) {
+			await handleButtonCommand(interaction as ButtonInteraction);
+		}
+	});
 };
 
 const handleSlashCommand = async (interaction: CommandInteraction) => {
-    let slashCommand = Commands.find(c => c.slashCommand.name === interaction.commandName);
+	let slashCommand = Commands.find(c => c.slashCommand.name === interaction.commandName);
 
-    if (slashCommand === undefined) {
-        slashCommand = TradeServerCommands.find(c => c.slashCommand.name === interaction.commandName);
-    }
+	if (slashCommand === undefined) {
+		slashCommand = TradeServerCommands.find(c => c.slashCommand.name === interaction.commandName);
+	}
 
-    if (slashCommand === undefined) {
-        slashCommand = DebugCommands.find(c => c.slashCommand.name === interaction.commandName);
-    }
+	if (slashCommand === undefined) {
+		slashCommand = DebugCommands.find(c => c.slashCommand.name === interaction.commandName);
+	}
 
-    if(slashCommand === undefined){
-        await interaction.reply({ content: "An error has occurred" });
-        return;
-    }
+	if (slashCommand === undefined) {
+		await interaction.reply({ content: "An error has occurred" });
+		return;
+	}
 
-    let serverInfo: ServerInfo | undefined = undefined;
+	let serverInfo: ServerInfo | undefined = undefined;
 
-    if(slashCommand.requireServerInfo){
-        const serverId = interaction.guildId;
+	if (slashCommand.requireServerInfo) {
+		const serverId = interaction.guildId;
 
-        if(serverId === null){
-            const errorEmbed = MakeErrorEmbed("Couldn't fetch server id", "Where did you use this command?")
+		if (serverId === null) {
+			const errorEmbed = MakeErrorEmbed("Couldn't fetch server id", "Where did you use this command?");
 
-            await interaction.reply({
-                embeds: [errorEmbed]
-            });
+			await interaction.reply({
+				embeds: [errorEmbed]
+			});
 
-            return;
-        }
+			return;
+		}
 
-        serverInfo = await GetServerInfo(serverId);
+		serverInfo = await GetServerInfo(serverId);
 
-        if(serverInfo === undefined){
-            const errorEmbed = new EmbedBuilder()
-                .setTitle("This server is not properly set up")
-                .setDescription("An admin may need to use /setchannel before this feature can work properly")
-                .setColor(Colors.DarkRed);
+		if (serverInfo === undefined) {
+			const errorEmbed = new EmbedBuilder()
+				.setTitle("This server is not properly set up")
+				.setDescription("An admin may need to use /setchannel before this feature can work properly")
+				.setColor(Colors.DarkRed);
 
-            await interaction.reply({
-                embeds: [errorEmbed]
-            });
+			await interaction.reply({
+				embeds: [errorEmbed]
+			});
 
-            return;
-        }
-    }
+			return;
+		}
+	}
 
-    let userInfo: UserInfo | undefined = undefined;
+	let userInfo: UserInfo | undefined = undefined;
 
-    if(slashCommand.requireUserInfo){
-        const userId = interaction.user.id;
+	if (slashCommand.requireUserInfo) {
+		const userId = interaction.user.id;
 
-        userInfo = await GetUserInfo(userId);
+		userInfo = await GetUserInfo(userId);
 
-        if(userInfo === undefined){
-            const errorEmbed = new EmbedBuilder()
-                .setTitle("You have no pigs!")
-                .setDescription("Open some packs loser")
-                .setColor(Colors.DarkRed);
+		if (userInfo === undefined) {
+			const errorEmbed = new EmbedBuilder()
+				.setTitle("You have no pigs!")
+				.setDescription("Open some packs loser")
+				.setColor(Colors.DarkRed);
 
-            await interaction.reply({
-                embeds: [errorEmbed]
-            });
+			await interaction.reply({
+				embeds: [errorEmbed]
+			});
 
-            return;
-        }
-    }
+			return;
+		}
+	}
 
-    slashCommand.response(interaction, serverInfo, userInfo);
+	slashCommand.response(interaction, serverInfo, userInfo);
 };
 
 
-const handleButtonCommand = async(interaction: ButtonInteraction) => {
-    const button = Buttons.find(b => b.id === interaction.customId);
+const handleButtonCommand = async (interaction: ButtonInteraction) => {
+	const button = Buttons.find(b => b.id === interaction.customId);
 
-    if (!button) {
-        await interaction.reply({ content: "An error has occurred" });
-        return;
-    }
+	if (!button) {
+		await interaction.reply({ content: "An error has occurred" });
+		return;
+	}
 
-    let serverInfo: ServerInfo | undefined = undefined;
+	let serverInfo: ServerInfo | undefined = undefined;
 
-    if(button.requireServerInfo){
-        const serverId = interaction.guildId;
+	if (button.requireServerInfo) {
+		const serverId = interaction.guildId;
 
-        if(serverId === null){
-            const errorEmbed = MakeErrorEmbed("Couldn't fetch server id", "Where did you use this command?")
+		if (serverId === null) {
+			const errorEmbed = MakeErrorEmbed("Couldn't fetch server id", "Where did you use this command?");
 
-            await interaction.reply({
-                embeds: [errorEmbed]
-            });
+			await interaction.reply({
+				embeds: [errorEmbed]
+			});
 
-            return;
-        }
+			return;
+		}
 
-        serverInfo = await GetServerInfo(serverId);
+		serverInfo = await GetServerInfo(serverId);
 
-        if(serverInfo === undefined){
-            const errorEmbed = new EmbedBuilder()
-                .setTitle("This server is not properly set up")
-                .setDescription("An admin may need to use /setchannel before this command can work properly")
-                .setColor(Colors.DarkRed);
+		if (serverInfo === undefined) {
+			const errorEmbed = new EmbedBuilder()
+				.setTitle("This server is not properly set up")
+				.setDescription("An admin may need to use /setchannel before this command can work properly")
+				.setColor(Colors.DarkRed);
 
-            await interaction.reply({
-                embeds: [errorEmbed]
-            });
+			await interaction.reply({
+				embeds: [errorEmbed]
+			});
 
-            return;
-        }
-    }
+			return;
+		}
+	}
 
-    let messageInfo: MessageInfo | undefined = undefined;
+	let messageInfo: MessageInfo | undefined = undefined;
 
-    if(button.requireMessageInfo){
-        const serverId = interaction.guildId;
+	if (button.requireMessageInfo) {
+		const serverId = interaction.guildId;
 
-        if(serverId === null){
-            const errorEmbed = MakeErrorEmbed("Couldn't fetch server id", "Where did you use this command?")
+		if (serverId === null) {
+			const errorEmbed = MakeErrorEmbed("Couldn't fetch server id", "Where did you use this command?");
 
-            await interaction.reply({
-                embeds: [errorEmbed]
-            });
+			await interaction.reply({
+				embeds: [errorEmbed]
+			});
 
-            return;
-        }
+			return;
+		}
 
-        const messageId = interaction.message.id;
+		const messageId = interaction.message.id;
 
-        messageInfo = GetMessageInfo(serverId, messageId);
+		messageInfo = GetMessageInfo(serverId, messageId);
 
-        if(messageInfo === undefined){
-            let errorEmbed = new EmbedBuilder()
-                .setTitle("This message has expired")
-                .setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
-                .setColor(Colors.Red);
+		if (messageInfo === undefined) {
+			let errorEmbed = new EmbedBuilder()
+				.setTitle("This message has expired")
+				.setDescription("Messages expire after ~3 hours of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
+				.setColor(Colors.Red);
 
-            if(button.id === "AcceptTrade" || button.id === "CancelTrade"){
-                errorEmbed = new EmbedBuilder()
-                    .setTitle("This message has expired")
-                    .setDescription("Trade messages expire after ~15 minutes of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
-                    .setColor(Colors.Red);
-            }
-            
-            interaction.reply({
-                embeds: [errorEmbed],
-                ephemeral: true
-            });
-    
-            return;
-        }
+			if (button.id === "AcceptTrade" || button.id === "CancelTrade") {
+				errorEmbed = new EmbedBuilder()
+					.setTitle("This message has expired")
+					.setDescription("Trade messages expire after ~15 minutes of being created.\nA message may also expire if the bot has been internally reset (sorry!).")
+					.setColor(Colors.Red);
+			}
 
-        const userId = interaction.user.id;
+			interaction.reply({
+				embeds: [errorEmbed],
+				ephemeral: true
+			});
 
-        if(
-            messageInfo.User !== undefined &&
-            messageInfo.User !== userId
-        ) {
-            const errorEmbed = new EmbedBuilder()
-                .setTitle("This isn't for you!")
-                .setDescription("Shoo shoo!")
-                .setColor(Colors.Red);
-            
-            interaction.reply({
-                embeds: [errorEmbed],
-                ephemeral: true
-            });
-    
-            return;
-        }
-    }
+			return;
+		}
 
-    let userInfo: UserInfo | undefined = undefined;
+		const userId = interaction.user.id;
 
-    if(button.requireUserInfo){
-        const userId = interaction.user.id;
+		if (
+			messageInfo.User !== undefined &&
+			messageInfo.User !== userId
+		) {
+			const errorEmbed = new EmbedBuilder()
+				.setTitle("This isn't for you!")
+				.setDescription("Shoo shoo!")
+				.setColor(Colors.Red);
 
-        userInfo = await GetUserInfo(userId);
+			interaction.reply({
+				embeds: [errorEmbed],
+				ephemeral: true
+			});
 
-        if(userInfo === undefined){
-            const errorEmbed = new EmbedBuilder()
-                .setTitle("You have no pigs!")
-                .setDescription("Open some packs loser")
-                .setColor(Colors.DarkRed);
+			return;
+		}
+	}
 
-            await interaction.reply({
-                embeds: [errorEmbed]
-            });
+	let userInfo: UserInfo | undefined = undefined;
 
-            return;
-        }
-    }
+	if (button.requireUserInfo) {
+		const userId = interaction.user.id;
 
-    button.response(interaction, serverInfo, messageInfo, userInfo);
-}
+		userInfo = await GetUserInfo(userId);
+
+		if (userInfo === undefined) {
+			const errorEmbed = new EmbedBuilder()
+				.setTitle("You have no pigs!")
+				.setDescription("Open some packs loser")
+				.setColor(Colors.DarkRed);
+
+			await interaction.reply({
+				embeds: [errorEmbed]
+			});
+
+			return;
+		}
+	}
+
+	button.response(interaction, serverInfo, messageInfo, userInfo);
+};
