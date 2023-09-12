@@ -45,7 +45,7 @@ export function AddPigRenderToEmbed(embed: EmbedBuilder, options: PigRenderOptio
 		if (set === "-") {
 			set = "Default";
 		}
-		embedDescriptionLines.push(`${set} set`);
+		embedDescriptionLines.push(set);
 	}
 
 	embedDescriptionLines.push(pig.Description.length > 0 ? pig.Description : "...");
