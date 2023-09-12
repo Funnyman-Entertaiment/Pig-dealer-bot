@@ -32,12 +32,12 @@ export function RunPostAssembledPigs(pack: Pack, serverInfo: ServerInfo, assembl
 	activeEvents.forEach(x => x.PostAssembledPigs(pack, serverInfo, assembledPigs));
 }
 
-export function RunPostChooseRandomPack(pack: Pack): Pack | undefined {
+export function RunPostChooseRandomPack(pack: Pack, serverInfo: ServerInfo): Pack | undefined {
 	let returnVal: Pack | undefined = undefined;
 
 	const activeEvents = GetActiveEvents();
 	activeEvents.forEach(x => {
-		returnVal = x.PostChooseRandomPack(pack);
+		returnVal = x.PostChooseRandomPack(pack, serverInfo);
 	});
 
 	return returnVal;

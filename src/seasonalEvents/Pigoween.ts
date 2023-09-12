@@ -10,8 +10,7 @@ export const Pigoween = new SeasonalEvent(
 	() => {
 		const currentDate = Timestamp.now().toDate();
 
-		return currentDate.getUTCMonth() === 10 &&
-			currentDate.getUTCDate() >= 25 && currentDate.getUTCDate() <= 31;
+		return currentDate.getUTCMonth() === 10;
 	}
 );
 

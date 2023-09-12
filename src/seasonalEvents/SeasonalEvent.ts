@@ -10,7 +10,7 @@ export class SeasonalEvent {
 
 	PostPackOpened: (pack: Pack, serverInfo: ServerInfo, chosenPigs: Pig[], pigsToShow: Pig[]) => void;
 	PostAssembledPigs: (pack: Pack, serverInfo: ServerInfo, assembledPigs: Pig[]) => void;
-	PostChooseRandomPack: (pack: Pack) => Pack | undefined;
+	PostChooseRandomPack: (pack: Pack, serverInfo: ServerInfo) => Pack | undefined;
 
 	constructor(name: string, description: string, isActive: () => boolean) {
 		this.Name = name;

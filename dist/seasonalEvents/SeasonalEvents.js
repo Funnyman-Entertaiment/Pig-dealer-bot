@@ -29,11 +29,11 @@ function RunPostAssembledPigs(pack, serverInfo, assembledPigs) {
     activeEvents.forEach(x => x.PostAssembledPigs(pack, serverInfo, assembledPigs));
 }
 exports.RunPostAssembledPigs = RunPostAssembledPigs;
-function RunPostChooseRandomPack(pack) {
+function RunPostChooseRandomPack(pack, serverInfo) {
     let returnVal = undefined;
     const activeEvents = GetActiveEvents();
     activeEvents.forEach(x => {
-        returnVal = x.PostChooseRandomPack(pack);
+        returnVal = x.PostChooseRandomPack(pack, serverInfo);
     });
     return returnVal;
 }

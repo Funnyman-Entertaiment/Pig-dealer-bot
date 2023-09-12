@@ -35,6 +35,10 @@ async function SpawnRandomPack() {
 		clearTimeout(packDropperTimeout);
 	}
 
+	packDropperTimeout = setTimeout(() => {
+		SpawnRandomPack();
+	}, 1000 * 60 * Cooldowns.MINUTES_BETWEEN_PACKS);
+
 	const q = query(collection(db, "serverInfo"));
 	const servers = await getDocs(q);
 
@@ -50,13 +54,6 @@ async function SpawnRandomPack() {
 		pack = GetPack(PACK_12);
 	}
 
-	if (pack === undefined) { return; }
-
-	const returnedPack = RunPostChooseRandomPack(pack);
-	if (returnedPack !== undefined) {
-		pack = returnedPack;
-	}
-
 	servers.forEach(async server => {
 		if (pack === undefined) { return; }
 
@@ -64,15 +61,22 @@ async function SpawnRandomPack() {
 
 		if (!serverInfo.Enabled) { return; }
 
-		let embedTitle = `A ${pack.Name} HAS APPEARED!`;
+		let packToDropInServer = pack;
+		const returnedPack = RunPostChooseRandomPack(pack, serverInfo);
+		if(returnedPack !== undefined)
+		{
+			packToDropInServer = returnedPack;
+		}
+
+		let embedTitle = `A ${packToDropInServer.Name} HAS APPEARED!`;
 		const vowelRegex = "^[aieouAIEOU].*";
-		const matched = pack.Name.match(vowelRegex);
+		const matched = packToDropInServer.Name.match(vowelRegex);
 		if (matched) {
-			embedTitle = `AN ${pack.Name} HAS APPEARED!`;
+			embedTitle = `AN ${packToDropInServer.Name} HAS APPEARED!`;
 		}
 
 		DropPack(serverInfo, {
-			pack: pack,
+			pack: packToDropInServer,
 			title: embedTitle,
 			ping: true
 		});
@@ -80,10 +84,6 @@ async function SpawnRandomPack() {
 
 	if (packsUntil5Pack >= 0) { packsUntil5Pack--; }
 	if (packsUntil12Pack >= 0) { packsUntil12Pack--; }
-
-	packDropperTimeout = setTimeout(() => {
-		SpawnRandomPack();
-	}, 1000 * 60 * Cooldowns.MINUTES_BETWEEN_PACKS);
 }
 
 
