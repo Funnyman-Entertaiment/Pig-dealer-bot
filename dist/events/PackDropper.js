@@ -111,6 +111,11 @@ const PackDropper = function () {
     packDropperTimeout = setTimeout(() => {
         SpawnRandomPack();
     }, 1000 * 5);
+    setInterval(() => {
+        if (!packDropperTimeout) {
+            SpawnRandomPack();
+        }
+    }, 1000 * 60 * 60 * 2);
     Set5PackSpawn();
     Set12PackSpawn();
 };

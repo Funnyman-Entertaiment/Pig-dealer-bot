@@ -57,7 +57,8 @@ exports.UnfavouritePig = new Button_1.Button("UnfavouritePig", false, true, true
         showId: !(0, UniquePigEvents_1.DoesPigIdHaveUniqueEvent)(currentPigID),
         count: msgInfo.PigCounts[pig.ID],
         favourite: msgInfo.FavouritePigs.includes(pig.ID),
-        shared: msgInfo.SharedPigs.includes(pig.ID)
+        shared: msgInfo.SharedPigs.includes(pig.ID),
+        showSet: msgInfo.ShowSet
     });
     const row = new discord_js_1.ActionRowBuilder()
         .addComponents(new discord_js_1.ButtonBuilder()

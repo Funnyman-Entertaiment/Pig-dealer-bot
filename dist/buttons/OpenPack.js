@@ -222,7 +222,8 @@ function GetOpenPackFollowUp(packName, chosenPigs, newPigs, interaction, userInf
         .setDisabled(true), new discord_js_1.ButtonBuilder()
         .setCustomId("GalleryNext")
         .setLabel("Next")
-        .setStyle(discord_js_1.ButtonStyle.Primary));
+        .setStyle(discord_js_1.ButtonStyle.Primary)
+        .setDisabled(chosenPigs.length == 1));
     if (!userInfo.FavouritePigs.includes(chosenPigs[0].ID)) {
         row.addComponents(new discord_js_1.ButtonBuilder()
             .setCustomId("FavouritePig")
