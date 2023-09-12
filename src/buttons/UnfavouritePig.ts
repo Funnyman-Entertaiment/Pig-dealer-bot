@@ -69,7 +69,8 @@ export const UnfavouritePig = new Button(
 			showId: !DoesPigIdHaveUniqueEvent(currentPigID),
 			count: msgInfo.PigCounts[pig.ID],
 			favourite: msgInfo.FavouritePigs.includes(pig.ID),
-			shared: msgInfo.SharedPigs.includes(pig.ID)
+			shared: msgInfo.SharedPigs.includes(pig.ID),
+			showSet: msgInfo.ShowSet
 		});
 		const row = new ActionRowBuilder<ButtonBuilder>()
 			.addComponents(
