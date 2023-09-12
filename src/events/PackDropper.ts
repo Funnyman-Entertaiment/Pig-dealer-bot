@@ -33,6 +33,7 @@ function GetRandomNumber(max: number, exception?: number): number {
 async function SpawnRandomPack() {
 	if (packDropperTimeout !== undefined) {
 		clearTimeout(packDropperTimeout);
+		packDropperTimeout = undefined;
 	}
 
 	packDropperTimeout = setTimeout(() => {
