@@ -270,6 +270,7 @@ function GetOpenPackFollowUp(packName: string, chosenPigs: Pig[], newPigs: strin
 				.setCustomId("GalleryNext")
 				.setLabel("Next")
 				.setStyle(ButtonStyle.Primary)
+				.setDisabled(chosenPigs.length == 1)
 		);
 
 	if (!userInfo.FavouritePigs.includes(chosenPigs[0].ID)) {
