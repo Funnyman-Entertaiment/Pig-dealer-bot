@@ -158,11 +158,7 @@ exports.Foil = new Command_1.Command("Foil", "Used to craft a foil pig, using 10
             return;
         }
     }
-    let anyPigsInList = false;
-    for (const _ in offeredPigs) {
-        anyPigsInList = true;
-        break;
-    }
+    const anyPigsInList = Object.keys(offeredPigs).length > 0;
     if (!anyPigsInList) {
         const errorEmbed = (0, Errors_1.MakeErrorEmbed)("The offered pigs list is empty", "You can still craft the pig foil tho");
         await interaction.followUp({

@@ -19,8 +19,8 @@ exports.Catalogue = new Command_1.Command("catalogue", "Shows you all pigs the b
         return;
     }
     const options = interaction.options;
-    const rarities = options.getString('rarity') ?? "";
-    const raritiesToFilter = rarities.split(',')
+    const rarities = options.getString("rarity") ?? "";
+    const raritiesToFilter = rarities.split(",")
         .map(rarity => rarity.trim().toLowerCase())
         .filter(rarity => rarity.length > 0);
     let pigs = (0, Pigs_1.GetAllPigs)();
@@ -69,19 +69,19 @@ exports.Catalogue = new Command_1.Command("catalogue", "Shows you all pigs the b
     });
     const row = new discord_js_1.ActionRowBuilder()
         .addComponents(new discord_js_1.ButtonBuilder()
-        .setCustomId('SetPrevious')
-        .setLabel('⏪ Prev. Set')
+        .setCustomId("SetPrevious")
+        .setLabel("⏪ Prev. Set")
         .setStyle(discord_js_1.ButtonStyle.Secondary), new discord_js_1.ButtonBuilder()
-        .setCustomId('ListPrevious')
-        .setLabel('Previous')
+        .setCustomId("ListPrevious")
+        .setLabel("Previous")
         .setStyle(discord_js_1.ButtonStyle.Primary)
         .setDisabled(true), new discord_js_1.ButtonBuilder()
-        .setCustomId('ListNext')
-        .setLabel('Next')
+        .setCustomId("ListNext")
+        .setLabel("Next")
         .setStyle(discord_js_1.ButtonStyle.Primary)
         .setDisabled(pigsBySet[firstSet].length <= 9), new discord_js_1.ButtonBuilder()
-        .setCustomId('SetNext')
-        .setLabel('Next. Set ⏩')
+        .setCustomId("SetNext")
+        .setLabel("Next. Set ⏩")
         .setStyle(discord_js_1.ButtonStyle.Secondary));
     (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} is checking the pig catalogue`);
     await interaction.followUp({

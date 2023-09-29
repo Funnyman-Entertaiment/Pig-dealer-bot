@@ -7,11 +7,11 @@ const Packs_1 = require("../database/Packs");
 const ColorPerPackRarity_1 = require("../Constants/ColorPerPackRarity");
 exports.TestPack = new Command_1.Command("", "", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("testpack")
-    .addIntegerOption(option => option.setName('id')
-    .setDescription('Pack id')
+    .addIntegerOption(option => option.setName("id")
+    .setDescription("Pack id")
     .setRequired(true))
     .setDescription("pack"), async (interaction) => {
-    const rawId = interaction.options.getInteger('id');
+    const rawId = interaction.options.getInteger("id");
     let id = "0";
     if (rawId !== null) {
         id = rawId.toString();
@@ -20,7 +20,7 @@ exports.TestPack = new Command_1.Command("", "", false, false, new discord_js_1.
     if (pack === undefined) {
         return;
     }
-    let img = `${id}.png`;
+    const img = `${id}.png`;
     const packEmbed = new discord_js_1.EmbedBuilder()
         .setTitle(pack.Name)
         .setDescription(pack.Rarity)

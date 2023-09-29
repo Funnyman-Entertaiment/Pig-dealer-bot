@@ -33,7 +33,7 @@ exports.RemoveRole = new Command_1.Command("Remove Role", "Removes the role the 
     const me = server.members.me;
     if (me === null) {
         (0, Log_1.LogError)(`Bot couldn't find its user in server ${(0, Log_1.PrintServer)(server)}`);
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`Couldn't find bot user in server`, `Server: ${server.id}`);
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Couldn't find bot user in server", `Server: ${server.id}`);
         interaction.reply({
             embeds: [errorEmbed],
             ephemeral: true
@@ -43,8 +43,8 @@ exports.RemoveRole = new Command_1.Command("Remove Role", "Removes the role the 
     const permissions = me.permissionsIn(channel);
     if (!permissions.has(discord_js_1.PermissionFlagsBits.ManageRoles)) {
         const errorEmbed = new discord_js_1.EmbedBuilder()
-            .setTitle(`The bot doesn't have enough persmissions to remove roles in this server`)
-            .setDescription(`Ask the admins to give the bot permissions to manage roles`)
+            .setTitle("The bot doesn't have enough persmissions to remove roles in this server")
+            .setDescription("Ask the admins to give the bot permissions to manage roles")
             .setColor(discord_js_1.Colors.Red);
         interaction.reply({
             embeds: [errorEmbed]
@@ -58,8 +58,8 @@ exports.RemoveRole = new Command_1.Command("Remove Role", "Removes the role the 
     if (role === null) {
         (0, Log_1.LogWarn)(`Pig collerctor role couldn't be found in server ${(0, Log_1.PrintServer)(server)}`);
         const errorEmbed = new discord_js_1.EmbedBuilder()
-            .setTitle(`The role couldn't be found`)
-            .setDescription(`Ask the admins to use the \`/setrole\` command again.`)
+            .setTitle("The role couldn't be found")
+            .setDescription("Ask the admins to use the `/setrole` command again.")
             .setColor(discord_js_1.Colors.Red);
         interaction.followUp({
             embeds: [errorEmbed]
@@ -68,7 +68,7 @@ exports.RemoveRole = new Command_1.Command("Remove Role", "Removes the role the 
     }
     member.roles.remove(role);
     const successEmbed = new discord_js_1.EmbedBuilder()
-        .setTitle(`The pig collector role has been succesfully removed!`)
+        .setTitle("The pig collector role has been succesfully removed!")
         .setColor(discord_js_1.Colors.Green);
     interaction.followUp({
         embeds: [successEmbed]

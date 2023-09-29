@@ -11,12 +11,12 @@ const UserInfo_1 = require("../database/UserInfo");
 const GetAuthor_1 = require("../Utils/GetAuthor");
 exports.ShowFoilBinder = new Command_1.Command("FoilBinder", "Shows you the foil pigs you own, with an image for each. You can define a user to see someone else's binder, rarity, to only see pigs of a certain rarity. You can also set favourites to True to only see pigs you've favourited.\nWhen viewing someone else's binder, a checkmark will signify if you already own a pig from their collection.", false, true, new discord_js_1.SlashCommandBuilder()
     .setName("foilbinder")
-    .addUserOption(option => option.setName('user')
-    .setDescription('user to check the binder of'))
-    .addStringOption(option => option.setName('rarity')
-    .setDescription('filter pigs by rarity'))
-    .addBooleanOption(option => option.setName('favourites')
-    .setDescription('show only favourite pigs'))
+    .addUserOption(option => option.setName("user")
+    .setDescription("user to check the binder of"))
+    .addStringOption(option => option.setName("rarity")
+    .setDescription("filter pigs by rarity"))
+    .addBooleanOption(option => option.setName("favourites")
+    .setDescription("show only favourite pigs"))
     .setDescription("Let's you check your own or someone else's pig binder")
     .setDMPermission(false), async (interaction, _serverInfo, userInfo) => {
     if (userInfo === undefined) {
@@ -28,7 +28,7 @@ exports.ShowFoilBinder = new Command_1.Command("FoilBinder", "Shows you the foil
         return;
     }
     const options = interaction.options;
-    const user = options.getUser('user');
+    const user = options.getUser("user");
     let userId;
     let author;
     if (user === null) {
@@ -58,8 +58,8 @@ exports.ShowFoilBinder = new Command_1.Command("FoilBinder", "Shows you the foil
             return;
         }
     }
-    const rarities = options.getString('rarity') ?? "";
-    const raritiesToFilter = rarities.split(',')
+    const rarities = options.getString("rarity") ?? "";
+    const raritiesToFilter = rarities.split(",")
         .map(rarity => rarity.trim().toLowerCase())
         .filter(rarity => rarity.length > 0);
     let pigs = (0, UserInfo_1.GetUserPigIDs)(userInfo);
@@ -73,7 +73,7 @@ exports.ShowFoilBinder = new Command_1.Command("FoilBinder", "Shows you the foil
         });
     }
     const favouritePigs = userInfo.FavouritePigs;
-    const onlyFavourites = options.getBoolean('favourites') ?? false;
+    const onlyFavourites = options.getBoolean("favourites") ?? false;
     if (onlyFavourites) {
         pigs = pigs.filter(pig => favouritePigs.includes(pig));
     }
@@ -125,25 +125,25 @@ exports.ShowFoilBinder = new Command_1.Command("FoilBinder", "Shows you the foil
     });
     const row = new discord_js_1.ActionRowBuilder()
         .addComponents(new discord_js_1.ButtonBuilder()
-        .setCustomId('GalleryPrevious')
-        .setLabel('Previous')
+        .setCustomId("GalleryPrevious")
+        .setLabel("Previous")
         .setStyle(discord_js_1.ButtonStyle.Primary)
         .setDisabled(true), new discord_js_1.ButtonBuilder()
-        .setCustomId('GalleryNext')
-        .setLabel('Next')
+        .setCustomId("GalleryNext")
+        .setLabel("Next")
         .setStyle(discord_js_1.ButtonStyle.Primary)
         .setDisabled(pigs.length === 1));
     if (userInfo.ID === interaction.user.id && !onlyFavourites) {
         if (!favouritePigs.includes(firstPig.ID)) {
             row.addComponents(new discord_js_1.ButtonBuilder()
-                .setCustomId('FavouritePig')
-                .setLabel('Favourite ⭐')
+                .setCustomId("FavouritePig")
+                .setLabel("Favourite ⭐")
                 .setStyle(discord_js_1.ButtonStyle.Secondary));
         }
         else {
             row.addComponents(new discord_js_1.ButtonBuilder()
-                .setCustomId('UnfavouritePig')
-                .setLabel('Unfavourite ⭐')
+                .setCustomId("UnfavouritePig")
+                .setLabel("Unfavourite ⭐")
                 .setStyle(discord_js_1.ButtonStyle.Secondary));
         }
     }

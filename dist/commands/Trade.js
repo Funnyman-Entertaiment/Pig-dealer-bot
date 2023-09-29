@@ -14,7 +14,7 @@ function ParseTradePigsString(interaction, pigsString) {
     if (pigsString.trim() === "") {
         return {};
     }
-    const pigTokens = pigsString.split(',');
+    const pigTokens = pigsString.split(",");
     const pigAmounts = {};
     let hasFoundNonPig = undefined;
     let hasFoundUnformattedPig = undefined;
@@ -25,16 +25,16 @@ function ParseTradePigsString(interaction, pigsString) {
         if (hasFoundUnformattedPig !== undefined) {
             return;
         }
-        const pigID = token.split('(')[0].trim();
+        const pigID = token.split("(")[0].trim();
         const pig = (0, Pigs_1.GetPig)(pigID);
         if (pig === undefined) {
             hasFoundNonPig = pigID;
             return;
         }
-        const pigNumberStr = token.split('(')[1];
+        const pigNumberStr = token.split("(")[1];
         let pigNumber = 1;
         if (pigNumberStr !== undefined) {
-            pigNumber = parseInt(pigNumberStr.replace(')', '').trim());
+            pigNumber = parseInt(pigNumberStr.replace(")", "").trim());
         }
         if (Number.isNaN(pigNumber) || pigNumber <= 0) {
             hasFoundUnformattedPig = token;
@@ -151,7 +151,7 @@ async function NewTrade(interaction, options) {
         if (amount > owned) {
             const errorEmbed = new discord_js_1.EmbedBuilder()
                 .setTitle("You're trying to offer more pigs than what you actually own!")
-                .setDescription(`For pig #${pigID.padStart(3, '0')} you're offering ${amount} when you actually have ${owned}`)
+                .setDescription(`For pig #${pigID.padStart(3, "0")} you're offering ${amount} when you actually have ${owned}`)
                 .setColor(discord_js_1.Colors.Red);
             interaction.reply({
                 ephemeral: true,
@@ -220,7 +220,7 @@ async function CounterOfferTrade(interaction, options) {
         if (amount > owned) {
             const errorEmbed = new discord_js_1.EmbedBuilder()
                 .setTitle("You're trying to offer more pigs than what you actually own!")
-                .setDescription(`For pig #${pigID.padStart(3, '0')} you're offering ${amount} when you actually have ${owned}`)
+                .setDescription(`For pig #${pigID.padStart(3, "0")} you're offering ${amount} when you actually have ${owned}`)
                 .setColor(discord_js_1.Colors.Red);
             interaction.reply({
                 ephemeral: true,
@@ -233,7 +233,7 @@ async function CounterOfferTrade(interaction, options) {
     const tradeServer = await Bot_1.client.guilds.fetch(msgInfo.ServerId);
     const tradeChannel = await tradeServer.channels.fetch(msgInfo.ChannelSentID);
     if (tradeChannel === null || !tradeChannel.isTextBased()) {
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`Error fetching original channel of trade`, `The trade will be forcefully cancelled`, `Server: ${msgInfo.ServerId}`, `Channel: ${msgInfo.ChannelSentID}`);
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Error fetching original channel of trade", "The trade will be forcefully cancelled", `Server: ${msgInfo.ServerId}`, `Channel: ${msgInfo.ChannelSentID}`);
         (0, MessageInfo_1.RemoveMessageInfoFromCache)(msgInfo);
         interaction.reply({
             embeds: [errorEmbed],
@@ -243,7 +243,7 @@ async function CounterOfferTrade(interaction, options) {
     }
     const tradeMessage = await tradeChannel.messages.fetch(msgInfo.ID);
     if (tradeMessage === null || tradeMessage === undefined) {
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`Error fetching original trade message`, `If the message has been deleted this is expected`, `The trade will be forcefully cancelled`, `Server: ${msgInfo.ServerId}`, `Channel: ${msgInfo.ChannelSentID}`, `Message: ${msgInfo.ID}`);
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Error fetching original trade message", "If the message has been deleted this is expected", "The trade will be forcefully cancelled", `Server: ${msgInfo.ServerId}`, `Channel: ${msgInfo.ChannelSentID}`, `Message: ${msgInfo.ID}`);
         (0, MessageInfo_1.RemoveMessageInfoFromCache)(msgInfo);
         interaction.reply({
             embeds: [errorEmbed],
@@ -253,7 +253,7 @@ async function CounterOfferTrade(interaction, options) {
     }
     const tradeStarter = await tradeServer.members.fetch(msgInfo.TradeStarterID);
     if (tradeStarter === undefined) {
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`Error fetching trade starter`, `The trade will be forcefully cancelled`, `Server: ${msgInfo.ServerId}`, `User: ${msgInfo.TradeStarterID}`);
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Error fetching trade starter", "The trade will be forcefully cancelled", `Server: ${msgInfo.ServerId}`, `User: ${msgInfo.TradeStarterID}`);
         (0, MessageInfo_1.RemoveMessageInfoFromCache)(msgInfo);
         interaction.reply({
             embeds: [errorEmbed],
@@ -263,7 +263,7 @@ async function CounterOfferTrade(interaction, options) {
     }
     const originalEmbed = tradeMessage.embeds[0];
     if (originalEmbed === undefined) {
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`Error fetching original trade embed`, `The trade will be forcefully cancelled`, `Server: ${msgInfo.ServerId}`, `Channel: ${msgInfo.ChannelSentID}`, `Message: ${msgInfo.ID}`);
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Error fetching original trade embed", "The trade will be forcefully cancelled", `Server: ${msgInfo.ServerId}`, `Channel: ${msgInfo.ChannelSentID}`, `Message: ${msgInfo.ID}`);
         (0, MessageInfo_1.RemoveMessageInfoFromCache)(msgInfo);
         interaction.reply({
             embeds: [errorEmbed],

@@ -13,7 +13,7 @@ function AddPigRenderToEmbed(embed, options) {
         img = `${pig.ID}.gif`;
     }
     if (!fs_1.default.existsSync(`./img/pigs/${img}`)) {
-        img = `none.png`;
+        img = "none.png";
     }
     const embedDescriptionLines = [];
     if (options.new !== undefined && options.new) {
@@ -32,7 +32,7 @@ function AddPigRenderToEmbed(embed, options) {
         if (set === "-") {
             set = "Default";
         }
-        embedDescriptionLines.push(`${set} set`);
+        embedDescriptionLines.push(set);
     }
     embedDescriptionLines.push(pig.Description.length > 0 ? pig.Description : "...");
     if (options.showId === undefined || options.showId) {

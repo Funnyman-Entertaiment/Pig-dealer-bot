@@ -20,7 +20,7 @@ exports.Information = new Command_1.Command("Information", "gives you a descript
         .setFooter({
         text: "Invite the bot now!!!"
     })
-        .setThumbnail(`attachment://pig_pfp.png`)
+        .setThumbnail("attachment://pig_pfp.png")
         .addFields([
         {
             name: "Open Packs",

@@ -10,15 +10,15 @@ const GetAuthor_1 = require("../Utils/GetAuthor");
 const Log_1 = require("../Utils/Log");
 exports.CheckPig = new Command_1.Command("CheckPig", "Shows a single pig in your collection", false, true, new discord_js_1.SlashCommandBuilder()
     .setName("checkpig")
-    .addStringOption(option => option.setName('id')
-    .setDescription('ID of the pig you wanna check.')
+    .addStringOption(option => option.setName("id")
+    .setDescription("ID of the pig you wanna check.")
     .setRequired(true))
     .setDescription("Shows you a single pig you own.")
     .setDMPermission(false), async function (interaction, _serverInfo, userInfo) {
     if (userInfo === undefined) {
         return;
     }
-    const pigID = interaction.options.getString('id', true);
+    const pigID = interaction.options.getString("id", true);
     const pig = (0, Pigs_1.GetPig)(pigID);
     if (pig === undefined) {
         const errorEmbed = new discord_js_1.EmbedBuilder()
@@ -45,7 +45,7 @@ exports.CheckPig = new Command_1.Command("CheckPig", "Shows a single pig in your
         });
         return;
     }
-    (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} is checking it's pig #${pig.ID.padStart(3, '0')}`);
+    (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} is checking it's pig #${pig.ID.padStart(3, "0")}`);
     const pigEmbed = new discord_js_1.EmbedBuilder()
         .setTitle("Here is your pig!")
         .setAuthor((0, GetAuthor_1.GetAuthor)(interaction));

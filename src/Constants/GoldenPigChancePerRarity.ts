@@ -1,3 +1,3 @@
 export const GOLDEN_PIG_CHANCE_PER_RARITY: { readonly [key: string]: number } = {
-    Legendary: 0.001
-}
+	Legendary: 0.001
+};

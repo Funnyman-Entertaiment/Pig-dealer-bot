@@ -5,42 +5,42 @@ import { COLOR_PER_PACK_RARITY } from "../Constants/ColorPerPackRarity";
 
 
 export const TestPack = new Command(
-    "",
-    "",
-    false,
-    false,
-    new SlashCommandBuilder()
-    .setName("testpack")
-    .addIntegerOption(option =>
-		option.setName('id')
-			.setDescription('Pack id')
-			.setRequired(true))
-    .setDescription("pack"),
+	"",
+	"",
+	false,
+	false,
+	new SlashCommandBuilder()
+		.setName("testpack")
+		.addIntegerOption(option =>
+			option.setName("id")
+				.setDescription("Pack id")
+				.setRequired(true))
+		.setDescription("pack"),
 
-    async (interaction) => {
-        const rawId = (interaction.options as CommandInteractionOptionResolver).getInteger('id')
-        let id: string = "0"
-        if(rawId !== null){
-            id = rawId.toString();
-        }
-        
-        const pack = GetPack(id);
+	async (interaction) => {
+		const rawId = (interaction.options as CommandInteractionOptionResolver).getInteger("id");
+		let id: string = "0";
+		if (rawId !== null) {
+			id = rawId.toString();
+		}
 
-        if(pack === undefined){
-            return;
-        }
+		const pack = GetPack(id);
 
-        let img = `${id}.png`;
+		if (pack === undefined) {
+			return;
+		}
 
-        const packEmbed = new EmbedBuilder()
-            .setTitle(pack.Name)
-            .setDescription(pack.Rarity)
-            .setImage(`attachment://${img}`)
-            .setColor(COLOR_PER_PACK_RARITY[pack.Rarity]);
+		const img = `${id}.png`;
 
-        await interaction.reply({
-            embeds: [packEmbed],
-            files: [`./img/packs/${img}`]
-        });
-    }
+		const packEmbed = new EmbedBuilder()
+			.setTitle(pack.Name)
+			.setDescription(pack.Rarity)
+			.setImage(`attachment://${img}`)
+			.setColor(COLOR_PER_PACK_RARITY[pack.Rarity]);
+
+		await interaction.reply({
+			embeds: [packEmbed],
+			files: [`./img/packs/${img}`]
+		});
+	}
 );

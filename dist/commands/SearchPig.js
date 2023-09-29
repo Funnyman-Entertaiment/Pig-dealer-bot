@@ -11,12 +11,12 @@ const UserInfo_1 = require("../database/UserInfo");
 const Log_1 = require("../Utils/Log");
 exports.SearchPig = new Command_1.Command("Search Pig", "Tells you which users own a certain pig, searched by ID.\nNote that the 0 digits at the start of lower digit IDs are purely cosmetic and are not needed when searching by ID. E.G. ACAB Pig (001) becomes only 1 when putting it into a command.", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("searchpig")
-    .addStringOption(option => option.setName('id')
-    .setDescription('Pig id')
+    .addStringOption(option => option.setName("id")
+    .setDescription("Pig id")
     .setRequired(true))
     .setDescription("Searches for any users that have the specified pig.")
     .setDMPermission(false), async (interaction) => {
-    const pigID = interaction.options.getString('id', true);
+    const pigID = interaction.options.getString("id", true);
     const pig = (0, Pigs_1.GetPig)(pigID);
     if (pig === undefined) {
         const pigEmbed = new discord_js_1.EmbedBuilder()
@@ -33,10 +33,10 @@ exports.SearchPig = new Command_1.Command("Search Pig", "Tells you which users o
     if (server === null) {
         return;
     }
-    (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(user)} is looking for pig #${pigID.padStart(3, '0')} in server ${(0, Log_1.PrintServer)(server)}`);
+    (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(user)} is looking for pig #${pigID.padStart(3, "0")} in server ${(0, Log_1.PrintServer)(server)}`);
     await interaction.deferReply();
     await (0, UserInfo_1.SaveAllUserInfo)();
-    const q = (0, lite_1.query)((0, lite_1.collection)(Bot_1.db, `users`));
+    const q = (0, lite_1.query)((0, lite_1.collection)(Bot_1.db, "users"));
     const userInfoDocs = await (0, lite_1.getDocs)(q);
     const userIDsWithPig = [];
     const foundUsersWithPig = {};
@@ -61,8 +61,7 @@ exports.SearchPig = new Command_1.Command("Search Pig", "Tells you which users o
                 foundUsersWithPig[userInfoDoc.id] = amountOfPigs;
             }
         }
-        catch {
-        }
+        catch { }
     }
     if (userIDsWithPig.length === 0) {
         const noUsersFoundEmbed = new discord_js_1.EmbedBuilder()

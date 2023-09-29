@@ -15,19 +15,19 @@ import { PreviousFoilCheck } from "./buttons/PreviousFoilCheck";
 import { UnfavouritePig } from "./buttons/UnfavouritePig";
 
 export const Buttons = [
-    OpenPack,
-    NextGallery,
-    PrevGallery,
-    NextSet,
-    PreviousSet,
-    NextList,
-    PreviousList,
-    DenyTrade,
-    AcceptTrade,
-    FavouritePig,
-    UnfavouritePig,
-    AcceptFoil,
-    CancelFoil,
-    NextFoilCheck,
-    PreviousFoilCheck
+	OpenPack,
+	NextGallery,
+	PrevGallery,
+	NextSet,
+	PreviousSet,
+	NextList,
+	PreviousList,
+	DenyTrade,
+	AcceptTrade,
+	FavouritePig,
+	UnfavouritePig,
+	AcceptFoil,
+	CancelFoil,
+	NextFoilCheck,
+	PreviousFoilCheck
 ];

@@ -17,7 +17,7 @@ async function AddTradeBulletin(interaction, userInfo, options) {
         });
         return;
     }
-    const set = options.getString('set', true);
+    const set = options.getString("set", true);
     const tradeBulletinEmbed = new discord_js_1.EmbedBuilder()
         .setTitle(`${interaction.user.username} wants to trade!`)
         .setDescription(`They're looking for pigs in the ${set} set.`)

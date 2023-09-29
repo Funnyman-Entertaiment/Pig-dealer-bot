@@ -158,13 +158,13 @@ function GetMsgInfoCacheForServer(serverId) {
 }
 exports.GetMsgInfoCacheForServer = GetMsgInfoCacheForServer;
 function GetMessageInfoFromCache(serverId, msgId) {
-    let cachedMessageInfos = GetMsgInfoCacheForServer(serverId);
+    const cachedMessageInfos = GetMsgInfoCacheForServer(serverId);
     const found = cachedMessageInfos.find(msg => msg.ID === msgId);
     return found;
 }
 exports.GetMessageInfoFromCache = GetMessageInfoFromCache;
 function AddMessageInfoToCache(msgInfo) {
-    let cachedMessageInfos = GetMsgInfoCacheForServer(msgInfo.ServerId);
+    const cachedMessageInfos = GetMsgInfoCacheForServer(msgInfo.ServerId);
     cachedMessageInfos.push(msgInfo);
 }
 exports.AddMessageInfoToCache = AddMessageInfoToCache;

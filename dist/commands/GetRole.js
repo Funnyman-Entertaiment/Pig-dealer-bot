@@ -33,7 +33,7 @@ exports.GetRole = new Command_1.Command("Get Role", "Gives you the role the bot 
     const me = server.members.me;
     if (me === null) {
         (0, Log_1.LogError)(`Bot couldn't find its user in server ${(0, Log_1.PrintServer)(server)}`);
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`Couldn't find bot user in server`, `Server: ${server.id}`);
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Couldn't find bot user in server", `Server: ${server.id}`);
         interaction.reply({
             embeds: [errorEmbed],
             ephemeral: true
@@ -43,8 +43,8 @@ exports.GetRole = new Command_1.Command("Get Role", "Gives you the role the bot 
     const permissions = me.permissionsIn(channel);
     if (!permissions.has(discord_js_1.PermissionFlagsBits.ManageRoles)) {
         const errorEmbed = new discord_js_1.EmbedBuilder()
-            .setTitle(`The bot doesn't have enough persmissions to add roles in this server`)
-            .setDescription(`Ask the admins to give the bot permissions to manage roles`)
+            .setTitle("The bot doesn't have enough persmissions to add roles in this server")
+            .setDescription("Ask the admins to give the bot permissions to manage roles")
             .setColor(discord_js_1.Colors.Red);
         interaction.reply({
             embeds: [errorEmbed]
@@ -58,8 +58,8 @@ exports.GetRole = new Command_1.Command("Get Role", "Gives you the role the bot 
     if (role === null) {
         (0, Log_1.LogWarn)(`Pig collerctor role couldn't be found in server ${(0, Log_1.PrintServer)(server)}`);
         const errorEmbed = new discord_js_1.EmbedBuilder()
-            .setTitle(`The role couldn't be found`)
-            .setDescription(`Ask the admins to use the \`/setrole\` command again.`)
+            .setTitle("The role couldn't be found")
+            .setDescription("Ask the admins to use the `/setrole` command again.")
             .setColor(discord_js_1.Colors.Red);
         interaction.followUp({
             embeds: [errorEmbed]
@@ -69,7 +69,7 @@ exports.GetRole = new Command_1.Command("Get Role", "Gives you the role the bot 
     (0, Log_1.LogInfo)(`Added pig collector role to user ${(0, Log_1.PrintUser)(member.user)}`);
     member.roles.add(role);
     const successEmbed = new discord_js_1.EmbedBuilder()
-        .setTitle(`You've been given the pig collector role succesfully!`)
+        .setTitle("You've been given the pig collector role succesfully!")
         .setColor(discord_js_1.Colors.Green);
     interaction.followUp({
         embeds: [successEmbed]

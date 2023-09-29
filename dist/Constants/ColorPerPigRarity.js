@@ -18,5 +18,8 @@ exports.COLOR_PER_PIG_RARITY = {
     ["Personal Gift"]: discord_js_1.Colors.White,
     ["Unimplemented"]: discord_js_1.Colors.Grey,
     ["Easter"]: 9031664,
-    ["Saint Patrick's Day"]: discord_js_1.Colors.Green
+    ["Saint Patrick's Day"]: discord_js_1.Colors.Green,
+    Halloween: discord_js_1.Colors.Orange,
+    ["Halloween (Rare)"]: 3329330,
+    ["Halloween (Epic)"]: 8061183
 };

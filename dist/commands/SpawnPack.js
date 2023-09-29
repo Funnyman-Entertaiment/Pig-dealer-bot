@@ -36,7 +36,7 @@ exports.SpawnPack = new Command_1.Command("", "", false, false, new discord_js_1
     }
     const pack = (0, Packs_1.GetPack)(packID);
     if (pack === undefined) {
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`Pack not found`, `PackID: ${packID}`);
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Pack not found", `PackID: ${packID}`);
         interaction.followUp({
             embeds: [errorEmbed]
         });
@@ -73,15 +73,15 @@ exports.SpawnPack = new Command_1.Command("", "", false, false, new discord_js_1
         }
     }
     if (serverInfos.length === 0) {
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`No servers found for those ids`);
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("No servers found for those ids");
         interaction.followUp({
             embeds: [errorEmbed]
         });
         return;
     }
     let embedTitle = `A ${pack.Name} HAS APPEARED!`;
-    let vowelRegex = '^[aieouAIEOU].*';
-    let matched = pack.Name.match(vowelRegex);
+    const vowelRegex = "^[aieouAIEOU].*";
+    const matched = pack.Name.match(vowelRegex);
     if (matched) {
         embedTitle = `AN ${pack.Name} HAS APPEARED!`;
     }

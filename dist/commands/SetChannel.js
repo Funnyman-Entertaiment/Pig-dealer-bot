@@ -7,8 +7,8 @@ const Command_1 = require("../Command");
 const Log_1 = require("../Utils/Log");
 exports.SetBotChannel = new Command_1.Command("Set Channel", "Only available to users with administrative access to the server. It will define what channel the bot sends packs to.", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("setchannel")
-    .addChannelOption(option => option.setName('channel')
-    .setDescription('channel to send packs')
+    .addChannelOption(option => option.setName("channel")
+    .setDescription("channel to send packs")
     .addChannelTypes(discord_js_1.ChannelType.GuildText)
     .setRequired(true))
     .setDescription("Let's you choose what channel the bot sends packs to")
@@ -28,7 +28,7 @@ exports.SetBotChannel = new Command_1.Command("Set Channel", "Only available to 
     if (serverInfo === undefined) {
         serverInfo = (0, ServerInfo_1.CreateNewDefaultServerInfo)(server.id);
     }
-    const channel = interaction.options.getChannel('channel', true);
+    const channel = interaction.options.getChannel("channel", true);
     (0, Log_1.LogInfo)(`User ${(0, Log_1.PrintUser)(interaction.user)} is setting the dropping channel to ${(0, Log_1.PrintChannel)(channel)} in server ${(0, Log_1.PrintServer)(server)}`);
     serverInfo.Channel = channel.id;
     await (0, ServerInfo_1.AddServerInfoToCache)(serverInfo);

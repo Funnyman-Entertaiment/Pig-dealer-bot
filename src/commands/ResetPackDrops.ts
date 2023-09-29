@@ -3,24 +3,24 @@ import { Command } from "../Command";
 import { PackDropper } from "../events/PackDropper";
 
 export const ResetPackDropper = new Command(
-    "",
-    "",
-    false,
-    false,
-    new SlashCommandBuilder()
-    .setName("resetpackdrops")
-    .setDescription("Resets pack drops. Only use if absolutely necessary or pack drops may duplicate."),
+	"",
+	"",
+	false,
+	false,
+	new SlashCommandBuilder()
+		.setName("resetpackdrops")
+		.setDescription("Resets pack drops. Only use if absolutely necessary or pack drops may duplicate."),
 
-    async (interaction: CommandInteraction) => {
-        PackDropper();
+	async (interaction: CommandInteraction) => {
+		PackDropper();
 
-        const successEmbed = new EmbedBuilder()
-            .setTitle("Succesfully reset pack dropping")
-            .setColor(Colors.Green);
+		const successEmbed = new EmbedBuilder()
+			.setTitle("Succesfully reset pack dropping")
+			.setColor(Colors.Green);
 
-        interaction.reply({
-            embeds: [successEmbed],
-            ephemeral: true
-        });
-    }
-)
+		interaction.reply({
+			embeds: [successEmbed],
+			ephemeral: true
+		});
+	}
+);

@@ -11,14 +11,14 @@ const PigRenderer_1 = require("../Utils/PigRenderer");
 const MessageInfo_1 = require("../database/MessageInfo");
 exports.ShowBinderList = new Command_1.Command("Binder List", "Shows you the pigs you own in list view. By default, it sorts them by set, but by setting that value to false it will sort them by ID.\nYou can also define a rarity and/or a user to only see pigs from only one rarity or another user, respectively.\nWhen viewing someone else's binder, a checkmark will signify if you already own a pig from their collection.", false, true, new discord_js_1.SlashCommandBuilder()
     .setName("binderlist")
-    .addBooleanOption(option => option.setName('set')
-    .setDescription('Whether to order the pigs by set or not.'))
-    .addUserOption(option => option.setName('user')
-    .setDescription('User to check the binder of.'))
-    .addStringOption(option => option.setName('rarity')
-    .setDescription('Filter pigs by rarity. Separate by commas to filter for several rarities.'))
-    .addBooleanOption(option => option.setName('favourites')
-    .setDescription('show only favourite pigs'))
+    .addBooleanOption(option => option.setName("set")
+    .setDescription("Whether to order the pigs by set or not."))
+    .addUserOption(option => option.setName("user")
+    .setDescription("User to check the binder of."))
+    .addStringOption(option => option.setName("rarity")
+    .setDescription("Filter pigs by rarity. Separate by commas to filter for several rarities."))
+    .addBooleanOption(option => option.setName("favourites")
+    .setDescription("show only favourite pigs"))
     .setDescription("Let's you check your own or someone else's pig binder")
     .setDMPermission(false), async (interaction, _serverInfo, userInfo) => {
     if (userInfo === undefined) {
@@ -30,10 +30,10 @@ exports.ShowBinderList = new Command_1.Command("Binder List", "Shows you the pig
         return;
     }
     const options = interaction.options;
-    const user = options.getUser('user');
-    const orderBySet = options.getBoolean('set') ?? false;
-    const rarities = options.getString('rarity') ?? "";
-    const raritiesToFilter = rarities.split(',')
+    const user = options.getUser("user");
+    const orderBySet = options.getBoolean("set") ?? false;
+    const rarities = options.getString("rarity") ?? "";
+    const raritiesToFilter = rarities.split(",")
         .map(rarity => rarity.trim().toLowerCase())
         .filter(rarity => rarity.length > 0);
     let author;
@@ -68,7 +68,7 @@ exports.ShowBinderList = new Command_1.Command("Binder List", "Shows you the pig
             return raritiesToFilter.includes(pig.Rarity.toLowerCase());
         });
     }
-    const onlyFavourites = options.getBoolean('favourites') ?? false;
+    const onlyFavourites = options.getBoolean("favourites") ?? false;
     if (onlyFavourites) {
         const favouritePigs = userInfo.FavouritePigs;
         pigs = pigs.filter(pig => favouritePigs.includes(pig.ID));
@@ -98,7 +98,7 @@ exports.ShowBinderList = new Command_1.Command("Binder List", "Shows you the pig
         });
     }
     else {
-        pigsBySet['Pigs'] = pigs.map(pig => pig.ID);
+        pigsBySet["Pigs"] = pigs.map(pig => pig.ID);
     }
     for (const set in pigsBySet) {
         if (!sets.includes(set)) {
@@ -135,29 +135,29 @@ exports.ShowBinderList = new Command_1.Command("Binder List", "Shows you the pig
     const row = new discord_js_1.ActionRowBuilder();
     if (orderBySet) {
         row.addComponents(new discord_js_1.ButtonBuilder()
-            .setCustomId('SetPrevious')
-            .setLabel('⏪ Prev. Set')
+            .setCustomId("SetPrevious")
+            .setLabel("⏪ Prev. Set")
             .setStyle(discord_js_1.ButtonStyle.Secondary), new discord_js_1.ButtonBuilder()
-            .setCustomId('ListPrevious')
-            .setLabel('Previous')
+            .setCustomId("ListPrevious")
+            .setLabel("Previous")
             .setStyle(discord_js_1.ButtonStyle.Primary)
             .setDisabled(true), new discord_js_1.ButtonBuilder()
-            .setCustomId('ListNext')
-            .setLabel('Next')
+            .setCustomId("ListNext")
+            .setLabel("Next")
             .setStyle(discord_js_1.ButtonStyle.Primary)
             .setDisabled(pigsBySet[firstSet].length <= 9), new discord_js_1.ButtonBuilder()
-            .setCustomId('SetNext')
-            .setLabel('Next. Set ⏩')
+            .setCustomId("SetNext")
+            .setLabel("Next. Set ⏩")
             .setStyle(discord_js_1.ButtonStyle.Secondary));
     }
     else {
         row.addComponents(new discord_js_1.ButtonBuilder()
-            .setCustomId('ListPrevious')
-            .setLabel('Previous')
+            .setCustomId("ListPrevious")
+            .setLabel("Previous")
             .setStyle(discord_js_1.ButtonStyle.Primary)
             .setDisabled(true), new discord_js_1.ButtonBuilder()
-            .setCustomId('ListNext')
-            .setLabel('Next')
+            .setCustomId("ListNext")
+            .setLabel("Next")
             .setStyle(discord_js_1.ButtonStyle.Primary)
             .setDisabled(pigsBySet[firstSet].length <= 9));
     }

@@ -6,67 +6,65 @@ import { LogError, PrintChannel, PrintServer } from "../Utils/Log";
 import { AddFoilChecksToEmbed } from "../Utils/PigRenderer";
 
 export const PreviousFoilCheck = new Button(
-    "PreviousFoilCheck",
-    false,
-    true,
-    false,
-    async (interaction, _serverInfo, messageInfo) => {
-        if(messageInfo === undefined){ return; }
+	"PreviousFoilCheck",
+	false,
+	true,
+	false,
+	async (interaction, _serverInfo, messageInfo) => {
+		if(messageInfo === undefined){ return; }
 
-        await interaction.deferUpdate();
+		await interaction.deferUpdate();
 
-        const server = interaction.guild;
-        if(server === null) {
-            const errorEmbed = MakeErrorEmbed(
-                "Error fetching server from interaction",
-                "Where did you find this message?"
-            );
+		const server = interaction.guild;
+		if(server === null) {
+			const errorEmbed = MakeErrorEmbed(
+				"Error fetching server from interaction",
+				"Where did you find this message?"
+			);
 
-            await interaction.followUp({
-                embeds: [errorEmbed]
-            });
+			await interaction.followUp({
+				embeds: [errorEmbed]
+			});
 
-            return;
-        }
+			return;
+		}
 
-        const message = interaction.message;
-        const msgInfo = messageInfo as FoilChecksMessage;
-        if(msgInfo === undefined){ return; }
+		const message = interaction.message;
+		const msgInfo = messageInfo as FoilChecksMessage;
+		if(msgInfo === undefined){ return; }
 
-        let newPage = msgInfo.CurrentPage - 1;
-        let setsNum = 0;
+		let newPage = msgInfo.CurrentPage - 1;
+		let setsNum = 0;
 
-        for (const _ in msgInfo.PigAmountsPerSet) {
-            setsNum++;
-        }
+		setsNum += Object.keys(msgInfo.PigAmountsPerSet).length;
 
-        const maxSets = Math.floor(setsNum/6) - 1;
+		const maxSets = Math.floor(setsNum/6) - 1;
 
-        if(newPage < 0){
-            newPage = maxSets + 1;
-        }
+		if(newPage < 0){
+			newPage = maxSets + 1;
+		}
 
-        msgInfo.CurrentPage = newPage;
+		msgInfo.CurrentPage = newPage;
 
-        if(message.embeds[0] === undefined){
-            LogError(`Couldn't get embed from message in channel ${PrintChannel(interaction.channel as any as GuildChannel)} in server ${PrintServer(server)}`)
-            const errorEmbed = MakeErrorEmbed(`Couldn't get embed from message`, `Make sure the bot is able to send embeds`);
-            await interaction.followUp({
-                embeds: [errorEmbed]
-            });
-            return;
-        }
+		if(message.embeds[0] === undefined){
+			LogError(`Couldn't get embed from message in channel ${PrintChannel(interaction.channel as unknown as GuildChannel)} in server ${PrintServer(server)}`);
+			const errorEmbed = MakeErrorEmbed("Couldn't get embed from message", "Make sure the bot is able to send embeds");
+			await interaction.followUp({
+				embeds: [errorEmbed]
+			});
+			return;
+		}
 
-        const editedEmbed = new EmbedBuilder(message.embeds[0].data)
-            .setFields([]);
+		const editedEmbed = new EmbedBuilder(message.embeds[0].data)
+			.setFields([]);
 
-        AddFoilChecksToEmbed(editedEmbed, {
-            page: msgInfo.CurrentPage,
-            pigAmountsPerSet: msgInfo.PigAmountsPerSet
-        });
+		AddFoilChecksToEmbed(editedEmbed, {
+			page: msgInfo.CurrentPage,
+			pigAmountsPerSet: msgInfo.PigAmountsPerSet
+		});
 
-        message.edit({
-            embeds: [editedEmbed]
-        });
-    }
+		message.edit({
+			embeds: [editedEmbed]
+		});
+	}
 );

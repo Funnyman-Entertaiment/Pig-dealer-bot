@@ -5,13 +5,15 @@ const Anniversary_1 = require("./Anniversary");
 const Chritmas_1 = require("./Chritmas");
 const Easter_1 = require("./Easter");
 const NewYears_1 = require("./NewYears");
+const Pigoween_1 = require("./Pigoween");
 const SaintPatricks_1 = require("./SaintPatricks");
 const SeasonalEvents = [
     Chritmas_1.Christmas,
     NewYears_1.NewYears,
     Easter_1.Easter,
     SaintPatricks_1.SaintPatricks,
-    Anniversary_1.Anniversary
+    Anniversary_1.Anniversary,
+    Pigoween_1.Pigoween
 ];
 function GetActiveEvents() {
     return SeasonalEvents.filter(x => x.IsActive());
@@ -27,11 +29,11 @@ function RunPostAssembledPigs(pack, serverInfo, assembledPigs) {
     activeEvents.forEach(x => x.PostAssembledPigs(pack, serverInfo, assembledPigs));
 }
 exports.RunPostAssembledPigs = RunPostAssembledPigs;
-function RunPostChooseRandomPack(pack) {
+function RunPostChooseRandomPack(pack, serverInfo) {
     let returnVal = undefined;
     const activeEvents = GetActiveEvents();
     activeEvents.forEach(x => {
-        returnVal = x.PostChooseRandomPack(pack);
+        returnVal = x.PostChooseRandomPack(pack, serverInfo);
     });
     return returnVal;
 }

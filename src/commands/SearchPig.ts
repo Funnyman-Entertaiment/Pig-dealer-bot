@@ -9,119 +9,118 @@ import { LogInfo, PrintServer, PrintUser } from "../Utils/Log";
 
 
 export const SearchPig = new Command(
-    "Search Pig",
-    "Tells you which users own a certain pig, searched by ID.\nNote that the 0 digits at the start of lower digit IDs are purely cosmetic and are not needed when searching by ID. E.G. ACAB Pig (001) becomes only 1 when putting it into a command.",
-    false,
-    false,
-    new SlashCommandBuilder()
-        .setName("searchpig")
-        .addStringOption(option =>
-            option.setName('id')
-                .setDescription('Pig id')
-                .setRequired(true))
-        .setDescription("Searches for any users that have the specified pig.")
-        .setDMPermission(false),
+	"Search Pig",
+	"Tells you which users own a certain pig, searched by ID.\nNote that the 0 digits at the start of lower digit IDs are purely cosmetic and are not needed when searching by ID. E.G. ACAB Pig (001) becomes only 1 when putting it into a command.",
+	false,
+	false,
+	new SlashCommandBuilder()
+		.setName("searchpig")
+		.addStringOption(option =>
+			option.setName("id")
+				.setDescription("Pig id")
+				.setRequired(true))
+		.setDescription("Searches for any users that have the specified pig.")
+		.setDMPermission(false),
 
-    async (interaction) => {
-        const pigID = (interaction.options as CommandInteractionOptionResolver).getString('id', true);
+	async (interaction) => {
+		const pigID = (interaction.options as CommandInteractionOptionResolver).getString("id", true);
 
-        const pig = GetPig(pigID);
+		const pig = GetPig(pigID);
 
-        if (pig === undefined) {
-            const pigEmbed = new EmbedBuilder()
-                .setTitle("No pig found with that id")
-                .setDescription("Yikes, you sure the id is right\n(Number ids don't actually start with 0s)");
+		if (pig === undefined) {
+			const pigEmbed = new EmbedBuilder()
+				.setTitle("No pig found with that id")
+				.setDescription("Yikes, you sure the id is right\n(Number ids don't actually start with 0s)");
 
-            await interaction.reply({
-                ephemeral: true,
-                embeds: [pigEmbed],
-            });
+			await interaction.reply({
+				ephemeral: true,
+				embeds: [pigEmbed],
+			});
 
-            return;
-        }
+			return;
+		}
 
-        const server = interaction.guild;
-        const user = interaction.user;
+		const server = interaction.guild;
+		const user = interaction.user;
 
-        if (server === null) { return; }
+		if (server === null) { return; }
 
-        LogInfo(`User ${PrintUser(user)} is looking for pig #${pigID.padStart(3, '0')} in server ${PrintServer(server)}`);
+		LogInfo(`User ${PrintUser(user)} is looking for pig #${pigID.padStart(3, "0")} in server ${PrintServer(server)}`);
 
-        await interaction.deferReply();
+		await interaction.deferReply();
 
-        await SaveAllUserInfo();
+		await SaveAllUserInfo();
 
-        const q = query(collection(db, `users`));
-        const userInfoDocs = await getDocs(q);
+		const q = query(collection(db, "users"));
+		const userInfoDocs = await getDocs(q);
 
-        const userIDsWithPig: string[] = [];
-        const foundUsersWithPig: { [key: string]: number } = {};
+		const userIDsWithPig: string[] = [];
+		const foundUsersWithPig: { [key: string]: number } = {};
 
-        for (let i = 0; i < userInfoDocs.docs.length; i++) {
-            const userInfoDoc = userInfoDocs.docs[i];
-            if (userInfoDoc.id === user.id) {
-                continue;
-            }
+		for (let i = 0; i < userInfoDocs.docs.length; i++) {
+			const userInfoDoc = userInfoDocs.docs[i];
+			if (userInfoDoc.id === user.id) {
+				continue;
+			}
 
-            const amountOfPigs = userInfoDoc.data().Pigs[pigID]
+			const amountOfPigs = userInfoDoc.data().Pigs[pigID];
 
-            if (amountOfPigs === undefined || amountOfPigs <= 0) {
-                continue;
-            }
+			if (amountOfPigs === undefined || amountOfPigs <= 0) {
+				continue;
+			}
 
-            try {
-                if (server.members.cache.has(userInfoDoc.id)) {
-                    userIDsWithPig.push(userInfoDoc.id);
-                    foundUsersWithPig[userInfoDoc.id] = amountOfPigs;
-                    continue;
-                }
+			try {
+				if (server.members.cache.has(userInfoDoc.id)) {
+					userIDsWithPig.push(userInfoDoc.id);
+					foundUsersWithPig[userInfoDoc.id] = amountOfPigs;
+					continue;
+				}
 
-                const userInServer = await server.members.fetch(userInfoDoc.id);
+				const userInServer = await server.members.fetch(userInfoDoc.id);
 
-                if (userInServer !== undefined) {
-                    userIDsWithPig.push(userInfoDoc.id)
-                    foundUsersWithPig[userInfoDoc.id] = amountOfPigs;
-                }
-            } catch {
-            }
-        }
+				if (userInServer !== undefined) {
+					userIDsWithPig.push(userInfoDoc.id);
+					foundUsersWithPig[userInfoDoc.id] = amountOfPigs;
+				}
+			} catch { /* empty */ }
+		}
 
-        if (userIDsWithPig.length === 0) {
-            const noUsersFoundEmbed = new EmbedBuilder()
-                .setTitle("No users have been found that have that pig")
-                .setColor(Colors.Red)
-                .setAuthor(GetAuthor(interaction));
+		if (userIDsWithPig.length === 0) {
+			const noUsersFoundEmbed = new EmbedBuilder()
+				.setTitle("No users have been found that have that pig")
+				.setColor(Colors.Red)
+				.setAuthor(GetAuthor(interaction));
 
-            interaction.followUp({
-                embeds: [noUsersFoundEmbed]
-            });
+			interaction.followUp({
+				embeds: [noUsersFoundEmbed]
+			});
 
-            return;
-        }
+			return;
+		}
 
-        const descriptionLines: string[] = [];
+		const descriptionLines: string[] = [];
 
-        for (let i = 0; i < userIDsWithPig.length; i++) {
-            const foundUserID = userIDsWithPig[i];
+		for (let i = 0; i < userIDsWithPig.length; i++) {
+			const foundUserID = userIDsWithPig[i];
 
-            if (!server.members.cache.has(foundUserID)) { continue; }
-            const foundMember = await server.members.fetch(foundUserID);
-            const pigNum = foundUsersWithPig[foundUserID];
+			if (!server.members.cache.has(foundUserID)) { continue; }
+			const foundMember = await server.members.fetch(foundUserID);
+			const pigNum = foundUsersWithPig[foundUserID];
 
-            if (foundMember.nickname === null) {
-                descriptionLines.push(`-${foundMember.user.username} -> ${pigNum} pig${pigNum > 1 ? "s" : ""}`);
-            } else {
-                descriptionLines.push(`-${foundMember.nickname} (${foundMember.user.username}) -> ${pigNum} pig${pigNum > 1 ? "s" : ""}`);
-            }
-        }
+			if (foundMember.nickname === null) {
+				descriptionLines.push(`-${foundMember.user.username} -> ${pigNum} pig${pigNum > 1 ? "s" : ""}`);
+			} else {
+				descriptionLines.push(`-${foundMember.nickname} (${foundMember.user.username}) -> ${pigNum} pig${pigNum > 1 ? "s" : ""}`);
+			}
+		}
 
-        const foundUsersEmbed = new EmbedBuilder()
-            .setTitle(`Found users with pig #${pig.ID.padStart(3, "0")}:`)
-            .setDescription(descriptionLines.join("\n"))
-            .setColor(Colors.Green);
+		const foundUsersEmbed = new EmbedBuilder()
+			.setTitle(`Found users with pig #${pig.ID.padStart(3, "0")}:`)
+			.setDescription(descriptionLines.join("\n"))
+			.setColor(Colors.Green);
 
-        interaction.followUp({
-            embeds: [foundUsersEmbed]
-        });
-    }
+		interaction.followUp({
+			embeds: [foundUsersEmbed]
+		});
+	}
 );

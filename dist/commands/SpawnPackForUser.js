@@ -43,7 +43,7 @@ exports.SpawnPackUser = new Command_1.Command("", "", false, false, new discord_
     }
     const pack = (0, Packs_1.GetPack)(packID);
     if (pack === undefined) {
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`Pack not found`, `PackID: ${packID}`);
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Pack not found", `PackID: ${packID}`);
         interaction.followUp({
             embeds: [errorEmbed]
         });
@@ -68,7 +68,7 @@ exports.SpawnPackUser = new Command_1.Command("", "", false, false, new discord_
             serverInfo = (0, ServerInfo_1.CreateServerInfoFromData)(serverDoc.id, serverDoc.data());
         }
         else {
-            const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`No server found with that id`, `ID: ${serverID}`);
+            const errorEmbed = (0, Errors_1.MakeErrorEmbed)("No server found with that id", `ID: ${serverID}`);
             interaction.followUp({
                 embeds: [errorEmbed]
             });
@@ -76,7 +76,7 @@ exports.SpawnPackUser = new Command_1.Command("", "", false, false, new discord_
         }
     }
     if (serverInfo.Channel === undefined) {
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`The server doesn't have a channel set`, `ID: ${serverID}`);
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("The server doesn't have a channel set", `ID: ${serverID}`);
         interaction.followUp({
             embeds: [errorEmbed]
         });
@@ -87,7 +87,7 @@ exports.SpawnPackUser = new Command_1.Command("", "", false, false, new discord_
         server = await Bot_1.client.guilds.fetch(serverID);
     }
     catch {
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`The bot doesn't have access to that server`, `ID: ${serverID}`);
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("The bot doesn't have access to that server", `ID: ${serverID}`);
         interaction.followUp({
             embeds: [errorEmbed]
         });
@@ -98,22 +98,22 @@ exports.SpawnPackUser = new Command_1.Command("", "", false, false, new discord_
         user = await server.members.fetch(userID);
     }
     catch {
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`The couldn't find the user in that server`, `Server: ${(0, Log_1.PrintServer)(server)}`, `UserID: ${userID}`);
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("The couldn't find the user in that server", `Server: ${(0, Log_1.PrintServer)(server)}`, `UserID: ${userID}`);
         interaction.followUp({
             embeds: [errorEmbed]
         });
         return;
     }
     if (user === undefined) {
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`The couldn't find the user in that server`, `Server: ${(0, Log_1.PrintServer)(server)}`, `UserID: ${userID}`);
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("The couldn't find the user in that server", `Server: ${(0, Log_1.PrintServer)(server)}`, `UserID: ${userID}`);
         interaction.followUp({
             embeds: [errorEmbed]
         });
         return;
     }
     let embedTitle = `A ${pack.Name} HAS APPEARED!`;
-    let vowelRegex = '^[aieouAIEOU].*';
-    let matched = pack.Name.match(vowelRegex);
+    const vowelRegex = "^[aieouAIEOU].*";
+    const matched = pack.Name.match(vowelRegex);
     if (matched) {
         embedTitle = `AN ${pack.Name} HAS APPEARED!`;
     }
@@ -129,7 +129,7 @@ exports.SpawnPackUser = new Command_1.Command("", "", false, false, new discord_
         ignoreCooldown: ignoreCooldown
     });
     const successEmbed = new discord_js_1.EmbedBuilder()
-        .setTitle(`Pack succesfully sent`)
+        .setTitle("Pack succesfully sent")
         .setColor(discord_js_1.Colors.Green);
     interaction.followUp({
         embeds: [successEmbed]

@@ -30,7 +30,7 @@ exports.NextGallery = new Button_1.Button("GalleryNext", false, true, false, asy
     msgInfo.CurrentPig++;
     if (message.embeds[0] === undefined) {
         (0, Log_1.LogError)(`Couldn't get embed from message in channel ${(0, Log_1.PrintChannel)(interaction.channel)} in server ${(0, Log_1.PrintServer)(server)}`);
-        const errorEmbed = (0, Errors_1.MakeErrorEmbed)(`Couldn't get embed from message`, `Make sure the bot is able to send embeds`);
+        const errorEmbed = (0, Errors_1.MakeErrorEmbed)("Couldn't get embed from message", "Make sure the bot is able to send embeds");
         interaction.followUp({
             embeds: [errorEmbed]
         });
@@ -57,25 +57,25 @@ exports.NextGallery = new Button_1.Button("GalleryNext", false, true, false, asy
     });
     const row = new discord_js_1.ActionRowBuilder()
         .addComponents(new discord_js_1.ButtonBuilder()
-        .setCustomId('GalleryPrevious')
-        .setLabel('Previous')
+        .setCustomId("GalleryPrevious")
+        .setLabel("Previous")
         .setStyle(discord_js_1.ButtonStyle.Primary)
         .setDisabled(msgInfo.Pigs.length === 1), new discord_js_1.ButtonBuilder()
-        .setCustomId('GalleryNext')
-        .setLabel('Next')
+        .setCustomId("GalleryNext")
+        .setLabel("Next")
         .setStyle(discord_js_1.ButtonStyle.Primary)
         .setDisabled(msgInfo.CurrentPig == msgInfo.Pigs.length - 1));
     if (msgInfo.ShowFavouriteButton) {
         if (!msgInfo.FavouritePigs.includes(pig.ID)) {
             row.addComponents(new discord_js_1.ButtonBuilder()
-                .setCustomId('FavouritePig')
-                .setLabel('Favourite ⭐')
+                .setCustomId("FavouritePig")
+                .setLabel("Favourite ⭐")
                 .setStyle(discord_js_1.ButtonStyle.Secondary));
         }
         else {
             row.addComponents(new discord_js_1.ButtonBuilder()
-                .setCustomId('UnfavouritePig')
-                .setLabel('Unfavourite ⭐')
+                .setCustomId("UnfavouritePig")
+                .setLabel("Unfavourite ⭐")
                 .setStyle(discord_js_1.ButtonStyle.Secondary));
         }
     }

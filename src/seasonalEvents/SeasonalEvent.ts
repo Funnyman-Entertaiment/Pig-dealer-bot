@@ -3,23 +3,23 @@ import { Pack } from "../database/Packs";
 import { Pig } from "../database/Pigs";
 
 export class SeasonalEvent {
-    Name: string;
-    Description: string;
+	Name: string;
+	Description: string;
 
-    IsActive: () => Boolean;
+	IsActive: () => boolean;
 
-    PostPackOpened: (pack: Pack, serverInfo: ServerInfo, chosenPigs: Pig[], pigsToShow: Pig[]) => void;
-    PostAssembledPigs: (pack: Pack, serverInfo: ServerInfo, assembledPigs: Pig[]) => void;
-    PostChooseRandomPack: (pack: Pack) => Pack | undefined;
+	PostPackOpened: (pack: Pack, serverInfo: ServerInfo, chosenPigs: Pig[], pigsToShow: Pig[]) => void;
+	PostAssembledPigs: (pack: Pack, serverInfo: ServerInfo, assembledPigs: Pig[]) => void;
+	PostChooseRandomPack: (pack: Pack, serverInfo: ServerInfo) => Pack | undefined;
 
-    constructor(name: string, description: string, isActive: () => Boolean) {
-        this.Name = name;
-        this.Description = description;
+	constructor(name: string, description: string, isActive: () => boolean) {
+		this.Name = name;
+		this.Description = description;
 
-        this.IsActive = isActive;
+		this.IsActive = isActive;
 
-        this.PostPackOpened = function () { }
-        this.PostAssembledPigs = function () { }
-        this.PostChooseRandomPack = function () { return undefined; }
-    }
+		this.PostPackOpened = function () { };
+		this.PostAssembledPigs = function () { };
+		this.PostChooseRandomPack = function () { return undefined; };
+	}
 }

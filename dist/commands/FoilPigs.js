@@ -11,7 +11,7 @@ function ParseTradePigsString(interaction, pigsString) {
     if (pigsString.trim() === "") {
         return {};
     }
-    const pigTokens = pigsString.split(',');
+    const pigTokens = pigsString.split(",");
     const pigAmounts = {};
     let hasFoundNonPig = undefined;
     let hasFoundUnformattedPig = undefined;
@@ -22,16 +22,16 @@ function ParseTradePigsString(interaction, pigsString) {
         if (hasFoundUnformattedPig !== undefined) {
             return;
         }
-        const pigID = token.split('(')[0].trim();
+        const pigID = token.split("(")[0].trim();
         const pig = (0, Pigs_1.GetPig)(pigID);
         if (pig === undefined) {
             hasFoundNonPig = pigID;
             return;
         }
-        const pigNumberStr = token.split('(')[1];
+        const pigNumberStr = token.split("(")[1];
         let pigNumber = 1;
         if (pigNumberStr !== undefined) {
-            pigNumber = parseInt(pigNumberStr.replace(')', '').trim());
+            pigNumber = parseInt(pigNumberStr.replace(")", "").trim());
         }
         if (Number.isNaN(pigNumber) || pigNumber <= 0) {
             hasFoundUnformattedPig = token;
@@ -163,7 +163,7 @@ exports.FoilPigs = new Command_1.Command("Foil Pigs", "Used to craft a foil pig,
         if (amount > actualAmount) {
             const errorEmbed = new discord_js_1.EmbedBuilder()
                 .setTitle("You're trying to offer more pigs than you have")
-                .setDescription(`You're offering ${amount} of #${id.padStart(3, '0')} when you actually have ${actualAmount}.`)
+                .setDescription(`You're offering ${amount} of #${id.padStart(3, "0")} when you actually have ${actualAmount}.`)
                 .setColor(discord_js_1.Colors.DarkRed)
                 .setAuthor((0, GetAuthor_1.GetAuthor)(interaction));
             interaction.reply({
@@ -175,7 +175,7 @@ exports.FoilPigs = new Command_1.Command("Foil Pigs", "Used to craft a foil pig,
         if (pigsOfSetAndRarity.find(p => p.ID === id) === undefined) {
             const errorEmbed = new discord_js_1.EmbedBuilder()
                 .setTitle("You're trying to offer a pig that doesn't meet the requirements!")
-                .setDescription(`You're offering #${id.padStart(3, '0')} but its set or rarity don't match.`)
+                .setDescription(`You're offering #${id.padStart(3, "0")} but its set or rarity don't match.`)
                 .setColor(discord_js_1.Colors.DarkRed)
                 .setAuthor((0, GetAuthor_1.GetAuthor)(interaction));
             interaction.reply({

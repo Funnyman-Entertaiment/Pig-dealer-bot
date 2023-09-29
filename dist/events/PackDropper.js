@@ -19,7 +19,7 @@ function GetRandomNumber(max, exception) {
     if (exception === undefined) {
         return Math.floor(Math.random() * max);
     }
-    let chosen = GetRandomNumber(max - 1);
+    const chosen = GetRandomNumber(max - 1);
     if (chosen >= exception) {
         return chosen + 1;
     }
@@ -30,7 +30,11 @@ function GetRandomNumber(max, exception) {
 async function SpawnRandomPack() {
     if (packDropperTimeout !== undefined) {
         clearTimeout(packDropperTimeout);
+        packDropperTimeout = undefined;
     }
+    packDropperTimeout = setTimeout(() => {
+        SpawnRandomPack();
+    }, 1000 * 60 * Variables_1.Cooldowns.MINUTES_BETWEEN_PACKS);
     const q = (0, lite_1.query)((0, lite_1.collection)(Bot_1.db, "serverInfo"));
     const servers = await (0, lite_1.getDocs)(q);
     (0, Log_1.LogInfo)("Sending random packs.");
@@ -41,13 +45,6 @@ async function SpawnRandomPack() {
     if (packsUntil12Pack === 0) {
         pack = (0, Packs_1.GetPack)(SignificantPackIDs_1.PACK_12);
     }
-    if (pack === undefined) {
-        return;
-    }
-    const returnedPack = (0, SeasonalEvents_1.RunPostChooseRandomPack)(pack);
-    if (returnedPack !== undefined) {
-        pack = returnedPack;
-    }
     servers.forEach(async (server) => {
         if (pack === undefined) {
             return;
@@ -56,14 +53,19 @@ async function SpawnRandomPack() {
         if (!serverInfo.Enabled) {
             return;
         }
-        let embedTitle = `A ${pack.Name} HAS APPEARED!`;
-        let vowelRegex = '^[aieouAIEOU].*';
-        let matched = pack.Name.match(vowelRegex);
+        let packToDropInServer = pack;
+        const returnedPack = (0, SeasonalEvents_1.RunPostChooseRandomPack)(pack, serverInfo);
+        if (returnedPack !== undefined) {
+            packToDropInServer = returnedPack;
+        }
+        let embedTitle = `A ${packToDropInServer.Name} HAS APPEARED!`;
+        const vowelRegex = "^[aieouAIEOU].*";
+        const matched = packToDropInServer.Name.match(vowelRegex);
         if (matched) {
-            embedTitle = `AN ${pack.Name} HAS APPEARED!`;
+            embedTitle = `AN ${packToDropInServer.Name} HAS APPEARED!`;
         }
         (0, DropPack_1.DropPack)(serverInfo, {
-            pack: pack,
+            pack: packToDropInServer,
             title: embedTitle,
             ping: true
         });
@@ -74,9 +76,6 @@ async function SpawnRandomPack() {
     if (packsUntil12Pack >= 0) {
         packsUntil12Pack--;
     }
-    packDropperTimeout = setTimeout(() => {
-        SpawnRandomPack();
-    }, 1000 * 60 * Variables_1.Cooldowns.MINUTES_BETWEEN_PACKS);
 }
 async function Set5PackSpawn() {
     if (fivePackTimeout !== undefined) {
@@ -113,6 +112,11 @@ const PackDropper = function () {
     packDropperTimeout = setTimeout(() => {
         SpawnRandomPack();
     }, 1000 * 5);
+    setInterval(() => {
+        if (!packDropperTimeout) {
+            SpawnRandomPack();
+        }
+    }, 1000 * 60 * 60 * 2);
     Set5PackSpawn();
     Set12PackSpawn();
 };

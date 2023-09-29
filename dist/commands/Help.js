@@ -9,11 +9,11 @@ const Variables_1 = require("../Constants/Variables");
 const Bot_1 = require("../Bot");
 exports.Help = new Command_1.Command("Help", "Shows useful information about every command", false, false, new discord_js_1.SlashCommandBuilder()
     .setName("help")
-    .addStringOption(option => option.setName('command')
-    .setDescription('Name of the command to learn more about.')
+    .addStringOption(option => option.setName("command")
+    .setDescription("Name of the command to learn more about.")
     .setRequired(true))
     .setDescription("Shows useful information about every command."), async function (interaction) {
-    const commandName = interaction.options.getString('command', true).toLowerCase();
+    const commandName = interaction.options.getString("command", true).toLowerCase();
     let allowTradeForumCommands = false;
     const server = interaction.guild;
     if (server !== null) {
