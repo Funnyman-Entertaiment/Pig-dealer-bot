@@ -6,7 +6,7 @@ import { PIGOWEEN_RARITY_PER_RARITY, PIGOWEEN_REPLACE_CHANCE_PER_RARITY } from "
 
 export const Pigoween = new SeasonalEvent(
 	"Pigoween",
-	"Muahahaha. It's Pigoween, so spooky.",
+	"IT'S PIGOWEEN YOU FILTHY ANIMALS!!!\n\nTHAT'S RIGHT! October first marks the start if the Pigoween seasonal event! Shit's about to get real spooky around these parts! We are stoked to introduce 16 brand new pigs only available through this event which (obviously) lasts until the first of November. These pigs drop in 3 rarities: Common, Rare and Epic. They will rarely replace pigs of the same rarities in any pack!\n\nEnjoy Pigoween and collect all 16 before the time is up!",
 	() => {
 		const currentDate = Timestamp.now().toDate();
 
