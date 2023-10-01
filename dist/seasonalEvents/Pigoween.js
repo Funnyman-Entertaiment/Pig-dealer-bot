@@ -8,7 +8,7 @@ const ExtraRandom_1 = require("../Utils/ExtraRandom");
 const Pigoween_1 = require("../Constants/Pigoween");
 exports.Pigoween = new SeasonalEvent_1.SeasonalEvent("Pigoween", "Muahahaha. It's Pigoween, so spooky.", () => {
     const currentDate = lite_1.Timestamp.now().toDate();
-    return currentDate.getUTCMonth() === 10;
+    return currentDate.getUTCMonth() === 9;
 });
 exports.Pigoween.PostPackOpened = function (_pack, _serverInfo, chosenPigs, pigsToShow) {
     for (let i = chosenPigs.length - 1; i > 0; i--) {

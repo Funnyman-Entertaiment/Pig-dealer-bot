@@ -10,7 +10,7 @@ export const Anniversary = new SeasonalEvent(
 	() => {
 		const currentDate = Timestamp.now().toDate();
 
-		return currentDate.getUTCMonth() === 11 &&
+		return currentDate.getUTCMonth() === 10 &&
 			currentDate.getUTCDate() >= 24 && currentDate.getUTCDate() <= 30;
 	}
 );

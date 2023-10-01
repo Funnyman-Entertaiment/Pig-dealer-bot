@@ -8,7 +8,7 @@ const Packs_1 = require("../database/Packs");
 const Anniversary_1 = require("../Constants/Anniversary");
 exports.Anniversary = new SeasonalEvent_1.SeasonalEvent("Pigniversary", "Today, some years ago, Pig Dealer was first released to the world.", () => {
     const currentDate = lite_1.Timestamp.now().toDate();
-    return currentDate.getUTCMonth() === 11 &&
+    return currentDate.getUTCMonth() === 10 &&
         currentDate.getUTCDate() >= 24 && currentDate.getUTCDate() <= 30;
 });
 const ServersWith2PackFoilCooldown = {};
