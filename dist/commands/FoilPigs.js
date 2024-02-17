@@ -79,7 +79,21 @@ function GetFieldDescriptionFromPigAmounts(pigAmounts) {
     if (descriptionLines.length === 0) {
         descriptionLines.push("Nothing");
     }
-    return descriptionLines.join("\n");
+    let description = "";
+    for (let i = 0; i < descriptionLines.length; i++) {
+        const line = descriptionLines[i];
+        const currLength = description.length;
+        const lineLength = line.length;
+        if (currLength + lineLength >= 999) {
+            description += "Too many pigs to display";
+            break;
+        }
+        description += line;
+        if (i != descriptionLines.length - 1) {
+            description += "\n";
+        }
+    }
+    return description;
 }
 exports.FoilPigs = new Command_1.Command("Foil Pigs", "Used to craft a foil pig, using 100 common, 50 rare, 15 epic or 5 legendary pigs from the same set.\nAllows you to manually input the IDs of the selected pigs, following the same syntax as all other ID defining commands: pigs:1,2,3,4.\nNote that the 0 digits at the start of lower digit IDs are purely cosmetic and are not needed when searching by ID. E.G. ACAB Pig (001) becomes only 1 when putting it into a command.", false, true, new discord_js_1.SlashCommandBuilder()
     .setName("foilpigs")

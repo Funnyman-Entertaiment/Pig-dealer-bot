@@ -21,7 +21,21 @@ function GetFieldDescriptionFromPigAmounts(pigAmounts) {
     if (descriptionLines.length === 0) {
         descriptionLines.push("Nothing");
     }
-    return descriptionLines.join("\n");
+    let description = "";
+    for (let i = 0; i < descriptionLines.length; i++) {
+        const line = descriptionLines[i];
+        const currLength = description.length;
+        const lineLength = line.length;
+        if (currLength + lineLength >= 999) {
+            description += "Too many pigs to display";
+            break;
+        }
+        description += line;
+        if (i != descriptionLines.length - 1) {
+            description += "\n";
+        }
+    }
+    return description;
 }
 exports.Foil = new Command_1.Command("Foil", "Used to craft a foil pig, using 100 common, 50 rare, 15 epic or 5 legendary pigs from the same set.\n`onlydupes` defines whether the bot only uses duped pigs for the process.\nYou will have the chance to review the pigs the bot has selected to use in the craft before it happens.\nIf you wish to manually select which pigs to use when crafting a foil pig, use `/foilpigs`", false, true, new discord_js_1.SlashCommandBuilder()
     .setName("foil")
