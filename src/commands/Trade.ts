@@ -95,7 +95,27 @@ function GetFieldDescriptionFromPigAmounts(pigAmounts: { [key: string]: number }
 		descriptionLines.push("Nothing");
 	}
 
-	return descriptionLines.join("\n");
+	let description = "";
+
+	for (let i = 0; i < descriptionLines.length; i++) {
+		const line = descriptionLines[i];
+		
+		const currLength = description.length;
+		const lineLength = line.length;
+
+		if(currLength + lineLength >= 999) {
+			description += "Too many pigs to display";
+			break;
+		}
+
+		description += line;
+
+		if(i != descriptionLines.length - 1) {
+			description += "\n";
+		}
+	}
+
+	return description;
 }
 
 async function NewTrade(interaction: CommandInteraction, options: CommandInteractionOptionResolver) {
